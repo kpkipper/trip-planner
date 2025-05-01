@@ -7,12 +7,38 @@ import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
 
 const TokyoTrip = () => {
-  const [currentTime, setCurrentTime] = useState(new Date('2025-05-04T11:00:00')) // May 8, 2025
+  const [currentTime, setCurrentTime] = useState(new Date('2025-05-04T11:00:00')) // May 4, 2025
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedDayIndex(newValue)
   }
+
+  const isCurrentActivity = (index: number) => {
+    const currentPlan = itinerary[selectedDayIndex].plans[index]
+    const [currentHour, currentMinute] = currentPlan.time.split(':').map(Number)
+    const currentStart = new Date(currentTime)
+    currentStart.setHours(currentHour, currentMinute, 0, 0)
+
+    const nextPlan = itinerary[selectedDayIndex].plans[index + 1]
+    let nextStart: Date | null = null
+
+    if (nextPlan) {
+      const [nextHour, nextMinute] = nextPlan.time.split(':').map(Number)
+      nextStart = new Date(currentTime)
+      nextStart.setHours(nextHour, nextMinute, 0, 0)
+    }
+
+    if (nextStart) {
+      return currentTime >= currentStart && currentTime < nextStart
+    } else {
+      return (
+        currentTime >= currentStart &&
+        currentTime < new Date(currentStart.getTime() + 60 * 60 * 1000)
+      )
+    }
+  }
+
   useEffect(() => {
     const todayISO = currentTime.toISOString().split('T')[0]
     const idx = itinerary.findIndex((day) => day.dateISO === todayISO)
@@ -27,15 +53,6 @@ const TokyoTrip = () => {
     }, 60000)
     return () => clearInterval(timer)
   }, [])
-
-  const isCurrentActivity = (time: string) => {
-    const [hour, minute] = time.split(':').map(Number)
-    const activityTime = new Date(currentTime)
-    activityTime.setHours(hour, minute, 0, 0)
-    return (
-      currentTime >= activityTime && currentTime < new Date(activityTime.getTime() + 60 * 60 * 1000)
-    )
-  }
 
   const openGoogleMaps = (location: string) => {
     const url = `https://www.google.com/maps/search/?q=${encodeURIComponent(location)}`
@@ -91,39 +108,28 @@ const TokyoTrip = () => {
               {itinerary[selectedDayIndex].date}
             </p>
           </div>
-          <div className="px-6 py-4">
-            
-          </div>
+          <div className="px-6 py-4"></div>
 
           <ul className="divide-y divide-gray-200">
             {itinerary[selectedDayIndex].plans.map((plan, idx) => {
-              const highlight = isCurrentActivity(plan.time)
-              const { emoji } = getCategoryData(plan.category)
+              const highlight = isCurrentActivity(idx)
+              const category = getCategoryData(plan.category) || {
+                emoji: '📍',
+                label: plan.category,
+              }
 
               return (
                 <li
                   key={idx}
-                  className={`flex justify-between items-center px-6 py-3 hover:bg-indigo-50 transition duration-150 ease-in-out ${
+                  className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-indigo-50 transition ${
                     highlight ? 'bg-yellow-100 font-medium text-indigo-800' : 'bg-white'
                   }`}
                   onClick={() => openGoogleMaps(plan.description)}
                 >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">{emoji}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-xl">{category.emoji}</span>
                     <span>{`${plan.time} - ${plan.description}`}</span>
-                  </div>
-                  {/* <Chip
-                    label={plan.category}
-                    color={color}
-                    size="small"
-                    sx={{
-                      ml: 2,
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                      backgroundColor: highlight ? '#facc15' : undefined,
-                      color: highlight ? '#1e3a8a' : undefined,
-                    }}
-                  /> */}
+                  </span>
                 </li>
               )
             })}
