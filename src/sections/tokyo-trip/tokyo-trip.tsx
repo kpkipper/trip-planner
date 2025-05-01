@@ -2,11 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { getCategoryData, itinerary } from './tokyo-trip.constant'
-import { ArrowUp } from 'lucide-react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
-import { Chip } from '@mui/material'
 
 const TokyoTrip = () => {
   const [currentTime, setCurrentTime] = useState(new Date('2025-05-04T11:00:00')) // May 8, 2025
@@ -100,7 +98,7 @@ const TokyoTrip = () => {
           <ul className="divide-y divide-gray-200">
             {itinerary[selectedDayIndex].plans.map((plan, idx) => {
               const highlight = isCurrentActivity(plan.time)
-              const { emoji, color } = getCategoryData(plan.category)
+              const { emoji } = getCategoryData(plan.category)
 
               return (
                 <li
