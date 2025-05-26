@@ -1,13 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { getCategoryData, itinerary } from './tokyo-trip.constant'
+
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
 
+import { getCategoryData, itinerary } from './tokyo-trip.constant'
+
 const TokyoTrip = () => {
-  const [currentTime, setCurrentTime] = useState(new Date('2025-05-04T11:00:00')) // May 4, 2025
+  const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -15,20 +17,14 @@ const TokyoTrip = () => {
   }
 
   const isCurrentActivity = (index: number) => {
+    const dayDate = itinerary[selectedDayIndex].dateISO
     const currentPlan = itinerary[selectedDayIndex].plans[index]
-    const [currentHour, currentMinute] = currentPlan.time.split(':').map(Number)
-    const currentStart = new Date(currentTime)
-    currentStart.setHours(currentHour, currentMinute, 0, 0)
-
+    const currentStart = new Date(`${dayDate}T${currentPlan.time}:00`)
     const nextPlan = itinerary[selectedDayIndex].plans[index + 1]
     let nextStart: Date | null = null
-
     if (nextPlan) {
-      const [nextHour, nextMinute] = nextPlan.time.split(':').map(Number)
-      nextStart = new Date(currentTime)
-      nextStart.setHours(nextHour, nextMinute, 0, 0)
+      nextStart = new Date(`${dayDate}T${nextPlan.time}:00`)
     }
-
     if (nextStart) {
       return currentTime >= currentStart && currentTime < nextStart
     } else {
@@ -48,15 +44,17 @@ const TokyoTrip = () => {
   }, [currentTime])
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime((prev) => new Date(prev.getTime() + 60000))
-    }, 60000)
-    return () => clearInterval(timer)
+    const now = new Date()
+    setCurrentTime(now)
+    const todayISO = now.toISOString().split('T')[0]
+    const idx = itinerary.findIndex((day) => day.dateISO === todayISO)
+    if (idx !== -1) {
+      setSelectedDayIndex(idx)
+    }
   }, [])
 
-  const openGoogleMaps = (location: string) => {
-    const url = `https://www.google.com/maps/search/?q=${encodeURIComponent(location)}`
-    window.open(url, '_blank')
+  const openGoogleMaps = (location?: string) => {
+    window.open(location, '_blank')
   }
 
   return (
@@ -66,7 +64,6 @@ const TokyoTrip = () => {
       </div>
       <div className="font-bold text-center text-gray-800 mb-6">on May 4–11, 2025</div>
 
-      {/* MUI Scrollable Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
           value={selectedDayIndex}
@@ -108,15 +105,11 @@ const TokyoTrip = () => {
               {itinerary[selectedDayIndex].date}
             </p>
           </div>
-          <div className="px-6 py-4"></div>
 
           <ul className="divide-y divide-gray-200">
             {itinerary[selectedDayIndex].plans.map((plan, idx) => {
               const highlight = isCurrentActivity(idx)
-              const category = getCategoryData(plan.category) || {
-                emoji: '📍',
-                label: plan.category,
-              }
+              const emoji = plan.category ? getCategoryData(plan.category) : plan.emoji ? plan.emoji :'📍'
 
               return (
                 <li
@@ -124,11 +117,11 @@ const TokyoTrip = () => {
                   className={`flex items-center justify-between px-6 py-3 cursor-pointer hover:bg-indigo-50 transition ${
                     highlight ? 'bg-yellow-100 font-medium text-indigo-800' : 'bg-white'
                   }`}
-                  onClick={() => openGoogleMaps(plan.description)}
+                  onClick={() => openGoogleMaps(plan.map)}
                 >
                   <span className="flex items-center gap-2">
-                    <span className="text-xl">{category.emoji}</span>
-                    <span>{`${plan.time} - ${plan.description}`}</span>
+                    <span className="text-xl">{emoji}</span>
+                    <span>{`${plan.time}: ${plan.description}`}</span>
                   </span>
                 </li>
               )
