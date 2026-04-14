@@ -7,9 +7,9 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
 
-import { getCategoryData, itinerary } from './tokyo-trip.constant'
+import { getCategoryData, itinerary } from './osaka-trip.constant'
 
-const TokyoTrip = () => {
+const OsakaTrip = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
 
@@ -43,19 +43,18 @@ const TokyoTrip = () => {
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 py-8">
-      {/* Header — matches user trip view style */}
       <div className="flex items-start justify-between mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Tokyo Trip Plan 🎏🗼</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Osaka Trip Plan 🦌🏯</h1>
           <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
             <MapPin size={13} />
-            <span>Tokyo, Japan</span>
+            <span>Osaka, Japan</span>
           </div>
         </div>
       </div>
 
       <p className="font-semibold text-[#0470b9] text-sm mb-6">
-        May 4, 2025 &ndash; May 11, 2025
+        May 2, 2026 &ndash; May 9, 2026
       </p>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -124,4 +123,4 @@ const TokyoTrip = () => {
   )
 }
 
-export default TokyoTrip
+export default OsakaTrip

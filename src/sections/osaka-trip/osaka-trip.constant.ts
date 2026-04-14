@@ -1,0 +1,446 @@
+import { ItineraryDay } from './osaka-trip.type'
+
+export const itinerary: ItineraryDay[] = [
+  {
+    date: '2 May (Sat)',
+    dateISO: '2026-05-02',
+    title: 'Arrival & Dotonbori',
+    plans: [
+      {
+        time: '09:20',
+        description: 'Arrive at Kansai International Airport (KIX)',
+        category: 'Arrival',
+        map: 'https://maps.google.com/?q=Kansai+International+Airport',
+      },
+      {
+        time: '10:20',
+        description: 'Nankai Limited Express Rapi:t → Namba (~40 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Namba+Station+Osaka',
+      },
+      {
+        time: '11:30',
+        description: 'Check-in at Koko Hotel Osaka Shinsekai',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+      {
+        time: '12:00',
+        description: 'Namba Yasaka Shrine — giant lion head stage 🦁',
+        category: 'Temple',
+        map: 'https://maps.google.com/?q=Namba+Yasaka+Shrine',
+      },
+      {
+        time: '13:00',
+        description: 'Lunch at Kuromon Ichiba Market',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Kuromon+Ichiba+Market+Osaka',
+      },
+      {
+        time: '14:30',
+        description: 'Walk around Namba & Amerika Mura',
+        emoji: '🛍️',
+        map: 'https://maps.google.com/?q=Amerika+Mura+Osaka',
+      },
+      {
+        time: '17:00',
+        description: 'Dotonbori canal & Glico sign 📸',
+        emoji: '🌉',
+        map: 'https://maps.google.com/?q=Dotonbori+Osaka',
+      },
+      {
+        time: '19:00',
+        description: 'Dinner at Dotonbori (Takoyaki & Okonomiyaki)',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Dotonbori+Osaka',
+      },
+      {
+        time: '21:00',
+        description: 'Return to hotel',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+    ],
+  },
+  {
+    date: '3 May (Sun)',
+    dateISO: '2026-05-03',
+    title: 'Minoo & Osaka Castle',
+    plans: [
+      {
+        time: '08:00',
+        description: 'Osaka Metro → Namba → Umeda Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Umeda+Station+Osaka',
+      },
+      {
+        time: '08:30',
+        description: 'Hankyu Minoh Line → Minoo Station (~25 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Minoo+Station+Osaka',
+      },
+      {
+        time: '09:00',
+        description: 'Minoo Park — waterfall trail hike 🌊',
+        emoji: '🌿',
+        map: 'https://maps.google.com/?q=Minoo+Park+Osaka',
+      },
+      {
+        time: '10:30',
+        description: 'Momiji tempura snack at park stalls 🍁',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Minoo+Park+Osaka',
+      },
+      {
+        time: '11:00',
+        description: 'Return to Osaka — Hankyu → Umeda',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Hankyu+Umeda+Station+Osaka',
+      },
+      {
+        time: '12:00',
+        description: 'Osaka Metro → Tanimachi 4-chome Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Tanimachi+4-chome+Station+Osaka',
+      },
+      {
+        time: '12:30',
+        description: 'Lunch near Osaka Castle area',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Osaka+Castle+Park',
+      },
+      {
+        time: '14:00',
+        description: 'Osaka Castle & Nishinomaru Garden',
+        emoji: '🏯',
+        map: 'https://maps.google.com/?q=Osaka+Castle',
+      },
+      {
+        time: '16:00',
+        description: 'Osaka Metro → Shinsaibashi Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Shinsaibashi+Station+Osaka',
+      },
+      {
+        time: '16:30',
+        description: 'Shinsaibashi shopping arcade',
+        category: 'Shopping',
+        map: 'https://maps.google.com/?q=Shinsaibashi+Shopping+Arcade+Osaka',
+      },
+      {
+        time: '19:00',
+        description: 'Dinner at Namba (Kushikatsu)',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Namba+Osaka',
+      },
+      {
+        time: '21:00',
+        description: 'Return to hotel',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+    ],
+  },
+  {
+    date: '4 May (Mon)',
+    dateISO: '2026-05-04',
+    title: 'Day Trip to Nara 🦌',
+    plans: [
+      {
+        time: '09:00',
+        description: 'Kintetsu Namba → Kintetsu Nara Station (~40 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Kintetsu+Nara+Station',
+      },
+      {
+        time: '09:50',
+        description: 'Nara Park — deer roaming freely 🦌',
+        emoji: '🌿',
+        map: 'https://maps.google.com/?q=Nara+Park',
+      },
+      {
+        time: '11:00',
+        description: 'Todaiji Temple — giant Buddha statue',
+        category: 'Temple',
+        map: 'https://maps.google.com/?q=Todai-ji+Temple+Nara',
+      },
+      {
+        time: '12:30',
+        description: 'Lunch in Nara (Kakinoha-zushi & local food)',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Naramachi+Nara',
+      },
+      {
+        time: '14:00',
+        description: 'Kasuga Taisha Shrine — lantern-lined path',
+        category: 'Temple',
+        map: 'https://maps.google.com/?q=Kasuga+Taisha+Shrine+Nara',
+      },
+      {
+        time: '15:30',
+        description: 'Kofukuji Temple & Naramachi old town walk',
+        emoji: '🏛️',
+        map: 'https://maps.google.com/?q=Kofuku-ji+Temple+Nara',
+      },
+      {
+        time: '17:00',
+        description: 'Kintetsu Nara → back to Osaka Namba',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Namba+Station+Osaka',
+      },
+      {
+        time: '18:30',
+        description: 'Dinner at Dotonbori',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Dotonbori+Osaka',
+      },
+    ],
+  },
+  {
+    date: '5 May (Tue)',
+    dateISO: '2026-05-05',
+    title: 'Day Trip to Kyoto 🏮',
+    plans: [
+      {
+        time: '07:30',
+        description: 'JR Rapid Service → Kyoto Station (~15 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Kyoto+Station',
+      },
+      {
+        time: '08:30',
+        description: 'Fushimi Inari Taisha — torii gate hike',
+        category: 'Temple',
+        map: 'https://maps.google.com/?q=Fushimi+Inari+Taisha+Kyoto',
+      },
+      {
+        time: '11:00',
+        description: "Nishiki Market (Kyoto's kitchen)",
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Nishiki+Market+Kyoto',
+      },
+      {
+        time: '12:30',
+        description: 'Lunch in Gion area',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Gion+Kyoto',
+      },
+      {
+        time: '14:00',
+        description: 'Gion District walk — geisha spotting',
+        emoji: '🏮',
+        map: 'https://maps.google.com/?q=Gion+District+Kyoto',
+      },
+      {
+        time: '15:30',
+        description: 'Kinkakuji (Golden Pavilion) ✨',
+        emoji: '🏅',
+        map: 'https://maps.google.com/?q=Kinkaku-ji+Kyoto',
+      },
+      {
+        time: '17:30',
+        description: 'JR → back to Osaka Namba',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Namba+Station+Osaka',
+      },
+      {
+        time: '19:30',
+        description: 'Dinner at Dotonbori',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Dotonbori+Osaka',
+      },
+    ],
+  },
+  {
+    date: '6 May (Wed)',
+    dateISO: '2026-05-06',
+    title: 'Osaka Aquarium & Tempozan',
+    plans: [
+      {
+        time: '09:30',
+        description: 'Osaka Metro Chuo Line → Osakako Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Osakako+Station+Osaka',
+      },
+      {
+        time: '10:00',
+        description: 'Kaiyukan Aquarium 🐋🦈',
+        emoji: '🐠',
+        map: 'https://maps.google.com/?q=Osaka+Aquarium+Kaiyukan',
+      },
+      {
+        time: '13:00',
+        description: 'Lunch at Tempozan Marketplace',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Tempozan+Marketplace+Osaka',
+      },
+      {
+        time: '14:30',
+        description: 'Tempozan Giant Ferris Wheel',
+        emoji: '🎡',
+        map: 'https://maps.google.com/?q=Tempozan+Giant+Ferris+Wheel+Osaka',
+      },
+      {
+        time: '16:00',
+        description: 'Walk around Osaka Bay area',
+        emoji: '🌊',
+        map: 'https://maps.google.com/?q=Osaka+Bay',
+      },
+      {
+        time: '18:00',
+        description: 'Return to Namba',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Namba+Station+Osaka',
+      },
+      {
+        time: '19:30',
+        description: 'Dinner at Dotonbori',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Dotonbori+Osaka',
+      },
+    ],
+  },
+  {
+    date: '7 May (Thu)',
+    dateISO: '2026-05-07',
+    title: 'Universal Studios Japan 🎢',
+    plans: [
+      {
+        time: '07:00',
+        description: 'JR Osaka Loop Line → Universal City Station (~20 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Universal+City+Station+Osaka',
+      },
+      {
+        time: '08:00',
+        description: 'Full day at Universal Studios Japan 🎡',
+        emoji: '🎠',
+        map: 'https://maps.google.com/?q=Universal+Studios+Japan',
+      },
+      {
+        time: '20:00',
+        description: 'Return to hotel at Koko Hotel Osaka Shinsekai',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+    ],
+  },
+  {
+    date: '8 May (Fri)',
+    dateISO: '2026-05-08',
+    title: 'Shinsekai & Tennoji',
+    plans: [
+      {
+        time: '09:00',
+        description: 'Osaka Metro → Dobutsuen-mae Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Dobutsuen-mae+Station+Osaka',
+      },
+      {
+        time: '09:30',
+        description: 'Shinsekai & Tsutenkaku Tower',
+        emoji: '🗼',
+        map: 'https://maps.google.com/?q=Tsutenkaku+Tower+Osaka',
+      },
+      {
+        time: '11:30',
+        description: 'Kushikatsu lunch at Shinsekai',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Shinsekai+Osaka',
+      },
+      {
+        time: '13:30',
+        description: 'Tennoji Park & Osaka Municipal Museum of Art',
+        emoji: '🌳',
+        map: 'https://maps.google.com/?q=Tennoji+Park+Osaka',
+      },
+      {
+        time: '15:30',
+        description: "Abeno Harukas observatory (Japan's tallest building)",
+        emoji: '🏙️',
+        map: 'https://maps.google.com/?q=Abeno+Harukas+Osaka',
+      },
+      {
+        time: '17:30',
+        description: 'Sumiyoshi Taisha Shrine',
+        category: 'Temple',
+        map: 'https://maps.google.com/?q=Sumiyoshi+Taisha+Shrine+Osaka',
+      },
+      {
+        time: '19:30',
+        description: 'Dinner back at Namba',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Namba+Osaka',
+      },
+      {
+        time: '21:00',
+        description: 'Return to hotel',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+    ],
+  },
+  {
+    date: '9 May (Sat)',
+    dateISO: '2026-05-09',
+    title: 'Departure ✈️',
+    plans: [
+      {
+        time: '09:00',
+        description: 'Last Osaka breakfast',
+        category: 'Food',
+        map: 'https://maps.google.com/?q=Shinsekai+Osaka',
+      },
+      {
+        time: '11:00',
+        description: 'Pack & check-out from Koko Hotel Osaka Shinsekai',
+        category: 'Hotel',
+        map: 'https://maps.google.com/?q=Koko+Hotel+Osaka+Shinsekai',
+      },
+      {
+        time: '12:00',
+        description: 'Lunch & last-minute shopping at Shinsaibashi',
+        category: 'Shopping',
+        map: 'https://maps.google.com/?q=Shinsaibashi+Shopping+Arcade+Osaka',
+      },
+      {
+        time: '15:00',
+        description: 'Head to Namba Station',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Namba+Station+Osaka',
+      },
+      {
+        time: '16:00',
+        description: 'Nankai Rapi:t → Kansai Airport (~40 mins)',
+        category: 'Train',
+        map: 'https://maps.google.com/?q=Kansai+International+Airport',
+      },
+      {
+        time: '17:00',
+        description: 'Check-in & airport shopping',
+        category: 'Shopping',
+        map: 'https://maps.google.com/?q=Kansai+International+Airport',
+      },
+      {
+        time: '19:30',
+        description: 'Departure from KIX → Thailand ✈️',
+        category: 'Departure',
+        map: 'https://maps.google.com/?q=Kansai+International+Airport',
+      },
+    ],
+  },
+]
+
+export const getCategoryData = (category: string) => {
+  const mapping: Record<string, string> = {
+    Arrival: '🛬',
+    Departure: '🛫',
+    Travel: '🚗',
+    Hotel: '🛌',
+    Shopping: '🛍️',
+    Temple: '⛩️',
+    Food: '🍜',
+    Train: '🚝',
+  }
+  return mapping[category]
+}
