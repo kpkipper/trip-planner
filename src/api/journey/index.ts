@@ -8,8 +8,8 @@ export const getJourneys = async () => {
   return data
 }
 
-export const getJourneyById = async (id: string) => {
-  const { data } = await apiClient.get<GetJourneyTripResponse>(`/api/v1/journeys/${id}`)
+export const getJourneyBySlug = async (slug: string) => {
+  const { data } = await apiClient.get<GetJourneyTripResponse>(`/api/v1/journeys/${slug}`)
   return data
 }
 
@@ -18,15 +18,15 @@ export const createJourney = async (trip: Trip) => {
   return data
 }
 
-export const updateJourney = async (id: string, trip: Trip) => {
-  const { data } = await apiClient.put<GetJourneyTripResponse>(
-    `/api/v1/journeys/${id}`,
+export const updateJourney = async (slug: string, trip: Trip) => {
+  const { data } = await apiClient.put<Response>(
+    `/api/v1/journeys/${slug}/update`,
     mapTripPayload(trip),
   )
   return data
 }
 
-export const deleteJourney = async (id: string) => {
-  const { data } = await apiClient.delete<Response>(`/api/v1/journeys/${id}`)
+export const deleteJourney = async (slug: string) => {
+  const { data } = await apiClient.delete<Response>(`/api/v1/journeys/${slug}`)
   return data
 }

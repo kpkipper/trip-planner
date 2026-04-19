@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -9,21 +9,15 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import { Edit2, Trash2, MapPin } from 'lucide-react'
 import { useTrips } from '@/contexts/trips-context'
-import { toSlug } from '@/lib/slug'
+import { deleteJourney, getJourneyBySlug } from '@/api/journey'
+import { formatJourneyDetail } from '@/utils/format-data'
 import ConfirmDialog from '@/components/confirm-dialog'
 import PageLoading from '@/components/page-loading'
+import type { Trip } from '@/types/trip'
 
-export default function PlanViewContent() {
-  const searchParams = useSearchParams()
-  const id = searchParams.get('id')
-  const { getTrip, deleteTrip } = useTrips()
-  const trip = id ? getTrip(id) : undefined
-  const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
-    if (!trip) return 0
-    const todayISO = new Date().toISOString().split('T')[0]
-    const idx = trip.days.findIndex((d) => d.dateISO === todayISO)
-    return idx !== -1 ? idx : 0
-  })
+function TripView({ trip, slug }: { trip: Trip; slug: string }) {
+  const router = useRouter()
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [snackbar, setSnackbar] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -35,58 +29,29 @@ export default function PlanViewContent() {
   }, [])
 
   const isCurrentActivity = (dayIdx: number, actIdx: number) => {
-    if (!trip) return false
     const day = trip.days[dayIdx]
     const act = day.activities[actIdx]
     if (!act.time) return false
-    const dateISO = day.dateISO
-    const actStart = new Date(`${dateISO}T${act.time}:00`)
+    const actStart = new Date(`${day.dateISO}T${act.time}:00`)
     const nextAct = day.activities[actIdx + 1]
-    const nextStart = nextAct?.time ? new Date(`${dateISO}T${nextAct.time}:00`) : null
+    const nextStart = nextAct?.time ? new Date(`${day.dateISO}T${nextAct.time}:00`) : null
     if (nextStart) return currentTime >= actStart && currentTime < nextStart
     return currentTime >= actStart && currentTime < new Date(actStart.getTime() + 60 * 60 * 1000)
   }
 
   const handleDelete = async () => {
-    if (!id) return
     setConfirmOpen(false)
     setDeleting(true)
-    const code = await deleteTrip(id)
+    const { code } = await deleteJourney(trip.slug!)
     if (code === 'JOURNEY-200000') {
       setSnackbar(true)
-      setTimeout(() => {
-        window.location.href = '/'
-      }, 1500)
+      setTimeout(() => router.replace('/'), 1500)
     } else {
-      window.location.href = '/'
+      router.replace('/')
     }
   }
 
   if (deleting) return <PageLoading />
-
-  if (!id) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <p>No trip selected.</p>
-      </div>
-    )
-  }
-
-  if (!trip) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <p>Trip not found.</p>
-        <button
-          onClick={() => {
-            window.location.href = '/'
-          }}
-          className="mt-3 text-[#0163a4] hover:underline text-sm"
-        >
-          Go back home
-        </button>
-      </div>
-    )
-  }
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 py-8">
@@ -108,7 +73,6 @@ export default function PlanViewContent() {
           Trip deleted successfully!
         </Alert>
       </Snackbar>
-      {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <div>
@@ -123,9 +87,9 @@ export default function PlanViewContent() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() =>
-              (window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`)
-            }
+            onClick={() => {
+              router.push(`/plans/${slug}/edit`)
+            }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
           >
             <Edit2 size={14} />
@@ -159,9 +123,9 @@ export default function PlanViewContent() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
           <p>No days planned yet.</p>
           <button
-            onClick={() =>
-              (window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`)
-            }
+            onClick={() => {
+              router.push(`/plans/${slug}/edit`)
+            }}
             className="mt-3 text-[#0163a4] hover:underline text-sm"
           >
             Edit plan to add days
@@ -169,7 +133,6 @@ export default function PlanViewContent() {
         </div>
       ) : (
         <>
-          {/* Day tabs */}
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
             <Tabs
               value={selectedDayIndex}
@@ -197,7 +160,6 @@ export default function PlanViewContent() {
             </Tabs>
           </Box>
 
-          {/* Day content */}
           {trip.days[selectedDayIndex] && (
             <div className="mb-6 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-b from-[#edf3f7] to-70% px-6 py-4">
@@ -226,7 +188,7 @@ export default function PlanViewContent() {
                         onClick={() => act.mapUrl && window.open(act.mapUrl, '_blank')}
                       >
                         <span className="flex items-center gap-2">
-                          <span className="text-xl">{act.emoji}</span>
+                          <span className="text-xl">{act.emoji || '📍'}</span>
                           <span>{`${act.time ? act.time + ': ' : ''}${act.description}`}</span>
                         </span>
                         {act.mapUrl && <MapPin size={14} className="text-gray-400 flex-shrink-0" />}
@@ -241,4 +203,33 @@ export default function PlanViewContent() {
       )}
     </div>
   )
+}
+
+export default function TripViewContent({ slug }: { slug: string }) {
+  const { trips, loaded } = useTrips()
+  const [fullTrip, setFullTrip] = useState<Trip | undefined>()
+
+  const partialTrip = trips.find((t) => t.slug === slug)
+
+  useEffect(() => {
+    getJourneyBySlug(slug)
+      .then(({ data }) => setFullTrip(formatJourneyDetail(data)))
+      .catch(() => {})
+  }, [slug])
+
+  const trip = fullTrip ?? partialTrip
+
+  if (!loaded) {
+    return <PageLoading />
+  }
+
+  if (!trip) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <p>Trip not found.</p>
+      </div>
+    )
+  }
+
+  return <TripView trip={trip} slug={slug} />
 }

@@ -13,7 +13,6 @@ import {
   FolderOpen,
 } from 'lucide-react'
 import { useTrips } from '@/contexts/trips-context'
-import { toSlug } from '@/lib/slug'
 
 interface SidebarProps {
   collapsed: boolean
@@ -45,7 +44,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const latestTrip =
     trips
       .slice()
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0] ?? null
+      .sort((a, b) => (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) - (a.updatedAt ? new Date(a.updatedAt).getTime() : 0))[0] ?? null
 
   const tripsByCountry = trips.reduce<Record<string, typeof trips>>((acc, trip) => {
     const key = trip.country || 'Other'
@@ -101,10 +100,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-1.5">
             Latest
           </div>
-          <a href={`/${toSlug(latestTrip.country)}/${toSlug(latestTrip.destination)}`}>
+          <a href={`/plans/${latestTrip.slug}`}>
             <div
               className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
-                pathname === `/${toSlug(latestTrip.country)}/${toSlug(latestTrip.destination)}`
+                pathname === `/plans/${latestTrip.slug}`
                   ? 'bg-[#edf3f7] border-[#0163a4]/30 text-[#0163a4]'
                   : 'bg-gray-50 border-gray-200 hover:bg-[#edf3f7] text-gray-700'
               }`}
@@ -153,7 +152,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {(isExpanded || collapsed) && (
                 <div className={collapsed ? '' : 'ml-3'}>
                   {tripsForCountry.map((trip) => {
-                    const href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}`
+                    const href = `/plans/${trip.slug}`
                     return (
                       <a key={trip.id} href={href}>
                         <div

@@ -1,5 +1,6 @@
 export interface ListJourneyType {
   id: string
+  slug: string
   title: string
   destination: string
 }
@@ -9,7 +10,7 @@ export interface ListCountryType {
   plan: ListJourneyType[]
 }
 
-export interface PlanType {
+export interface ActivityPlanType {
   id: string
   time: string
   description: string
@@ -23,13 +24,12 @@ export interface ItineraryDayType {
   date: string
   date_iso: string
   title: string
-  plans: PlanType[]
-  created_at?: string
-  updated_at?: string
+  plans: ActivityPlanType[]
 }
 
 export interface JourneyType {
   id: string
+  slug: string
   title: string
   country: string
   destination: string

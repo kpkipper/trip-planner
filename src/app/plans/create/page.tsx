@@ -1,11 +1,11 @@
 import { Suspense } from 'react'
-import CreatePlanContent from './create-plan-content'
+import { CreateEditContent } from '@/sections/create-edit-content'
 import PageLoading from '@/components/page-loading'
 
 export default function CreatePlanPage() {
   return (
     <Suspense fallback={<PageLoading />}>
-      <CreatePlanContent />
+      <CreateEditContent />
     </Suspense>
   )
 }

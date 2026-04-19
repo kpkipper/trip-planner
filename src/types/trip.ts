@@ -16,12 +16,12 @@ export interface TripDay {
 
 export interface Trip {
   id: string
+  slug: string
   title: string
   destination: string
   country: string
   startDate: string
   endDate: string
   days: TripDay[]
-  createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }

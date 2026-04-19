@@ -1,5 +1,5 @@
 import type { Trip } from '@/types/trip'
-import type { JourneyType, ListCountryType } from './type'
+import type { JourneyType, ListCountryType } from '@/api/journey/type'
 
 export const mapTripResponse = (journey: JourneyType): Trip => {
   const destParts = (journey.destination ?? '').split(', ')
@@ -7,6 +7,7 @@ export const mapTripResponse = (journey: JourneyType): Trip => {
     destParts.length > 1 ? destParts.slice(0, -1).join(', ') : (journey.destination ?? '')
   return {
     id: journey.id,
+    slug: journey.slug ?? '',
     title: journey.title ?? '',
     destination,
     country: journey.country ?? '',
@@ -26,7 +27,6 @@ export const mapTripResponse = (journey: JourneyType): Trip => {
         mapUrl: plan.map_url,
       })),
     })),
-    createdAt: journey.created_at ?? new Date().toISOString(),
     updatedAt: journey.updated_at ?? new Date().toISOString(),
   }
 }
