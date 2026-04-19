@@ -1,9 +1,10 @@
 import { Suspense } from 'react'
 import PlanViewContent from './plan-view-content'
+import PageLoading from '@/components/page-loading'
 
 export default function PlanViewPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-gray-500">Loading...</div>}>
+    <Suspense fallback={<PageLoading />}>
       <PlanViewContent />
     </Suspense>
   )

@@ -3,18 +3,31 @@
 import { useEffect, useState } from 'react'
 import TripViewContent from './[country]/[city]/trip-view-content'
 import TripEditContent from './[country]/[city]/edit/trip-edit-content'
+import { useTrips } from '@/contexts/trips-context'
+import { toSlug } from '@/lib/slug'
 
 export default function Home() {
   const [parts, setParts] = useState<string[] | null>(null)
+  const { trips, loaded } = useTrips()
 
   useEffect(() => {
     const segments = window.location.pathname.split('/').filter(Boolean)
-    if (segments.length === 0) {
-      window.location.replace('/japan/tokyo')
-    } else {
+    if (segments.length > 0) {
       setParts(segments)
     }
   }, [])
+
+  useEffect(() => {
+    if (parts !== null || !loaded) return
+    const latest = trips
+      .slice()
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+    if (latest) {
+      window.location.replace(`/${toSlug(latest.country)}/${toSlug(latest.destination)}`)
+    } else {
+      window.location.replace('/plans/create')
+    }
+  }, [loaded, trips, parts])
 
   if (parts === null) return null
 

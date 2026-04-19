@@ -3,9 +3,14 @@
 import { useTrips } from '@/contexts/trips-context'
 import { toSlug } from '@/lib/slug'
 import CreatePlanContent from '@/app/plans/create/create-plan-content'
+import PageLoading from '@/components/page-loading'
 
 export default function TripEditContent({ country, city }: { country: string; city: string }) {
-  const { trips } = useTrips()
+  const { trips, loaded } = useTrips()
+
+  if (!loaded) {
+    return <PageLoading />
+  }
 
   const trip = trips.find(
     (t) => toSlug(t.country) === country && toSlug(t.destination) === city,
@@ -25,5 +30,5 @@ export default function TripEditContent({ country, city }: { country: string; ci
     )
   }
 
-  return <CreatePlanContent editId={trip.id} />
+  return <CreatePlanContent editId={trip.id} country={country} city={city} />
 }

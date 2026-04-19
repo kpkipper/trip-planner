@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import TripViewContent from './trip-view-content'
+import PageLoading from '@/components/page-loading'
 
 export function generateStaticParams() {
   return [
@@ -15,7 +16,7 @@ export default async function TripPage({
 }) {
   const { country, city } = await params
   return (
-    <Suspense fallback={<div className="p-8 text-gray-500">Loading...</div>}>
+    <Suspense fallback={<PageLoading />}>
       <TripViewContent country={country} city={city} />
     </Suspense>
   )

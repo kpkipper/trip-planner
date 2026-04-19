@@ -2,84 +2,106 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Trip } from '@/types/trip'
-
-const STORAGE_KEY = 'trip-planner-trips'
-
-// Built-in trips — data preserved in tokyo-trip.constant.ts, view handled by TokyoTrip component
-const BUILTIN_TRIPS: Trip[] = [
-  {
-    id: 'builtin-tokyo-2025',
-    title: 'Tokyo 2025',
-    destination: 'Tokyo',
-    country: 'Japan',
-    startDate: '2025-05-04',
-    endDate: '2025-05-11',
-    days: [],
-    createdAt: '2025-05-04T00:00:00.000Z',
-    updatedAt: '2025-05-04T00:00:00.000Z',
-  },
-]
+import {
+  createJourney,
+  deleteJourney,
+  getJourneys,
+  getJourneyById,
+  updateJourney,
+} from '@/api/journey'
+import { formatListJourney, formatJourneyDetail } from '@/api/journey/utils'
 
 interface TripsContextValue {
   trips: Trip[]
   loaded: boolean
-  addTrip: (trip: Trip) => void
-  updateTrip: (trip: Trip) => void
-  deleteTrip: (id: string) => void
+  addTrip: (trip: Trip) => Promise<string>
+  updateTrip: (trip: Trip) => Promise<void>
+  deleteTrip: (id: string) => Promise<string>
   getTrip: (id: string) => Trip | undefined
+  loadTrip: (id: string) => Promise<Trip>
 }
 
 const TripsContext = createContext<TripsContextValue | null>(null)
 
 export function TripsProvider({ children }: { children: React.ReactNode }) {
-  const [staticTrips, setStaticTrips] = useState<Trip[]>([])
   const [userTrips, setUserTrips] = useState<Trip[]>([])
   const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
-    // Load localStorage trips synchronously
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) setUserTrips(JSON.parse(stored))
-    } catch {
-      // ignore
+  const fetchTrips = async (): Promise<Trip[]> => {
+    const res = await getJourneys()
+    return formatListJourney(res.data ?? [])
+  }
+
+  const fetchTripById = async (id: string): Promise<Trip> => {
+    const res = await getJourneyById(id)
+    return formatJourneyDetail(res.data)
+  }
+
+  const addTripRequest = async (trip: Trip): Promise<string> => {
+    const res = await createJourney(trip)
+    return res.code
+  }
+
+  const updateTripRequest = async (trip: Trip): Promise<Trip> => {
+    const res = await updateJourney(trip.id, trip)
+    return formatJourneyDetail(res.data)
+  }
+
+  const deleteTripRequest = async (id: string): Promise<string> => {
+    const res = await deleteJourney(id)
+    return res.code
+  }
+
+  const mergeTrips = (prev: Trip[], incoming: Trip[]): Trip[] => {
+    const merged = [...prev]
+    for (const trip of incoming) {
+      const idx = merged.findIndex((t) => t.id === trip.id)
+      if (idx >= 0) merged[idx] = trip
+      else merged.push(trip)
     }
+    return merged
+  }
 
-    // Load static trips from public/data/trips.json
-    fetch('/data/trips.json')
-      .then((r) => r.json())
-      .then((data: Trip[]) => setStaticTrips(Array.isArray(data) ? data : []))
-      .catch(() => {})
-      .finally(() => setLoaded(true))
-  }, [])
-
-  const persist = (newTrips: Trip[]) => {
-    setUserTrips(newTrips)
+  const loadTrips = async () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTrips))
-    } catch {
-      // ignore
+      const trips = await fetchTrips()
+      setUserTrips((prev) => mergeTrips(prev, trips))
+    } catch (err) {
+      console.error('Failed to load trips', err)
+    } finally {
+      setLoaded(true)
     }
   }
 
-  const allBuiltinIds = new Set([...BUILTIN_TRIPS.map((t) => t.id), ...staticTrips.map((t) => t.id)])
-
-  // Static trips override localStorage trips with the same ID
-  const allTrips = [
-    ...BUILTIN_TRIPS,
-    ...staticTrips,
-    ...userTrips.filter((t) => !allBuiltinIds.has(t.id)),
-  ]
+  useEffect(() => {
+    loadTrips()
+  }, [])
 
   return (
     <TripsContext.Provider
       value={{
-        trips: allTrips,
+        trips: userTrips,
         loaded,
-        addTrip: (trip) => persist([...userTrips, trip]),
-        updateTrip: (trip) => persist(userTrips.map((t) => (t.id === trip.id ? trip : t))),
-        deleteTrip: (id) => persist(userTrips.filter((t) => t.id !== id)),
-        getTrip: (id) => allTrips.find((t) => t.id === id),
+        addTrip: async (trip) => {
+          const code = await addTripRequest(trip)
+          setUserTrips((prev) => [...prev, trip])
+          return code
+        },
+        updateTrip: async (trip) => {
+          const updated = await updateTripRequest(trip)
+          setUserTrips((prev) => prev.map((t) => (t.id === trip.id ? updated : t)))
+        },
+        deleteTrip: async (id) => {
+          const code = await deleteTripRequest(id)
+          setUserTrips((prev) => prev.filter((t) => t.id !== id))
+          return code
+        },
+        getTrip: (id) => userTrips.find((t) => t.id === id),
+        loadTrip: async (id) => {
+          const trip = await fetchTripById(id)
+          setUserTrips((prev) => prev.map((t) => (t.id === id ? trip : t)))
+          return trip
+        },
       }}
     >
       {children}

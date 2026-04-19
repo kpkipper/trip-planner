@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next build && firebase serve --only hosting",
     "lint": "next lint",
-    "format": "prettier --write ."
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "release": "next build && firebase deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,6 +17,9 @@
     "@heroicons/react": "^2.2.0",
     "@mui/material": "^7.0.2",
     "@tailwindcss/postcss": "^4.1.5",
+    "axios": "^1.15.0",
+    "country-state-city": "^3.2.1",
+    "firebase": "^11.6.1",
     "framer-motion": "^12.9.4",
     "lucide-react": "^0.503.0",
     "next": "15.3.1",
@@ -29,6 +34,7 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
+    "firebase-tools": "^14.2.2",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "tailwindcss": "^4.1.5",

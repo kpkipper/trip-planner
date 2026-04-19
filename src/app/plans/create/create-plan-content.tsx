@@ -1,10 +1,24 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Plus, Trash2, ChevronDown, ChevronUp, ArrowLeft, Save, GripVertical } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
+  MapPin,
+} from 'lucide-react'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import { useTrips } from '@/contexts/trips-context'
+import PageLoading from '@/components/page-loading'
 import { toSlug } from '@/lib/slug'
+import { Country, State } from 'country-state-city'
 import type { Activity, Trip, TripDay } from '@/types/trip'
 
 function uid() {
@@ -26,19 +40,201 @@ function generateDays(startDate: string, endDate: string, existing: TripDay[]): 
     const dateISO = cur.toISOString().split('T')[0]
     const dateDisplay = formatDateDisplay(dateISO)
     const prev = existing.find((d) => d.dateISO === dateISO)
-    days.push(
-      prev ?? { id: uid(), date: dateDisplay, dateISO, title: dateDisplay, activities: [] },
-    )
+    days.push(prev ?? { id: uid(), date: dateDisplay, dateISO, title: dateDisplay, activities: [] })
     cur.setDate(cur.getDate() + 1)
     i++
   }
   return days
 }
 
-export default function CreatePlanContent({ editId: editIdProp }: { editId?: string | null } = {}) {
+const ALL_COUNTRIES = Country.getAllCountries()
+const COUNTRY_NAMES = ALL_COUNTRIES.map((c: { name: string }) => c.name)
+
+function Autocomplete({
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
+  hasError,
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  placeholder?: string
+  disabled?: boolean
+  hasError?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const filtered = value.trim()
+    ? options.filter((o) => o.toLowerCase().includes(value.toLowerCase()))
+    : options
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={containerRef} className="relative">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
+          hasError ? 'border-red-400' : 'border-gray-300'
+        }`}
+      />
+      {open && !disabled && filtered.length > 0 && (
+        <ul className="absolute z-50 mt-1 left-0 right-0 max-h-52 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+          {filtered.map((opt) => (
+            <li
+              key={opt}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onChange(opt)
+                setOpen(false)
+              }}
+              className="px-3 py-2 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2)
+    .toString()
+    .padStart(2, '0')
+  const m = i % 2 === 0 ? '00' : '30'
+  return `${h}:${m}`
+})
+
+function TimeAutocomplete({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const digits = value.replace(/\D/g, '')
+  const filtered =
+    digits.length > 0
+      ? TIME_OPTIONS.filter((opt) => opt.replace(/\D/g, '').startsWith(digits))
+      : TIME_OPTIONS
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={containerRef} className="relative w-20">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setOpen(true)}
+        placeholder="09:00"
+        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+      />
+      {open && filtered.length > 0 && (
+        <ul className="absolute z-50 mt-1 left-0 w-24 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+          {filtered.map((opt) => (
+            <li
+              key={opt}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onChange(opt)
+                setOpen(false)
+              }}
+              className="px-3 py-1.5 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function EmojiButton({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={containerRef} className="relative flex-shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-8 h-8 flex items-center justify-center text-lg rounded-lg border border-gray-200 hover:bg-gray-100 transition"
+        title="Set emoji"
+      >
+        {value || '📍'}
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 left-0 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-44">
+          <p className="text-xs text-gray-500 mb-1.5">Type or paste an emoji</p>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => {
+              const segments = [...new Intl.Segmenter().segment(e.target.value)]
+              const last = segments.at(-1)?.segment ?? ''
+              onChange(last)
+            }}
+            placeholder="📍"
+            className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition mb-2"
+          />
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault()
+              onChange('')
+              setOpen(false)
+            }}
+            className="text-xs text-gray-500 hover:text-red-500 transition"
+          >
+            Reset to 📍
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function CreatePlanContent({
+  editId: editIdProp,
+  country: countrySlug,
+  city: citySlug,
+}: { editId?: string | null; country?: string; city?: string } = {}) {
   const searchParams = useSearchParams()
   const editId = editIdProp ?? searchParams.get('id')
-  const { addTrip, updateTrip, getTrip } = useTrips()
+  const { addTrip, updateTrip, loadTrip } = useTrips()
 
   const [title, setTitle] = useState('')
   const [destination, setDestination] = useState('')
@@ -46,24 +242,43 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [days, setDays] = useState<TripDay[]>([])
+  const [snackbar, setSnackbar] = useState(false)
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set())
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [dragOver, setDragOver] = useState<{ dayId: string; index: number } | null>(null)
+  const [loadingEdit, setLoadingEdit] = useState(!!editId)
 
   const dragItem = useRef<{ dayId: string; index: number } | null>(null)
 
+  const destinationOptions = useMemo(() => {
+    const isoCode = ALL_COUNTRIES.find(
+      (c: { name: string; isoCode: string }) => c.name === country,
+    )?.isoCode
+    if (!isoCode) return []
+    return (State.getStatesOfCountry(isoCode) ?? [])
+      .map((s) =>
+        s.name
+          .replace(/ Prefecture$/, '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, ''),
+      )
+      .sort()
+  }, [country])
+
   useEffect(() => {
     if (!editId) return
-    const trip = getTrip(editId)
-    if (!trip) return
-    setTitle(trip.title)
-    setDestination(trip.destination)
-    setCountry(trip.country)
-    setStartDate(trip.startDate)
-    setEndDate(trip.endDate)
-    setDays(trip.days)
-    setExpandedDays(new Set(trip.days.map((d) => d.id)))
-  }, [editId, getTrip])
+    loadTrip(editId)
+      .then((trip) => {
+        setTitle(trip.title)
+        setDestination(trip.destination)
+        setCountry(trip.country)
+        setStartDate(trip.startDate)
+        setEndDate(trip.endDate)
+        setDays(trip.days)
+        setExpandedDays(new Set(trip.days.map((d) => d.id)))
+      })
+      .finally(() => setLoadingEdit(false))
+  }, [editId])
 
   useEffect(() => {
     if (!startDate || !endDate || startDate > endDate) return
@@ -87,7 +302,13 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
     setDays((prev) =>
       prev.map((d) =>
         d.id === dayId
-          ? { ...d, activities: [...d.activities, { id: uid(), time: '', description: '', mapUrl: '' }] }
+          ? {
+              ...d,
+              activities: [
+                ...d.activities,
+                { id: uid(), time: '', description: '', mapUrl: '', emoji: '' },
+              ],
+            }
           : d,
       ),
     )
@@ -97,7 +318,10 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
     setDays((prev) =>
       prev.map((d) =>
         d.id === dayId
-          ? { ...d, activities: d.activities.map((a) => (a.id === actId ? { ...a, [field]: value } : a)) }
+          ? {
+              ...d,
+              activities: d.activities.map((a) => (a.id === actId ? { ...a, [field]: value } : a)),
+            }
           : d,
       ),
     )
@@ -108,6 +332,19 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
       prev.map((d) =>
         d.id === dayId ? { ...d, activities: d.activities.filter((a) => a.id !== actId) } : d,
       ),
+    )
+  }
+
+  const moveActivity = (dayId: string, fromIndex: number, dir: 'up' | 'down') => {
+    setDays((prev) =>
+      prev.map((d) => {
+        if (d.id !== dayId) return d
+        const acts = [...d.activities]
+        const to = dir === 'up' ? fromIndex - 1 : fromIndex + 1
+        if (to < 0 || to >= acts.length) return d
+        ;[acts[fromIndex], acts[to]] = [acts[to], acts[fromIndex]]
+        return { ...d, activities: acts }
+      }),
     )
   }
 
@@ -142,6 +379,15 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
     setDragOver(null)
   }
 
+  const clearError = (key: string) => {
+    if (errors[key])
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+  }
+
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!title.trim()) errs.title = 'Trip title is required'
@@ -155,30 +401,55 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     const now = new Date().toISOString()
     if (editId) {
-      updateTrip({ id: editId, title, destination, country, startDate, endDate, days, createdAt: now, updatedAt: now })
+      await updateTrip({
+        id: editId,
+        title,
+        destination,
+        country,
+        startDate,
+        endDate,
+        days,
+        createdAt: now,
+        updatedAt: now,
+      })
       window.location.href = `/${toSlug(country)}/${toSlug(destination)}`
     } else {
       const id = uid()
-      const trip: Trip = { id, title, destination, country, startDate, endDate, days, createdAt: now, updatedAt: now }
-      addTrip(trip)
-      window.location.href = `/${toSlug(country)}/${toSlug(destination)}`
+      const trip: Trip = {
+        id,
+        title,
+        destination,
+        country,
+        startDate,
+        endDate,
+        days,
+        createdAt: now,
+        updatedAt: now,
+      }
+      const code = await addTrip(trip)
+      if (code === 'JOURNEY-201000') {
+        setSnackbar(true)
+        setTimeout(() => {
+          window.location.href = `/${toSlug(country)}/${toSlug(destination)}`
+        }, 1500)
+      } else {
+        window.location.href = `/${toSlug(country)}/${toSlug(destination)}`
+      }
     }
+  }
+
+  if (loadingEdit) {
+    return <PageLoading />
   }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => window.history.back()}
-          className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
         <h1 className="text-2xl font-bold text-gray-800">
           {editId ? 'Edit Plan' : 'Create New Plan'}
         </h1>
@@ -193,7 +464,10 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                clearError('title')
+              }}
               placeholder="e.g. Tokyo Adventure 2025"
               className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
                 errors.title ? 'border-red-400' : 'border-gray-300'
@@ -202,42 +476,56 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-              <input
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="e.g. Tokyo"
-                className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
-                  errors.destination ? 'border-red-400' : 'border-gray-300'
-                }`}
-              />
-              {errors.destination && <p className="text-red-500 text-xs mt-1">{errors.destination}</p>}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <input
-                type="text"
+              <Autocomplete
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(v) => {
+                  setCountry(v)
+                  setDestination('')
+                  clearError('country')
+                }}
+                options={COUNTRY_NAMES}
                 placeholder="e.g. Japan"
-                className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
-                  errors.country ? 'border-red-400' : 'border-gray-300'
-                }`}
+                hasError={!!errors.country}
               />
               {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Destination
+                {!country && (
+                  <span className="text-gray-400 font-normal"> (select country first)</span>
+                )}
+              </label>
+              <Autocomplete
+                value={destination}
+                onChange={(v) => {
+                  setDestination(v)
+                  clearError('destination')
+                }}
+                options={destinationOptions}
+                placeholder={country ? 'e.g. Tokyo' : '—'}
+                disabled={!country}
+                hasError={!!errors.destination}
+              />
+              {errors.destination && (
+                <p className="text-red-500 text-xs mt-1">{errors.destination}</p>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value)
+                  clearError('startDate')
+                }}
                 className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
                   errors.startDate ? 'border-red-400' : 'border-gray-300'
                 }`}
@@ -249,7 +537,10 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value)
+                  clearError('endDate')
+                }}
                 min={startDate}
                 className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
                   errors.endDate ? 'border-red-400' : 'border-gray-300'
@@ -317,42 +608,68 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
                             onDragOver={(e) => handleDragOver(e, day.id, aIdx)}
                             onDrop={() => handleDrop(day.id, aIdx)}
                             onDragEnd={handleDragEnd}
-                            className={`flex items-start gap-2 rounded-lg transition-colors ${
-                              isOver ? 'bg-indigo-50 ring-1 ring-indigo-200' : ''
+                            className={`rounded-xl border border-gray-200 bg-gray-50 p-2.5 space-y-2 transition-colors ${
+                              isOver ? 'ring-1 ring-indigo-200 bg-indigo-50' : ''
                             }`}
                           >
-                            <span className="mt-2 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none flex-shrink-0">
-                              <GripVertical size={16} />
-                            </span>
-                            <div className="flex-1 grid grid-cols-[80px_1fr] gap-2">
-                              <input
-                                type="text"
+                            {/* Row 1: grip (desktop) | emoji | time | spacer | ↑↓ (mobile) | delete */}
+                            <div className="flex items-center gap-2">
+                              <span className="hidden sm:inline-flex cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none flex-shrink-0">
+                                <GripVertical size={16} />
+                              </span>
+                              <EmojiButton
+                                value={act.emoji ?? ''}
+                                onChange={(v) => updateActivity(day.id, act.id, 'emoji', v)}
+                              />
+                              <TimeAutocomplete
                                 value={act.time}
-                                onChange={(e) => updateActivity(day.id, act.id, 'time', e.target.value)}
-                                placeholder="09:00"
-                                className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+                                onChange={(v) => updateActivity(day.id, act.id, 'time', v)}
                               />
-                              <input
-                                type="text"
-                                value={act.description}
-                                onChange={(e) => updateActivity(day.id, act.id, 'description', e.target.value)}
-                                placeholder="What are you doing?"
-                                className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
-                              />
+                              <div className="flex-1" />
+                              <button
+                                onClick={() => moveActivity(day.id, aIdx, 'up')}
+                                disabled={aIdx === 0}
+                                className="sm:hidden p-1 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
+                              >
+                                <ArrowUp size={14} />
+                              </button>
+                              <button
+                                onClick={() => moveActivity(day.id, aIdx, 'down')}
+                                disabled={aIdx === day.activities.length - 1}
+                                className="sm:hidden p-1 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
+                              >
+                                <ArrowDown size={14} />
+                              </button>
+                              <button
+                                onClick={() => removeActivity(day.id, act.id)}
+                                className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                              >
+                                <Trash2 size={15} />
+                              </button>
                             </div>
+                            {/* Row 2: description */}
                             <input
                               type="text"
-                              value={act.mapUrl ?? ''}
-                              onChange={(e) => updateActivity(day.id, act.id, 'mapUrl', e.target.value)}
-                              placeholder="Maps URL (optional)"
-                              className="flex-[0.8] border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition hidden sm:block"
+                              value={act.description}
+                              onChange={(e) =>
+                                updateActivity(day.id, act.id, 'description', e.target.value)
+                              }
+                              placeholder="What are you doing?"
+                              className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
                             />
-                            <button
-                              onClick={() => removeActivity(day.id, act.id)}
-                              className="mt-1.5 p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                            >
-                              <Trash2 size={15} />
-                            </button>
+                            {/* Row 3: map URL */}
+                            <div className="flex items-center gap-1.5">
+                              <MapPin size={13} className="text-gray-400 flex-shrink-0" />
+                              <input
+                                type="text"
+                                value={act.mapUrl ?? ''}
+                                onChange={(e) =>
+                                  updateActivity(day.id, act.id, 'mapUrl', e.target.value)
+                                }
+                                placeholder="Maps URL (optional)"
+                                className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+                              />
+                            </div>
                           </div>
                         )
                       })}
@@ -385,21 +702,38 @@ export default function CreatePlanContent({ editId: editIdProp }: { editId?: str
         </div>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
+        <button
+          onClick={() => {
+            if (editId && countrySlug && citySlug) {
+              window.location.href = `/${countrySlug}/${citySlug}`
+            } else {
+              window.location.href = '/'
+            }
+          }}
+          className="px-6 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
+        >
+          Cancel
+        </button>
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#0163a4] text-white rounded-lg hover:bg-[#0470b9] transition-colors text-sm font-medium"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-[#0163a4] text-white rounded-lg hover:bg-[#0470b9] transition-colors text-sm font-medium"
         >
           <Save size={16} />
           Save Plan
         </button>
-        <button
-          onClick={() => window.history.back()}
-          className="px-6 py-2.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-        >
-          Cancel
-        </button>
       </div>
+
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={1500}
+        onClose={() => setSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbar(false)}>
+          Trip created successfully!
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

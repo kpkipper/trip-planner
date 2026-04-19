@@ -1,21 +1,25 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { Edit2, Trash2, MapPin, Save } from 'lucide-react'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
+import { Edit2, Trash2, MapPin } from 'lucide-react'
 import { useTrips } from '@/contexts/trips-context'
 import { toSlug } from '@/lib/slug'
-import { TokyoTrip } from '@/sections/tokyo-trip'
-import { OsakaTrip } from '@/sections/osaka-trip'
+import ConfirmDialog from '@/components/confirm-dialog'
+import PageLoading from '@/components/page-loading'
 import type { Trip } from '@/types/trip'
 
 function TripView({ trip, country, city }: { trip: Trip; country: string; city: string }) {
   const { deleteTrip } = useTrips()
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [saving, setSaving] = useState(false)
+  const [snackbar, setSnackbar] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60_000)
@@ -33,42 +37,42 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
     return currentTime >= actStart && currentTime < new Date(actStart.getTime() + 60 * 60 * 1000)
   }
 
-  // Downloads a merged trips.json — replace public/data/trips.json and redeploy
-  const handleSaveToApp = async () => {
-    setSaving(true)
-    try {
-      let existing: Trip[] = []
-      try {
-        const res = await fetch('/data/trips.json')
-        existing = await res.json()
-      } catch {
-        // ignore if file doesn't exist yet
-      }
-      // Add or update the current trip (exclude builtin-tokyo which is hardcoded)
-      const filtered = existing.filter((t) => t.id !== trip.id && !t.id.startsWith('builtin-'))
-      const merged = [...filtered, trip]
-      const json = JSON.stringify(merged, null, 2)
-      const blob = new Blob([json], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'trips.json'
-      a.click()
-      URL.revokeObjectURL(url)
-      alert('Downloaded trips.json\n\nReplace public/data/trips.json in the repo, then run: pnpm release')
-    } finally {
-      setSaving(false)
+  const handleDelete = async () => {
+    setConfirmOpen(false)
+    setDeleting(true)
+    const code = await deleteTrip(trip.id)
+    if (code === 'JOURNEY-200000') {
+      setSnackbar(true)
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 1500)
+    } else {
+      window.location.href = '/'
     }
   }
 
-  const handleDelete = () => {
-    if (!window.confirm('Delete this trip? This cannot be undone.')) return
-    deleteTrip(trip.id)
-    window.location.href = '/'
-  }
+  if (deleting) return <PageLoading />
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 py-8">
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete this trip?"
+        description="This action cannot be undone. The trip and all its data will be permanently removed."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={1500}
+        onClose={() => setSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbar(false)}>
+          Trip deleted successfully!
+        </Alert>
+      </Snackbar>
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <div>
@@ -83,14 +87,6 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={handleSaveToApp}
-            disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#0163a4] hover:bg-[#edf3f7] text-[#0163a4] text-sm transition-colors disabled:opacity-50"
-          >
-            <Save size={14} />
-            {saving ? 'Saving...' : 'Save to app'}
-          </button>
-          <button
             onClick={() => {
               window.location.href = `/${country}/${city}/edit`
             }}
@@ -100,7 +96,7 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
             Edit
           </button>
           <button
-            onClick={handleDelete}
+            onClick={() => setConfirmOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-500 text-sm transition-colors"
           >
             <Trash2 size={14} />
@@ -140,7 +136,7 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
             <Tabs
               value={selectedDayIndex}
-              onChange={(_, v) => setSelectedDayIndex(v)}
+              onChange={(_: React.SyntheticEvent, v: number) => setSelectedDayIndex(v)}
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile
@@ -192,7 +188,7 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
                         onClick={() => act.mapUrl && window.open(act.mapUrl, '_blank')}
                       >
                         <span className="flex items-center gap-2">
-                          <span className="text-xl">📍</span>
+                          <span className="text-xl">{act.emoji || '📍'}</span>
                           <span>{`${act.time ? act.time + ': ' : ''}${act.description}`}</span>
                         </span>
                         {act.mapUrl && <MapPin size={14} className="text-gray-400 flex-shrink-0" />}
@@ -210,21 +206,17 @@ function TripView({ trip, country, city }: { trip: Trip; country: string; city: 
 }
 
 export default function TripViewContent({ country, city }: { country: string; city: string }) {
-  const { trips, loaded } = useTrips()
-
-  if (country === 'japan' && city === 'tokyo') {
-    return <TokyoTrip />
-  }
-
-  if (country === 'japan' && city === 'osaka') {
-    return <OsakaTrip />
-  }
-
-  if (!loaded) {
-    return <div className="p-8 text-gray-400 text-sm">Loading...</div>
-  }
+  const { trips, loaded, loadTrip } = useTrips()
 
   const trip = trips.find((t) => toSlug(t.country) === country && toSlug(t.destination) === city)
+
+  useEffect(() => {
+    if (trip?.id) loadTrip(trip.id).catch(() => {})
+  }, [trip?.id])
+
+  if (!loaded) {
+    return <PageLoading />
+  }
 
   if (!trip) {
     return (

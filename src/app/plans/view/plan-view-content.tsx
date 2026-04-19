@@ -1,35 +1,38 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { Edit2, Trash2, MapPin, ArrowLeft } from 'lucide-react'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
+import { Edit2, Trash2, MapPin } from 'lucide-react'
 import { useTrips } from '@/contexts/trips-context'
 import { toSlug } from '@/lib/slug'
-import type { Trip } from '@/types/trip'
+import ConfirmDialog from '@/components/confirm-dialog'
+import PageLoading from '@/components/page-loading'
 
 export default function PlanViewContent() {
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
   const { getTrip, deleteTrip } = useTrips()
-  const [trip, setTrip] = useState<Trip | undefined>(undefined)
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0)
-  const [currentTime] = useState(new Date())
+  const trip = id ? getTrip(id) : undefined
+  const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
+    if (!trip) return 0
+    const todayISO = new Date().toISOString().split('T')[0]
+    const idx = trip.days.findIndex((d) => d.dateISO === todayISO)
+    return idx !== -1 ? idx : 0
+  })
+  const [currentTime, setCurrentTime] = useState(new Date())
+  const [snackbar, setSnackbar] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    if (!id) return
-    const t = getTrip(id)
-    setTrip(t)
-    // Auto-select today's day if it exists
-    if (t) {
-      const todayISO = new Date().toISOString().split('T')[0]
-      const idx = t.days.findIndex((d) => d.dateISO === todayISO)
-      if (idx !== -1) setSelectedDayIndex(idx)
-    }
-  }, [id, getTrip])
+    const interval = setInterval(() => setCurrentTime(new Date()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
 
   const isCurrentActivity = (dayIdx: number, actIdx: number) => {
     if (!trip) return false
@@ -44,12 +47,22 @@ export default function PlanViewContent() {
     return currentTime >= actStart && currentTime < new Date(actStart.getTime() + 60 * 60 * 1000)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!id) return
-    if (!window.confirm('Delete this trip? This cannot be undone.')) return
-    deleteTrip(id)
-    window.location.href = '/'
+    setConfirmOpen(false)
+    setDeleting(true)
+    const code = await deleteTrip(id)
+    if (code === 'JOURNEY-200000') {
+      setSnackbar(true)
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 1500)
+    } else {
+      window.location.href = '/'
+    }
   }
+
+  if (deleting) return <PageLoading />
 
   if (!id) {
     return (
@@ -64,7 +77,9 @@ export default function PlanViewContent() {
       <div className="flex flex-col items-center justify-center h-64 text-gray-500">
         <p>Trip not found.</p>
         <button
-          onClick={() => { window.location.href = '/' }}
+          onClick={() => {
+            window.location.href = '/'
+          }}
           className="mt-3 text-[#0163a4] hover:underline text-sm"
         >
           Go back home
@@ -75,15 +90,27 @@ export default function PlanViewContent() {
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 py-8">
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete this trip?"
+        description="This action cannot be undone. The trip and all its data will be permanently removed."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={1500}
+        onClose={() => setSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbar(false)}>
+          Trip deleted successfully!
+        </Alert>
+      </Snackbar>
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => window.history.back()}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">{trip.title}</h1>
             <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
@@ -96,14 +123,16 @@ export default function PlanViewContent() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`}
+            onClick={() =>
+              (window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`)
+            }
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
           >
             <Edit2 size={14} />
             Edit
           </button>
           <button
-            onClick={handleDelete}
+            onClick={() => setConfirmOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-500 text-sm transition-colors"
           >
             <Trash2 size={14} />
@@ -130,7 +159,9 @@ export default function PlanViewContent() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
           <p>No days planned yet.</p>
           <button
-            onClick={() => window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`}
+            onClick={() =>
+              (window.location.href = `/${toSlug(trip.country)}/${toSlug(trip.destination)}/edit`)
+            }
             className="mt-3 text-[#0163a4] hover:underline text-sm"
           >
             Edit plan to add days
@@ -142,7 +173,7 @@ export default function PlanViewContent() {
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
             <Tabs
               value={selectedDayIndex}
-              onChange={(_, v) => setSelectedDayIndex(v)}
+              onChange={(_: React.SyntheticEvent, v: number) => setSelectedDayIndex(v)}
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile
@@ -195,7 +226,7 @@ export default function PlanViewContent() {
                         onClick={() => act.mapUrl && window.open(act.mapUrl, '_blank')}
                       >
                         <span className="flex items-center gap-2">
-                          <span className="text-xl">📍</span>
+                          <span className="text-xl">{act.emoji}</span>
                           <span>{`${act.time ? act.time + ': ' : ''}${act.description}`}</span>
                         </span>
                         {act.mapUrl && <MapPin size={14} className="text-gray-400 flex-shrink-0" />}

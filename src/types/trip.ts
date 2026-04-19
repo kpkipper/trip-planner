@@ -3,6 +3,7 @@ export interface Activity {
   time: string
   description: string
   mapUrl?: string
+  emoji?: string
 }
 
 export interface TripDay {
