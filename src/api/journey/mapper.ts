@@ -8,7 +8,7 @@ const toISODate = (val?: string): string | undefined => {
 export const toJourneyPayload = (trip: Trip) => ({
   title: trip.title,
   country: trip.country,
-  destination: `${trip.destination}, ${trip.country}`,
+  destination: `${trip.destination}`,
   departure_date: toISODate(trip.startDate),
   return_date: toISODate(trip.endDate),
   itinerary_days: trip.days.map((day) => ({
