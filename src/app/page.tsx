@@ -15,7 +15,7 @@ export default function Home() {
       .slice()
       .sort((a, b) => (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) - (a.updatedAt ? new Date(a.updatedAt).getTime() : 0))[0]
     router.replace(latest ? `/plans/${latest.slug}` : '/plans/create')
-  }, [loaded, trips])
+  }, [loaded, trips, router])
 
   return <PageLoading />
 }

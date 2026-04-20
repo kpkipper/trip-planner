@@ -56,3 +56,9 @@ export interface Response {
   code: string
   message: string
 }
+
+export interface CreateJourneyResponse {
+  code: string
+  message: string
+  data: { slug: string }
+}

@@ -122,7 +122,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* My Plans */}
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {!collapsed && (
+        {!collapsed && allCountries.length > 0 && (
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2 mt-1">
             My Plans
           </div>

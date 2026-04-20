@@ -1,26 +1,19 @@
 import type { Trip } from '@/types/trip'
 
-export const mapTripPayload = (trip: Trip) => ({
+const toISODate = (val?: string): string | undefined => {
+  if (!val) return undefined
+  return val.includes('T') ? val : `${val}T00:00:00Z`
+}
+
+export const toJourneyPayload = (trip: Trip) => ({
   title: trip.title,
   country: trip.country,
   destination: `${trip.destination}, ${trip.country}`,
-  departure_date: trip.startDate
-    ? trip.startDate.includes('T')
-      ? trip.startDate
-      : `${trip.startDate}T00:00:00Z`
-    : undefined,
-  return_date: trip.endDate
-    ? trip.endDate.includes('T')
-      ? trip.endDate
-      : `${trip.endDate}T00:00:00Z`
-    : undefined,
+  departure_date: toISODate(trip.startDate),
+  return_date: toISODate(trip.endDate),
   itinerary_days: trip.days.map((day) => ({
     date: day.date,
-    date_iso: day.dateISO
-      ? day.dateISO.includes('T')
-        ? day.dateISO
-        : `${day.dateISO}T00:00:00Z`
-      : undefined,
+    date_iso: toISODate(day.dateISO),
     title: day.title,
     plans: day.activities.map((act, i) => ({
       time: act.time,

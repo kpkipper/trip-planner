@@ -1,7 +1,38 @@
-import type { Trip } from '@/types/trip'
-import type { JourneyType, ListCountryType } from '@/api/journey/type'
+import type { Trip, TripDay, Activity } from '@/types/trip'
+import type { JourneyType, ItineraryDayType, ActivityPlanType, ListCountryType } from '@/api/journey/type'
 
-export const mapTripResponse = (journey: JourneyType): Trip => {
+const toDate = (val?: string): string => val?.split('T')[0] ?? ''
+
+const toActivity = (plan: ActivityPlanType, index: number): Activity => ({
+  id: plan.id ?? String(index),
+  time: plan.time ?? '',
+  description: plan.description ?? '',
+  emoji: plan.emoji ?? '📍',
+  mapUrl: plan.map_url,
+})
+
+const toTripDay = (day: ItineraryDayType, index: number): TripDay => ({
+  id: day.id ?? String(index),
+  date: day.date ?? '',
+  dateISO: toDate(day.date_iso),
+  title: day.title ?? '',
+  activities: (day.plans ?? []).map(toActivity),
+})
+
+export const toTripList = (data: ListCountryType[]): Trip[] =>
+  data.flatMap((g) =>
+    (g.plan ?? []).map((p) =>
+      toTrip({
+        ...p,
+        country: g.country,
+        departure_date: '',
+        return_date: '',
+        itinerary_days: [],
+      }),
+    ),
+  )
+
+export const toTrip = (journey: JourneyType): Trip => {
   const destParts = (journey.destination ?? '').split(', ')
   const destination =
     destParts.length > 1 ? destParts.slice(0, -1).join(', ') : (journey.destination ?? '')
@@ -11,40 +42,9 @@ export const mapTripResponse = (journey: JourneyType): Trip => {
     title: journey.title ?? '',
     destination,
     country: journey.country ?? '',
-    startDate: journey.departure_date ? journey.departure_date.split('T')[0] : '',
-    endDate: journey.return_date ? journey.return_date.split('T')[0] : '',
-    days: (journey.itinerary_days ?? []).map((day, di) => ({
-      id: day.id ?? String(di),
-      date: day.date ?? '',
-      dateISO: day.date_iso ? day.date_iso.split('T')[0] : '',
-      title: day.title ?? '',
-      activities: (day.plans ?? []).map((plan, pi) => ({
-        id: plan.id ?? String(pi),
-        time: plan.time ?? '',
-        description: plan.description ?? '',
-        category: plan.category,
-        emoji: plan.emoji ?? '📍',
-        mapUrl: plan.map_url,
-      })),
-    })),
-    updatedAt: journey.updated_at ?? new Date().toISOString(),
+    startDate: toDate(journey.departure_date),
+    endDate: toDate(journey.return_date),
+    days: (journey.itinerary_days ?? []).map(toTripDay),
+    updatedAt: journey.updated_at,
   }
-}
-
-export const formatListJourney = (data: ListCountryType[]): Trip[] => {
-  return data.flatMap((g) =>
-    (g.plan ?? []).map((p) =>
-      mapTripResponse({
-        ...p,
-        country: g.country,
-        departure_date: '',
-        return_date: '',
-        itinerary_days: [],
-      }),
-    ),
-  )
-}
-
-export const formatJourneyDetail = (data: JourneyType): Trip => {
-  return mapTripResponse(data)
 }

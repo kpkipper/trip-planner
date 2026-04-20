@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { TripsProvider } from '@/contexts/trips-context'
+import { ToastProvider } from '@/contexts/toast-context'
 import ClientLayout from '@/components/client-layout'
 
 const geistSans = Geist({
@@ -22,10 +23,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased">
-        <TripsProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </TripsProvider>
+      <body className="antialiased" suppressHydrationWarning>
+        <ToastProvider>
+          <TripsProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </TripsProvider>
+        </ToastProvider>
       </body>
     </html>
   )

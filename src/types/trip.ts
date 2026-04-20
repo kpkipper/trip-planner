@@ -15,8 +15,8 @@ export interface TripDay {
 }
 
 export interface Trip {
-  id: string
-  slug: string
+  id?: string
+  slug?: string
   title: string
   destination: string
   country: string

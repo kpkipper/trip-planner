@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import type { Trip } from '@/types/trip'
 import { getJourneys } from '@/api/journey'
-import { formatListJourney } from '@/utils/format-data'
+import { toTripList } from '@/utils/format-data'
 
 interface TripsContextValue {
   trips: Trip[]
@@ -21,7 +21,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setLoaded(false)
     getJourneys()
-      .then(({ data }) => setUserTrips(formatListJourney(data ?? [])))
+      .then(({ data }) => setUserTrips(toTripList(data ?? [])))
       .catch((err) => console.error('Failed to load trips', err))
       .finally(() => setLoaded(true))
   }, [pathname])
