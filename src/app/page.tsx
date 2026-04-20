@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useRouter } from 'next/navigation'
-import { useTrips } from '@/contexts/trips-context'
+
 import PageLoading from '@/components/page-loading'
+import { useTrips } from '@/contexts/trips-context'
 
 export default function Home() {
   const router = useRouter()
@@ -13,7 +15,11 @@ export default function Home() {
     if (!loaded) return
     const latest = trips
       .slice()
-      .sort((a, b) => (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) - (a.updatedAt ? new Date(a.updatedAt).getTime() : 0))[0]
+      .sort(
+        (a, b) =>
+          (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) -
+          (a.updatedAt ? new Date(a.updatedAt).getTime() : 0),
+      )[0]
     router.replace(latest ? `/plans/${latest.slug}` : '/plans/create')
   }, [loaded, trips, router])
 

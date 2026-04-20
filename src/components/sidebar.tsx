@@ -1,17 +1,20 @@
 'use client'
 
 import React, { useState } from 'react'
+
 import { usePathname } from 'next/navigation'
+
 import {
-  PlaneTakeoff,
-  Plus,
   ChevronDown,
   ChevronRight,
+  FolderOpen,
   MapPin,
   Menu,
+  PlaneTakeoff,
+  Plus,
   X,
-  FolderOpen,
 } from 'lucide-react'
+
 import { useTrips } from '@/contexts/trips-context'
 
 interface SidebarProps {
@@ -44,7 +47,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const latestTrip =
     trips
       .slice()
-      .sort((a, b) => (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) - (a.updatedAt ? new Date(a.updatedAt).getTime() : 0))[0] ?? null
+      .sort(
+        (a, b) =>
+          (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) -
+          (a.updatedAt ? new Date(a.updatedAt).getTime() : 0),
+      )[0] ?? null
 
   const tripsByCountry = trips.reduce<Record<string, typeof trips>>((acc, trip) => {
     const key = trip.country || 'Other'

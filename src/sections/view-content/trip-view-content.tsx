@@ -1,24 +1,34 @@
 'use client'
 
 import { type SyntheticEvent } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import Box from '@mui/material/Box'
-import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { Edit2, Trash2, MapPin } from 'lucide-react'
+import Tabs from '@mui/material/Tabs'
+import { Edit2, MapPin, Trash2 } from 'lucide-react'
+
 import ConfirmDialog from '@/components/confirm-dialog'
-import PageLoading from '@/components/page-loading'
 import NotFound from '@/components/not-found'
+import PageLoading from '@/components/page-loading'
+
 import ActivityItem from './activity-item'
 import { useTripView } from './use-trip-view'
 
 export default function TripViewContent({ slug }: { slug: string }) {
   const router = useRouter()
   const {
-    trip, selectedDayIndex, setSelectedDayIndex,
-    confirmOpen, setConfirmOpen,
-    deleting, loading, notFound,
-    isCurrentActivity, handleDelete,
+    trip,
+    selectedDayIndex,
+    setSelectedDayIndex,
+    confirmOpen,
+    setConfirmOpen,
+    deleting,
+    loading,
+    notFound,
+    isCurrentActivity,
+    handleDelete,
   } = useTripView(slug)
 
   if (loading || deleting) return <PageLoading />
@@ -43,7 +53,9 @@ export default function TripViewContent({ slug }: { slug: string }) {
           <h1 className="text-2xl font-bold text-gray-800">{trip.title}</h1>
           <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
             <MapPin size={13} />
-            <span>{trip.destination}, {trip.country}</span>
+            <span>
+              {trip.destination}, {trip.country}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -67,11 +79,15 @@ export default function TripViewContent({ slug }: { slug: string }) {
       {/* Date range */}
       <p className="font-semibold text-[#0470b9] text-sm mb-6">
         {new Date(trip.startDate + 'T12:00:00').toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric',
-        })}
-        {' '}&ndash;{' '}
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })}{' '}
+        &ndash;{' '}
         {new Date(trip.endDate + 'T12:00:00').toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
         })}
       </p>
 

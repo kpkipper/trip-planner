@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { deleteJourney, getJourneyBySlug } from '@/api/journey'
-import { toTrip } from '@/utils/format-data'
 import { useToast } from '@/contexts/toast-context'
 import { useTrips } from '@/contexts/trips-context'
+import { toTrip } from '@/utils/format-data'
+
 import type { Trip } from '@/types/trip'
 
 export function useTripView(slug: string) {
@@ -71,9 +74,15 @@ export function useTripView(slug: string) {
   }
 
   return {
-    trip, selectedDayIndex, setSelectedDayIndex,
-    confirmOpen, setConfirmOpen,
-    deleting, loading, notFound,
-    isCurrentActivity, handleDelete,
+    trip,
+    selectedDayIndex,
+    setSelectedDayIndex,
+    confirmOpen,
+    setConfirmOpen,
+    deleting,
+    loading,
+    notFound,
+    isCurrentActivity,
+    handleDelete,
   }
 }

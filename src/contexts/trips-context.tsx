@@ -1,10 +1,13 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+
 import { usePathname } from 'next/navigation'
-import type { Trip } from '@/types/trip'
+
 import { getJourneys } from '@/api/journey'
 import { toTripList } from '@/utils/format-data'
+
+import type { Trip } from '@/types/trip'
 
 interface TripsContextValue {
   trips: Trip[]
@@ -27,9 +30,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   }, [pathname])
 
   return (
-    <TripsContext.Provider value={{ trips: userTrips, loaded }}>
-      {children}
-    </TripsContext.Provider>
+    <TripsContext.Provider value={{ trips: userTrips, loaded }}>{children}</TripsContext.Provider>
   )
 }
 

@@ -1,5 +1,10 @@
-import type { Trip, TripDay, Activity } from '@/types/trip'
-import type { JourneyType, ItineraryDayType, ActivityPlanType, ListCountryType } from '@/api/journey/type'
+import type {
+  ActivityPlanType,
+  ItineraryDayType,
+  JourneyType,
+  ListCountryType,
+} from '@/api/journey/type'
+import type { Activity, Trip, TripDay } from '@/types/trip'
 
 const toDate = (val?: string): string => val?.split('T')[0] ?? ''
 

@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+
 import { Country } from 'country-state-city'
+
 import type { TripDay } from '@/types/trip'
 
 export function uid() {
@@ -106,7 +108,13 @@ export function Autocomplete({
   )
 }
 
-export function TimeAutocomplete({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function TimeAutocomplete({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 

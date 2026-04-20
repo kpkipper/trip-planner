@@ -1,7 +1,9 @@
-import type { DragEvent } from 'react'
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
-import type { Activity, TripDay } from '@/types/trip'
+
 import ActivityRow from './activity-row'
+
+import type { Activity, TripDay } from '@/types/trip'
+import type { DragEvent } from 'react'
 
 interface DayCardProps {
   day: TripDay

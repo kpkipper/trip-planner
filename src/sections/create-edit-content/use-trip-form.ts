@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { State } from 'country-state-city'
-import type { DragEvent } from 'react'
-import { createJourney, updateJourney, getJourneyBySlug } from '@/api/journey'
-import { toTrip } from '@/utils/format-data'
+
+import { createJourney, getJourneyBySlug, updateJourney } from '@/api/journey'
 import { useToast } from '@/contexts/toast-context'
+import { toTrip } from '@/utils/format-data'
+
+import { ALL_COUNTRIES, generateDays, uid } from './helper'
+
 import type { Activity, Trip, TripDay } from '@/types/trip'
-import { uid, generateDays, ALL_COUNTRIES } from './helper'
+import type { DragEvent } from 'react'
 
 export function useTripForm(slugProp?: string) {
   const router = useRouter()
@@ -52,19 +57,22 @@ export function useTripForm(slugProp?: string) {
     setExpandedDays(new Set(trip.days.map((d) => d.id)))
   }, [])
 
-  const loadTrip = useCallback(async (slug: string) => {
-    try {
-      const res = await getJourneyBySlug(slug)
-      if (res.code === 'JOURNEY-404000') {
-        showToast('Trip not found', 'error')
-        router.replace('/plans/create')
-        return
+  const loadTrip = useCallback(
+    async (slug: string) => {
+      try {
+        const res = await getJourneyBySlug(slug)
+        if (res.code === 'JOURNEY-404000') {
+          showToast('Trip not found', 'error')
+          router.replace('/plans/create')
+          return
+        }
+        applyTrip(toTrip(res.data))
+      } finally {
+        setLoadingEdit(false)
       }
-      applyTrip(toTrip(res.data))
-    } finally {
-      setLoadingEdit(false)
-    }
-  }, [applyTrip, showToast, router])
+    },
+    [applyTrip, showToast, router],
+  )
 
   useEffect(() => {
     if (!slugProp) return
@@ -225,7 +233,14 @@ export function useTripForm(slugProp?: string) {
     setSaving(true)
     try {
       if (slugProp) {
-        const { code } = await updateJourney(slugProp, { title, destination, country, startDate, endDate, days })
+        const { code } = await updateJourney(slugProp, {
+          title,
+          destination,
+          country,
+          startDate,
+          endDate,
+          days,
+        })
         if (code === 'JOURNEY-404000') {
           showToast('Trip not found', 'error')
           savingRef.current = false

@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react'
+
 import type { Activity } from '@/types/trip'
 
 interface ActivityItemProps {

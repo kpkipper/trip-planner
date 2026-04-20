@@ -1,9 +1,12 @@
-import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
-import { TripsProvider } from '@/contexts/trips-context'
-import { ToastProvider } from '@/contexts/toast-context'
+
 import ClientLayout from '@/components/client-layout'
+import { ToastProvider } from '@/contexts/toast-context'
+import { TripsProvider } from '@/contexts/trips-context'
+
+import type { Metadata } from 'next'
+
+import './globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

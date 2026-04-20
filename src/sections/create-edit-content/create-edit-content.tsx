@@ -1,10 +1,12 @@
 'use client'
 
 import { Save } from 'lucide-react'
+
 import PageLoading from '@/components/page-loading'
-import { useTripForm } from './use-trip-form'
-import TripInfoForm from './trip-info-form'
+
 import DayCard from './day-card'
+import TripInfoForm from './trip-info-form'
+import { useTripForm } from './use-trip-form'
 
 export default function CreateEditContent({ slug: slugProp }: { slug?: string } = {}) {
   const {
@@ -121,7 +123,6 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
           {saving ? 'Saving...' : 'Save Plan'}
         </button>
       </div>
-
     </div>
   )
 }

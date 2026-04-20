@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+
 import { Menu, PlaneTakeoff } from 'lucide-react'
+
 import Sidebar from './sidebar'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

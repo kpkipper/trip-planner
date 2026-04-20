@@ -1,5 +1,5 @@
-import MuiSnackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import MuiSnackbar from '@mui/material/Snackbar'
 
 interface SnackbarProps {
   open: boolean

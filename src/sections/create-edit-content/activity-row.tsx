@@ -1,7 +1,9 @@
-import type { DragEvent } from 'react'
-import { GripVertical, ArrowUp, ArrowDown, Trash2, MapPin } from 'lucide-react'
-import type { Activity } from '@/types/trip'
+import { ArrowDown, ArrowUp, GripVertical, MapPin, Trash2 } from 'lucide-react'
+
 import { EmojiButton, TimeAutocomplete } from './helper'
+
+import type { Activity } from '@/types/trip'
+import type { DragEvent } from 'react'
 
 interface ActivityRowProps {
   act: Activity
@@ -45,14 +47,8 @@ export default function ActivityRow({
         <span className="hidden sm:inline-flex cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none flex-shrink-0">
           <GripVertical size={16} />
         </span>
-        <EmojiButton
-          value={act.emoji ?? ''}
-          onChange={(v) => onUpdate('emoji', v)}
-        />
-        <TimeAutocomplete
-          value={act.time}
-          onChange={(v) => onUpdate('time', v)}
-        />
+        <EmojiButton value={act.emoji ?? ''} onChange={(v) => onUpdate('emoji', v)} />
+        <TimeAutocomplete value={act.time} onChange={(v) => onUpdate('time', v)} />
         <div className="flex-1" />
         <button
           onClick={() => onMove('up')}
