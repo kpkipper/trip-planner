@@ -7,13 +7,14 @@ import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { Edit2, MapPin, Trash2 } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 
 import ConfirmDialog from '@/components/confirm-dialog'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 
-import ActivityItem from './activity-item'
+import TripActionMenu from './trip-action-menu'
+import TripDayDetail from './trip-day-detail'
 import { useTripView } from './use-trip-view'
 
 export default function TripViewContent({ slug }: { slug: string }) {
@@ -58,22 +59,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => router.push(`/plans/${slug}/edit`)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
-          >
-            <Edit2 size={14} />
-            Edit
-          </button>
-          <button
-            onClick={() => setConfirmOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-500 text-sm transition-colors"
-          >
-            <Trash2 size={14} />
-            Delete
-          </button>
-        </div>
+        <TripActionMenu slug={slug} trip={trip} onDelete={() => setConfirmOpen(true)} />
       </div>
 
       {/* Date range */}
@@ -134,32 +120,11 @@ export default function TripViewContent({ slug }: { slug: string }) {
 
           {/* Day detail */}
           {selectedDay && (
-            <div className="mb-6 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-b from-[#edf3f7] to-70% px-6 py-4">
-                <h2 className="text-lg font-semibold text-[#0163a4]">
-                  Day {selectedDayIndex + 1}: {selectedDay.title}
-                </h2>
-                <p className="text-[#0470b9] font-semibold inline-block px-4 py-1.5 rounded-md w-fit text-base shadow-sm mt-1 bg-[#0470b91a]">
-                  {selectedDay.date}
-                </p>
-              </div>
-
-              {selectedDay.activities.length === 0 ? (
-                <div className="px-6 py-8 text-center text-gray-400 text-sm bg-white">
-                  No activities for this day yet.
-                </div>
-              ) : (
-                <ul className="divide-y divide-gray-200">
-                  {selectedDay.activities.map((act, idx) => (
-                    <ActivityItem
-                      key={act.id}
-                      act={act}
-                      highlight={isCurrentActivity(selectedDayIndex, idx)}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
+            <TripDayDetail
+              day={selectedDay}
+              dayIndex={selectedDayIndex}
+              isCurrentActivity={(actIdx) => isCurrentActivity(selectedDayIndex, actIdx)}
+            />
           )}
         </>
       )}
