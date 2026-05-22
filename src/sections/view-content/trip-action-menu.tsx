@@ -38,31 +38,31 @@ export default function TripActionMenu({ slug, trip, onDelete }: Props) {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setMenuOpen((v) => !v)}
-        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 transition-colors"
+        className="p-2 rounded-lg border border-gray-300 dark:border-[#3c3c4a] hover:bg-gray-50 dark:hover:bg-[#363640] text-gray-600 dark:text-gray-400 transition-colors"
         aria-label="Actions"
       >
         <MoreVertical size={16} />
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#313139] border border-gray-200 dark:border-[#3c3c4a] rounded-xl shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] overflow-hidden z-20">
           <button
             onClick={() => {
               router.push(`/plans/${slug}/edit`)
               close()
             }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#3c3c4a] transition-colors"
           >
             <Edit2 size={14} />
             Edit
           </button>
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-100 dark:border-[#3c3c4a]" />
           <button
             onClick={() => {
               exportJSON(trip)
               close()
             }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#3c3c4a] transition-colors"
           >
             <FileJson size={14} />
             Export as JSON
@@ -72,18 +72,18 @@ export default function TripActionMenu({ slug, trip, onDelete }: Props) {
               exportPDF(trip)
               close()
             }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#3c3c4a] transition-colors"
           >
             <FileText size={14} />
             Export as PDF
           </button>
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-100 dark:border-[#3c3c4a]" />
           <button
             onClick={() => {
               onDelete()
               close()
             }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >
             <Trash2 size={14} />
             Delete

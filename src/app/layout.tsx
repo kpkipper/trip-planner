@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from 'next/font/google'
 
 import ClientLayout from '@/components/client-layout'
+import { ThemeProvider } from '@/contexts/theme-context'
 import { ToastProvider } from '@/contexts/toast-context'
 import { TripsProvider } from '@/contexts/trips-context'
 
@@ -25,13 +26,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
-        <ToastProvider>
-          <TripsProvider>
-            <ClientLayout>{children}</ClientLayout>
-          </TripsProvider>
-        </ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            <TripsProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </TripsProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

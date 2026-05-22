@@ -12,6 +12,7 @@ import { MapPin } from 'lucide-react'
 import ConfirmDialog from '@/components/confirm-dialog'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
+import { useTheme } from '@/contexts/theme-context'
 
 import TripActionMenu from './trip-action-menu'
 import TripDayDetail from './trip-day-detail'
@@ -19,6 +20,7 @@ import { useTripView } from './use-trip-view'
 
 export default function TripViewContent({ slug }: { slug: string }) {
   const router = useRouter()
+  const { theme } = useTheme()
   const {
     trip,
     selectedDayIndex,
@@ -51,8 +53,8 @@ export default function TripViewContent({ slug }: { slug: string }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{trip.title}</h1>
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{trip.title}</h1>
+          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             <MapPin size={13} />
             <span>
               {trip.destination}, {trip.country}
@@ -63,7 +65,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
       </div>
 
       {/* Date range */}
-      <p className="font-semibold text-[#0470b9] text-sm mb-6">
+      <p className="font-semibold text-[#0470b9] dark:text-[#5fb3f5] text-sm mb-6">
         {new Date(trip.startDate + 'T12:00:00').toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -79,7 +81,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
 
       {/* Empty state */}
       {trip.days.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
+        <div className="bg-white dark:bg-[#2c2c36] rounded-2xl shadow-sm border border-gray-200 dark:border-[#3c3c4a] p-8 text-center text-gray-500 dark:text-gray-400">
           <p>No days planned yet.</p>
           <button
             onClick={() => router.push(`/plans/${slug}/edit`)}
@@ -91,28 +93,41 @@ export default function TripViewContent({ slug }: { slug: string }) {
       ) : (
         <>
           {/* Day tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Box
+            sx={{
+              borderBottom: 1,
+              borderColor: theme === 'dark' ? '#3c3c4a' : 'divider',
+              mb: 3,
+            }}
+          >
             <Tabs
               value={selectedDayIndex}
               onChange={(_: SyntheticEvent, v: number) => setSelectedDayIndex(v)}
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile
+              sx={{
+                '& .MuiTab-root': {
+                  color: theme === 'dark' ? '#9a9aaa' : undefined,
+                },
+                '& .MuiTab-root.Mui-selected': {
+                  color: theme === 'dark' ? '#5fb3f5' : '#4f46e5',
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: theme === 'dark' ? '#5fb3f5' : '#4f46e5',
+                },
+              }}
             >
               {trip.days.map((day, idx) => (
                 <Tab
                   key={day.id}
                   label={
                     <div className="text-center">
-                      <div className="text-xs text-gray-500">Day {idx + 1}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Day {idx + 1}</div>
                       <div className="font-semibold">{day.date}</div>
                     </div>
                   }
-                  sx={{
-                    textTransform: 'none',
-                    transition: 'all 0.3s ease',
-                    '&.Mui-selected': { color: '#4f46e5', fontWeight: 'bold' },
-                  }}
+                  sx={{ textTransform: 'none', transition: 'all 0.3s ease' }}
                 />
               ))}
             </Tabs>

@@ -83,12 +83,12 @@ export function Autocomplete({
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
-          hasError ? 'border-red-400' : 'border-gray-300'
+        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition bg-white dark:bg-[#363640] dark:text-gray-100 dark:placeholder-gray-500 disabled:bg-gray-50 dark:disabled:bg-[#2c2c36] disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed ${
+          hasError ? 'border-red-400' : 'border-gray-300 dark:border-[#3c3c4a]'
         }`}
       />
       {open && !disabled && filtered.length > 0 && (
-        <ul className="absolute z-50 mt-1 left-0 right-0 max-h-52 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+        <ul className="absolute z-50 mt-1 left-0 right-0 max-h-52 overflow-y-auto bg-white dark:bg-[#313139] border border-gray-200 dark:border-[#3c3c4a] rounded-lg shadow-lg text-sm">
           {filtered.map((opt) => (
             <li
               key={opt}
@@ -97,7 +97,7 @@ export function Autocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-2 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+              className="px-3 py-2 cursor-pointer hover:bg-[#edf3f7] dark:hover:bg-[#1f2e42] text-gray-700 dark:text-gray-300"
             >
               {opt}
             </li>
@@ -141,10 +141,10 @@ export function TimeAutocomplete({
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
         placeholder="09:00"
-        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+        className="w-full border border-gray-300 dark:border-[#3c3c4a] rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition bg-white dark:bg-[#363640] dark:text-gray-100 dark:placeholder-gray-500"
       />
       {open && filtered.length > 0 && (
-        <ul className="absolute z-50 mt-1 left-0 w-24 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+        <ul className="absolute z-50 mt-1 left-0 w-24 max-h-48 overflow-y-auto bg-white dark:bg-[#313139] border border-gray-200 dark:border-[#3c3c4a] rounded-lg shadow-lg text-sm">
           {filtered.map((opt) => (
             <li
               key={opt}
@@ -153,7 +153,7 @@ export function TimeAutocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-1.5 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+              className="px-3 py-1.5 cursor-pointer hover:bg-[#edf3f7] dark:hover:bg-[#1f2e42] text-gray-700 dark:text-gray-300"
             >
               {opt}
             </li>
@@ -182,14 +182,14 @@ export function EmojiButton({ value, onChange }: { value: string; onChange: (v: 
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-8 h-8 flex items-center justify-center text-lg rounded-lg border border-gray-200 hover:bg-gray-100 transition"
+        className="w-8 h-8 flex items-center justify-center text-lg rounded-lg border border-gray-200 dark:border-[#3c3c4a] hover:bg-gray-100 dark:hover:bg-[#3c3c4a] transition"
         title="Set emoji"
       >
         {value || '📍'}
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 left-0 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-44">
-          <p className="text-xs text-gray-500 mb-1.5">Type or paste an emoji</p>
+        <div className="absolute z-50 mt-1 left-0 bg-white dark:bg-[#313139] border border-gray-200 dark:border-[#3c3c4a] rounded-xl shadow-lg p-3 w-44">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Type or paste an emoji</p>
           <input
             type="text"
             value={value}
@@ -199,7 +199,7 @@ export function EmojiButton({ value, onChange }: { value: string; onChange: (v: 
               onChange(last)
             }}
             placeholder="📍"
-            className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition mb-2"
+            className="w-full border border-gray-300 dark:border-[#3c3c4a] rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition mb-2 bg-white dark:bg-[#363640] dark:text-gray-100"
           />
           <button
             type="button"
@@ -208,7 +208,7 @@ export function EmojiButton({ value, onChange }: { value: string; onChange: (v: 
               onChange('')
               setOpen(false)
             }}
-            className="text-xs text-gray-500 hover:text-red-500 transition"
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 transition"
           >
             Reset to 📍
           </button>
