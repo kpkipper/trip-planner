@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react'
 
-import { Menu, PlaneTakeoff } from 'lucide-react'
+import { Menu } from 'lucide-react'
 
+import Logo from './logo'
 import Sidebar from './sidebar'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -37,10 +38,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           >
             <Menu size={20} />
           </button>
-          <span className="ml-3 font-bold text-[#0163a4] flex items-center gap-1.5 text-sm">
-            <PlaneTakeoff size={16} />
-            Trip Planner
-          </span>
+          <Logo size={26} className="ml-3" />
         </div>
 
         {children}
