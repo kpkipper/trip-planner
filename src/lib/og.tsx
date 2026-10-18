@@ -39,63 +39,61 @@ export function ogImage({
   subtitle?: string
 }) {
   return new ImageResponse(
-    (
-      <div
-        style={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '78px 90px',
-          background: 'linear-gradient(135deg, #0a86d6, #013f6d)',
-          fontFamily: 'Outfit, "Noto Sans Thai"',
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={planeUri} width={138} height={138} alt="" />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {eyebrow ? (
-            <div
-              style={{
-                display: 'flex',
-                fontSize: 28,
-                fontWeight: 500,
-                letterSpacing: 6,
-                color: '#8fd0f6',
-                marginBottom: 14,
-              }}
-            >
-              {eyebrow}
-            </div>
-          ) : null}
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '78px 90px',
+        background: 'linear-gradient(135deg, #0a86d6, #013f6d)',
+        fontFamily: 'Outfit, "Noto Sans Thai"',
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={planeUri} width={138} height={138} alt="" />
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {eyebrow ? (
           <div
             style={{
               display: 'flex',
-              fontSize: 82,
-              fontWeight: 800,
-              color: '#ffffff',
-              lineHeight: 1.05,
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: 6,
+              color: '#8fd0f6',
+              marginBottom: 14,
             }}
           >
-            {title}
+            {eyebrow}
           </div>
-          {subtitle ? (
-            <div
-              style={{
-                display: 'flex',
-                fontSize: 36,
-                fontWeight: 500,
-                color: '#cfe8fb',
-                marginTop: 18,
-              }}
-            >
-              {subtitle}
-            </div>
-          ) : null}
+        ) : null}
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 82,
+            fontWeight: 800,
+            color: '#ffffff',
+            lineHeight: 1.05,
+          }}
+        >
+          {title}
         </div>
+        {subtitle ? (
+          <div
+            style={{
+              display: 'flex',
+              fontSize: 36,
+              fontWeight: 500,
+              color: '#cfe8fb',
+              marginTop: 18,
+            }}
+          >
+            {subtitle}
+          </div>
+        ) : null}
       </div>
-    ),
+    </div>,
     {
       ...OG_SIZE,
       fonts: [
