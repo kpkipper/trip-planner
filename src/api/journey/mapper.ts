@@ -18,7 +18,6 @@ export const toJourneyPayload = (trip: Trip) => ({
     plans: day.activities.map((act, i) => ({
       time: act.time,
       description: act.description,
-      emoji: act.emoji ?? '📍',
       map_url: act.mapUrl,
       sort_order: i + 1,
     })),

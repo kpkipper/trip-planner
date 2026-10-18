@@ -9,25 +9,35 @@ interface Props {
 }
 
 export default function TripDayDetail({ day, dayIndex, isCurrentActivity }: Props) {
+  let placeCount = 0
+
   return (
-    <div className="mb-6 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-      <div className="bg-gradient-to-b from-[#edf3f7] to-70% px-6 py-4">
-        <h2 className="text-lg font-semibold text-[#0163a4]">
-          Day {dayIndex + 1}: {day.title}
-        </h2>
-        <p className="text-[#0470b9] font-semibold inline-block px-4 py-1.5 rounded-md w-fit text-base shadow-sm mt-1 bg-[#0470b91a]">
-          {day.date}
-        </p>
+    <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+      <div className="mb-4 flex items-center gap-4">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#0163a4] text-2xl font-bold text-white">
+          {dayIndex + 1}
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-gray-500">
+            Day {dayIndex + 1} · {day.date}
+          </p>
+          <h2 className="text-2xl font-bold text-gray-900">{day.title}</h2>
+        </div>
       </div>
 
       {day.activities.length === 0 ? (
-        <div className="px-6 py-8 text-center text-gray-400 text-sm bg-white">
+        <div className="py-8 text-center text-sm text-gray-400">
           No activities for this day yet.
         </div>
       ) : (
-        <ul className="divide-y divide-gray-200">
+        <ul className="relative before:absolute before:top-4 before:bottom-4 before:left-[86px] before:w-0.5 before:bg-[#0163a4]/20">
           {day.activities.map((act, idx) => (
-            <ActivityItem key={act.id} act={act} highlight={isCurrentActivity(idx)} />
+            <ActivityItem
+              key={act.id}
+              act={act}
+              highlight={isCurrentActivity(idx)}
+              placeNumber={act.mapUrl ? ++placeCount : undefined}
+            />
           ))}
         </ul>
       )}

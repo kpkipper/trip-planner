@@ -139,10 +139,7 @@ export function useTripForm(slugProp?: string) {
         d.id === dayId
           ? {
               ...d,
-              activities: [
-                ...d.activities,
-                { id: uid(), time: '', description: '', mapUrl: '', emoji: '' },
-              ],
+              activities: [...d.activities, { id: uid(), time: '', description: '', mapUrl: '' }],
             }
           : d,
       ),
