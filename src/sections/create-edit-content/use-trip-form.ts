@@ -30,7 +30,6 @@ export function useTripForm(slugProp?: string) {
   const [saving, setSaving] = useState(false)
 
   const dragItem = useRef<{ dayId: string; index: number } | null>(null)
-  const skipDayGen = useRef(false)
   const savingRef = useRef(false)
 
   const destinationOptions = useMemo(() => {
@@ -47,7 +46,6 @@ export function useTripForm(slugProp?: string) {
   }, [country])
 
   const applyTrip = useCallback((trip: Trip) => {
-    skipDayGen.current = true
     setTitle(trip.title)
     setDestination(trip.destination)
     setCountry(trip.country)
@@ -79,14 +77,11 @@ export function useTripForm(slugProp?: string) {
     loadTrip(slugProp)
   }, [slugProp, loadTrip])
 
-  useEffect(() => {
-    if (skipDayGen.current) {
-      skipDayGen.current = false
-      return
-    }
-    if (!startDate || !endDate || startDate > endDate) return
-    setDays((prev) => generateDays(startDate, endDate, prev))
-  }, [startDate, endDate])
+  // Rebuild the day list when the user changes the date range (keeps existing days).
+  const regenerateDays = (start: string, end: string) => {
+    if (!start || !end || start > end) return
+    setDays((prev) => generateDays(start, end, prev))
+  }
 
   const clearError = (key: string) => {
     if (errors[key])
@@ -113,10 +108,12 @@ export function useTripForm(slugProp?: string) {
   }
   const onStartDateChange = (v: string) => {
     setStartDate(v)
+    regenerateDays(v, endDate)
     clearError('startDate')
   }
   const onEndDateChange = (v: string) => {
     setEndDate(v)
+    regenerateDays(startDate, v)
     clearError('endDate')
   }
 
@@ -139,10 +136,7 @@ export function useTripForm(slugProp?: string) {
         d.id === dayId
           ? {
               ...d,
-              activities: [
-                ...d.activities,
-                { id: uid(), time: '', description: '', mapUrl: '', emoji: '' },
-              ],
+              activities: [...d.activities, { id: uid(), time: '', description: '', mapUrl: '' }],
             }
           : d,
       ),

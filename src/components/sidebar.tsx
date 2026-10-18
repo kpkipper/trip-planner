@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 
+// import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import {
@@ -28,13 +29,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { trips } = useTrips()
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set())
 
-  // Auto-expand countries that have trips
-  React.useEffect(() => {
+  const [seenTrips, setSeenTrips] = useState(trips)
+
+  // Auto-expand countries that have trips whenever the trip list changes
+  if (seenTrips !== trips) {
+    setSeenTrips(trips)
     const countries = trips.map((t) => t.country).filter(Boolean)
     if (countries.length > 0) {
       setExpandedCountries((prev) => new Set([...prev, ...countries]))
     }
-  }, [trips])
+  }
 
   const toggleCountry = (country: string) => {
     setExpandedCountries((prev) => {
@@ -84,16 +88,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* TODO: will enable Create Plan later */}
       {/* <div className="px-3 py-3 flex flex-col gap-2">
-        <a href="/plans/create">
-          <button
-            className={`flex items-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium ${
-              collapsed ? 'justify-center px-2' : ''
-            }`}
-          >
-            <Plus size={18} className="flex-shrink-0" />
-            {!collapsed && 'Create Plan'}
-          </button>
-        </a>
+        <Link
+          href="/plans/create"
+          className={`flex items-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium ${
+            collapsed ? 'justify-center px-2' : ''
+          }`}
+        >
+          <Plus size={18} className="flex-shrink-0" />
+          {!collapsed && 'Create Plan'}
+        </Link>
       </div> */}
 
       {/* Latest Trip */}

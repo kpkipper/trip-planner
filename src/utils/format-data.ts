@@ -12,7 +12,6 @@ const toActivity = (plan: ActivityPlanType, index: number): Activity => ({
   id: plan.id ?? String(index),
   time: plan.time ?? '',
   description: plan.description ?? '',
-  emoji: plan.emoji ?? '📍',
   mapUrl: plan.map_url,
 })
 

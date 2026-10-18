@@ -23,7 +23,7 @@ export function exportPDF(trip: Trip) {
             : `<ul>${day.activities
                 .map(
                   (act) =>
-                    `<li>${act.emoji ? `${act.emoji} ` : ''}${act.time ? `<strong>${act.time}</strong> — ` : ''}${act.description}</li>`,
+                    `<li>${act.time ? `<strong>${act.time}</strong> — ` : ''}${act.description}</li>`,
                 )
                 .join('')}</ul>`
         }

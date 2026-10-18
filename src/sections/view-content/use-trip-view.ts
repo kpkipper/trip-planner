@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -9,6 +9,16 @@ import { toTrip } from '@/utils/format-data'
 
 import type { Trip } from '@/types/trip'
 
+const MINUTE = 60_000
+
+// Ticks once a minute. The server snapshot is null so SSG output and hydration match.
+const subscribeToMinute = (onTick: () => void) => {
+  const interval = setInterval(onTick, MINUTE)
+  return () => clearInterval(interval)
+}
+const getCurrentMinute = () => Math.floor(Date.now() / MINUTE)
+const getServerMinute = () => null
+
 export function useTripView(slug: string) {
   const router = useRouter()
   const { showToast } = useToast()
@@ -16,17 +26,12 @@ export function useTripView(slug: string) {
 
   const [trip, setTrip] = useState<Trip>()
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
-  const [currentTime, setCurrentTime] = useState<Date | null>(null)
+  const currentMinute = useSyncExternalStore(subscribeToMinute, getCurrentMinute, getServerMinute)
+  const currentTime = currentMinute === null ? null : new Date(currentMinute * MINUTE)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
-
-  useEffect(() => {
-    setCurrentTime(new Date())
-    const interval = setInterval(() => setCurrentTime(new Date()), 60_000)
-    return () => clearInterval(interval)
-  }, [])
 
   useEffect(() => {
     const load = async () => {

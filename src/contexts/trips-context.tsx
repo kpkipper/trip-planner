@@ -20,9 +20,15 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   const [userTrips, setUserTrips] = useState<Trip[]>([])
   const [loaded, setLoaded] = useState(false)
   const pathname = usePathname()
+  const [loadedPath, setLoadedPath] = useState(pathname)
+
+  // Mark as loading again as soon as the path changes, before the refetch below.
+  if (loadedPath !== pathname) {
+    setLoadedPath(pathname)
+    setLoaded(false)
+  }
 
   useEffect(() => {
-    setLoaded(false)
     getJourneys()
       .then(({ data }) => setUserTrips(toTripList(data ?? [])))
       .catch((err) => console.error('Failed to load trips', err))

@@ -15,7 +15,6 @@ export interface ActivityPlanType {
   time: string
   description: string
   category?: string
-  emoji?: string
   map_url?: string
 }
 
