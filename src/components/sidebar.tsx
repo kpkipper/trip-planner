@@ -10,12 +10,13 @@ import {
   FolderOpen,
   MapPin,
   Menu,
-  PlaneTakeoff,
-  Plus,
+  // Plus,
   X,
 } from 'lucide-react'
 
 import { useTrips } from '@/contexts/trips-context'
+
+import Logo from './logo'
 
 interface SidebarProps {
   collapsed: boolean
@@ -70,12 +71,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
-        {!collapsed && (
-          <span className="font-bold text-[#0163a4] flex items-center gap-2 text-sm">
-            <PlaneTakeoff size={18} />
-            Trip Planner
-          </span>
-        )}
+        {!collapsed && <Logo size={32} />}
         <button
           onClick={onToggle}
           className={`p-1.5 rounded-md hover:bg-gray-100 text-gray-500 transition-colors ${
@@ -86,9 +82,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
 
-      {/* Create Plan */}
-      <div className="px-3 py-3 flex flex-col gap-2">
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+      {/* TODO: will enable Create Plan later */}
+      {/* <div className="px-3 py-3 flex flex-col gap-2">
         <a href="/plans/create">
           <button
             className={`flex items-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium ${
@@ -99,7 +94,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             {!collapsed && 'Create Plan'}
           </button>
         </a>
-      </div>
+      </div> */}
 
       {/* Latest Trip */}
       {!collapsed && latestTrip && (
