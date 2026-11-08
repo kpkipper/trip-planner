@@ -17,7 +17,7 @@ import { loginPath } from '@/lib/safe-next'
 export default function InvitesContent() {
   const router = useRouter()
   const { status } = useAuth()
-  const { invites, loaded, refresh } = useInvites()
+  const { invites, loaded, failed, refresh } = useInvites()
   const { showToast } = useToast()
   const [busyId, setBusyId] = useState<string | null>(null)
 
@@ -31,6 +31,23 @@ export default function InvitesContent() {
   }, [status, refresh])
 
   if (status !== 'authed' || !loaded) return <PageLoading />
+
+  if (failed) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Invites</h1>
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+          <p className="mb-3">Could not load your invites.</p>
+          <button
+            onClick={() => void refresh()}
+            className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387]"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const respond = async (id: string, slug: string, accept: boolean) => {
     if (busyId) return

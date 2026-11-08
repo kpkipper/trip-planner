@@ -49,7 +49,7 @@ export default function MembersPanel({ slug, role, onChanged }: Props) {
   const [inviteRole, setInviteRole] = useState<MemberRole>('traveler')
   const [linkRole, setLinkRole] = useState<MemberRole>('traveler')
   const [busy, setBusy] = useState(false)
-  const [newUrl, setNewUrl] = useState<string | null>(null)
+  const [newLink, setNewLink] = useState<{ id: string; url: string } | null>(null)
   const [removing, setRemoving] = useState<MemberView | null>(null)
 
   const fail = useCallback(
@@ -140,22 +140,22 @@ export default function MembersPanel({ slug, role, onChanged }: Props) {
 
   const handleCreateLink = () =>
     run(async () => {
-      const { url } = await createInviteLink(slug, effectiveLinkRole)
+      const { url, link } = await createInviteLink(slug, effectiveLinkRole)
       // The URL (with its token) is only shown now; it is never stored or logged.
-      setNewUrl(url)
+      setNewLink({ id: link.id, url })
       await reloadLinks()
     })
 
   const handleCopy = async () => {
-    if (!newUrl) return
-    if (await copyText(newUrl)) showToast('Link copied')
+    if (!newLink) return
+    if (await copyText(newLink.url)) showToast('Link copied')
     else showToast('Could not copy. Select the link and copy it manually.', 'error')
   }
 
   const handleRevoke = (id: string) =>
     run(async () => {
       await revokeInviteLink(slug, id)
-      setNewUrl(null)
+      setNewLink((cur) => (cur?.id === id ? null : cur))
       await reloadLinks()
     })
 
@@ -282,11 +282,11 @@ export default function MembersPanel({ slug, role, onChanged }: Props) {
             </button>
           </div>
 
-          {newUrl && (
+          {newLink && (
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-gray-50 p-2">
               <input
                 readOnly
-                value={newUrl}
+                value={newLink.url}
                 aria-label="New invite link"
                 onFocus={(e) => e.currentTarget.select()}
                 className="min-w-0 flex-1 bg-transparent text-xs text-gray-700 focus:outline-none"

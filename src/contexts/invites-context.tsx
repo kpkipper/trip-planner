@@ -12,6 +12,7 @@ import type { InviteView } from '@/api/members/type'
 interface InvitesContextValue {
   invites: InviteView[]
   loaded: boolean
+  failed: boolean
   refresh: () => Promise<void>
 }
 
@@ -22,13 +23,16 @@ export function InvitesProvider({ children }: { children: React.ReactNode }) {
   const { status, user } = useAuth()
   const userId = user?.id ?? null
   const [fetched, setFetched] = useState<{ userId: string; list: InviteView[] } | null>(null)
+  const [failedFor, setFailedFor] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
     if (!userId) return
     try {
       const list = await myInvites()
       setFetched({ userId, list })
+      setFailedFor(null)
     } catch (err) {
+      setFailedFor(userId)
       console.error('Failed to load invites:', errorSummary(err))
     }
   }, [userId])
@@ -40,9 +44,16 @@ export function InvitesProvider({ children }: { children: React.ReactNode }) {
   }, [status, refresh])
 
   const current = fetched && fetched.userId === userId ? fetched.list : null
+  const failed = failedFor !== null && failedFor === userId
   const value = useMemo(
-    () => ({ invites: current ?? [], loaded: current !== null, refresh }),
-    [current, refresh],
+    // On failure the list is hidden (no badge) and the request counts as settled.
+    () => ({
+      invites: failed ? [] : (current ?? []),
+      loaded: current !== null || failed,
+      failed,
+      refresh,
+    }),
+    [current, failed, refresh],
   )
   return <InvitesContext.Provider value={value}>{children}</InvitesContext.Provider>
 }
