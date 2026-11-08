@@ -1,9 +1,11 @@
 import { cache, Suspense } from 'react'
 
-import { getJourneyBySlug, getJourneys } from '@/api/journey'
+import { getJourneyBySlug } from '@/api/journey'
 import PageLoading from '@/components/page-loading'
 import { siteConfig } from '@/config/site'
-import { TripViewContent } from '@/sections/view-content'
+import { tripStaticParams } from '@/lib/public-slugs'
+import { SHELL_PARAM } from '@/lib/shell-param'
+import { TripViewShell } from '@/sections/shell-pages'
 import { toTrip } from '@/utils/format-data'
 
 import type { Metadata } from 'next'
@@ -14,10 +16,7 @@ const getTrip = cache(async (slug: string) => {
   return toTrip(data)
 })
 
-export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
-  const { data } = await getJourneys()
-  return data.flatMap((country) => country.plan.map((trip) => ({ slug: trip.slug })))
-}
+export const generateStaticParams = tripStaticParams
 
 export async function generateMetadata({
   params,
@@ -25,6 +24,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
+  if (slug === SHELL_PARAM) return { robots: { index: false, follow: false } }
 
   try {
     const trip = await getTrip(slug)
@@ -56,7 +56,7 @@ export async function generateMetadata({
 
 export default async function TripPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const trip = await getTrip(slug).catch(() => null)
+  const trip = slug === SHELL_PARAM ? null : await getTrip(slug).catch(() => null)
 
   const jsonLd = trip
     ? {
@@ -83,7 +83,7 @@ export default async function TripPage({ params }: { params: Promise<{ slug: str
         />
       )}
       <Suspense fallback={<PageLoading />}>
-        <TripViewContent slug={slug} />
+        <TripViewShell slug={slug} />
       </Suspense>
     </>
   )

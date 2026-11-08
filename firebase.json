@@ -14,6 +14,24 @@
           }
         ]
       }
+    ],
+    "rewrites": [
+      {
+        "source": "/plans/*/edit",
+        "destination": "/plans/_shell/edit.html"
+      },
+      {
+        "source": "/plans/*",
+        "destination": "/plans/_shell.html"
+      },
+      {
+        "source": "/u/*",
+        "destination": "/u/_shell.html"
+      },
+      {
+        "source": "/join/*",
+        "destination": "/join/_shell.html"
+      }
     ]
   }
 }

@@ -1,8 +1,8 @@
 import { Suspense } from 'react'
 
-import { getJourneys } from '@/api/journey'
 import PageLoading from '@/components/page-loading'
-import { CreateEditContent } from '@/sections/create-edit-content'
+import { tripStaticParams } from '@/lib/public-slugs'
+import { TripEditShell } from '@/sections/shell-pages'
 
 import type { Metadata } from 'next'
 
@@ -12,16 +12,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
-  const { data } = await getJourneys()
-  return data.flatMap((country) => country.plan.map((trip) => ({ slug: trip.slug })))
-}
+export const generateStaticParams = tripStaticParams
 
 export default async function EditPlanPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   return (
     <Suspense fallback={<PageLoading />}>
-      <CreateEditContent slug={slug} />
+      <TripEditShell slug={slug} />
     </Suspense>
   )
 }

@@ -1,6 +1,7 @@
 import { getJourneys } from '@/api/journey'
 import { siteConfig } from '@/config/site'
 import { errorSummary } from '@/lib/error-summary'
+import { SHELL_PARAM } from '@/lib/shell-param'
 
 import type { MetadataRoute } from 'next'
 
@@ -12,11 +13,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data } = await getJourneys()
     trips = data.flatMap((country) =>
-      country.plan.map((trip) => ({
-        url: `${siteConfig.url}/plans/${trip.slug}`,
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      })),
+      country.plan
+        .filter((trip) => trip.slug !== SHELL_PARAM)
+        .map((trip) => ({
+          url: `${siteConfig.url}/plans/${trip.slug}`,
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        })),
     )
   } catch (err) {
     console.error('sitemap: failed to load journeys:', errorSummary(err))
