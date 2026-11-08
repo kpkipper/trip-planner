@@ -2,6 +2,7 @@
 
 import { Save } from 'lucide-react'
 
+import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 
 import DayCard from './day-card'
@@ -20,6 +21,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
     errors,
     dragOver,
     loadingEdit,
+    loadFailed,
     saving,
     destinationOptions,
     onTitleChange,
@@ -42,6 +44,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
   } = useTripForm(slugProp)
 
   if (loadingEdit) return <PageLoading />
+  if (loadFailed) return <NotFound />
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

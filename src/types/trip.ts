@@ -1,8 +1,12 @@
+import type { JourneyStatusType } from '@/api/journey/type'
+
 export interface Activity {
   id: string
   time: string
   description: string
   mapUrl?: string
+  category?: string
+  hiddenFromPublic?: boolean
 }
 
 export interface TripDay {
@@ -11,6 +15,25 @@ export interface TripDay {
   dateISO: string
   title: string
   activities: Activity[]
+}
+
+export interface TripPerson {
+  username: string
+  displayName: string
+  avatarUrl: string
+  bio?: string
+}
+
+export interface TripMember extends TripPerson {
+  role: string
+  status: string
+}
+
+export interface TripLive {
+  city: string
+  dayNumber: number
+  totalDays: number
+  todayPlans?: Activity[]
 }
 
 export interface Trip {
@@ -23,4 +46,15 @@ export interface Trip {
   endDate: string
   days: TripDay[]
   updatedAt?: string
+  // Set by the privacy-aware API; missing on trips built in the create form.
+  redacted?: boolean
+  role?: string
+  visibility?: string
+  status?: JourneyStatusType
+  owner?: TripPerson
+  members?: TripMember[]
+  live?: TripLive
+  coverUrl?: string
+  monthStart?: string
+  monthEnd?: string
 }

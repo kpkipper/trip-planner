@@ -10,6 +10,7 @@ import { ChevronDown, ChevronRight, FolderOpen, MapPin, Menu, Plus, X } from 'lu
 import { useAuth } from '@/contexts/auth-context'
 import { useTrips } from '@/contexts/trips-context'
 import { loginPath } from '@/lib/safe-next'
+import { statusLabel } from '@/lib/trip-status'
 
 import AccountMenu from './account-menu'
 import Logo from './logo'
@@ -21,7 +22,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const { trips } = useTrips()
+  const { trips, myTrips, sharedTrips } = useTrips()
   const { status } = useAuth()
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set())
 
@@ -62,6 +63,37 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }, {})
 
   const allCountries = Object.keys(tripsByCountry)
+  const authed = status === 'authed'
+
+  const renderTripGroup = (heading: string, list: typeof trips) =>
+    list.length > 0 && (
+      <div className="mb-3">
+        {!collapsed && (
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2 mt-1">
+            {heading}
+          </div>
+        )}
+        {list.map((trip) => {
+          const href = `/plans/${trip.slug}`
+          const badge = statusLabel(trip.status)
+          return (
+            <a key={trip.slug} href={href} title={trip.title}>
+              <div
+                className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
+                  pathname === href
+                    ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                    : 'hover:bg-gray-50 text-gray-600'
+                } ${collapsed ? 'justify-center' : ''}`}
+              >
+                <MapPin size={13} className="flex-shrink-0" />
+                {!collapsed && <span className="flex-1 truncate">{trip.title}</span>}
+                {!collapsed && badge && <span aria-label={badge.text}>{badge.emoji}</span>}
+              </div>
+            </a>
+          )
+        })}
+      </div>
+    )
 
   return (
     <div
@@ -136,13 +168,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* My Plans */}
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {!collapsed && allCountries.length > 0 && (
+        {authed && (
+          <>
+            {renderTripGroup('My trips', myTrips)}
+            {renderTripGroup('Shared with me', sharedTrips)}
+          </>
+        )}
+
+        {!authed && !collapsed && allCountries.length > 0 && (
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2 mt-1">
             My Plans
           </div>
         )}
 
-        {allCountries.map((country) => {
+        {(authed ? [] : allCountries).map((country) => {
           const isExpanded = expandedCountries.has(country)
           const tripsForCountry = tripsByCountry[country] || []
 

@@ -6,6 +6,8 @@ import { State } from 'country-state-city'
 
 import { createJourney, getJourneyBySlug, updateJourney } from '@/api/journey'
 import { useToast } from '@/contexts/toast-context'
+import { errorSummary } from '@/lib/error-summary'
+import { classifyLoadError } from '@/lib/load-error'
 import { toTrip } from '@/utils/format-data'
 
 import { ALL_COUNTRIES, generateDays, uid } from './helper'
@@ -28,6 +30,7 @@ export function useTripForm(slugProp?: string) {
   const [dragOver, setDragOver] = useState<{ dayId: string; index: number } | null>(null)
   const [loadingEdit, setLoadingEdit] = useState(!!slugProp)
   const [saving, setSaving] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
 
   const dragItem = useRef<{ dayId: string; index: number } | null>(null)
   const savingRef = useRef(false)
@@ -56,20 +59,36 @@ export function useTripForm(slugProp?: string) {
   }, [])
 
   const loadTrip = useCallback(
-    async (slug: string) => {
-      try {
-        const res = await getJourneyBySlug(slug)
-        if (res.code === 'JOURNEY-404000') {
-          showToast('Trip not found', 'error')
-          router.replace('/plans/create')
-          return
-        }
-        applyTrip(toTrip(res.data))
-      } finally {
-        setLoadingEdit(false)
-      }
-    },
-    [applyTrip, showToast, router],
+    (slug: string) =>
+      getJourneyBySlug(slug)
+        .then((res) => {
+          if (classifyLoadError(undefined, res)) {
+            showToast('Trip not found', 'error')
+            setLoadFailed(true)
+            return
+          }
+          const trip = toTrip(res.data)
+          if (trip.redacted) {
+            setLoadFailed(true)
+            return
+          }
+          applyTrip(trip)
+        })
+        .catch((err) => {
+          const kind = classifyLoadError(err)
+          showToast(
+            kind === 'forbidden'
+              ? "You don't have access"
+              : kind === 'not-found'
+                ? 'Trip not found'
+                : 'Something went wrong',
+            'error',
+          )
+          setLoadFailed(true)
+          console.error('Failed to load trip:', errorSummary(err))
+        })
+        .finally(() => setLoadingEdit(false)),
+    [applyTrip, showToast],
   )
 
   useEffect(() => {
@@ -268,6 +287,7 @@ export function useTripForm(slugProp?: string) {
     errors,
     dragOver,
     loadingEdit,
+    loadFailed,
     saving,
     destinationOptions,
     onTitleChange,

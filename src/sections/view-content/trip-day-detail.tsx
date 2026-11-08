@@ -6,9 +6,10 @@ interface Props {
   day: TripDay
   dayIndex: number
   isCurrentActivity: (actIdx: number) => boolean
+  livePlanIds?: Set<string>
 }
 
-export default function TripDayDetail({ day, dayIndex, isCurrentActivity }: Props) {
+export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePlanIds }: Props) {
   let placeCount = 0
 
   return (
@@ -35,7 +36,7 @@ export default function TripDayDetail({ day, dayIndex, isCurrentActivity }: Prop
             <ActivityItem
               key={act.id}
               act={act}
-              highlight={isCurrentActivity(idx)}
+              highlight={isCurrentActivity(idx) || !!livePlanIds?.has(act.id)}
               placeNumber={act.mapUrl ? ++placeCount : undefined}
             />
           ))}

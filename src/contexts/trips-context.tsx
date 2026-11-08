@@ -1,19 +1,23 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 import { usePathname } from 'next/navigation'
 
-import { getJourneys } from '@/api/journey'
+import { getJourneys, getMyJourneys } from '@/api/journey'
 import { errorSummary } from '@/lib/error-summary'
-import { toTripList } from '@/utils/format-data'
+import { toTripList, toTripListFromMine } from '@/utils/format-data'
 
 import { useAuth } from './auth-context'
 
 import type { Trip } from '@/types/trip'
 
 interface TripsContextValue {
+  // Anonymous: the public list. Logged in: the trips I own or joined (newest departure first).
   trips: Trip[]
+  // Logged in only: split by the viewer's role.
+  myTrips: Trip[]
+  sharedTrips: Trip[]
   loaded: boolean
 }
 
@@ -38,9 +42,13 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
     // Wait until we know whether the user is logged in, so the list is fetched once.
     if (status === 'loading') return
     let cancelled = false
-    getJourneys()
-      .then(({ data }) => {
-        if (!cancelled) setUserTrips(toTripList(data ?? []))
+    const request =
+      status === 'authed'
+        ? getMyJourneys().then(toTripListFromMine)
+        : getJourneys().then(({ data }) => toTripList(data ?? []))
+    request
+      .then((list) => {
+        if (!cancelled) setUserTrips(list)
       })
       .catch((err) => console.error('Failed to load trips:', errorSummary(err)))
       .finally(() => {
@@ -51,9 +59,18 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, status])
 
-  return (
-    <TripsContext.Provider value={{ trips: userTrips, loaded }}>{children}</TripsContext.Provider>
+  const authed = status === 'authed'
+  const value = useMemo(
+    () => ({
+      trips: userTrips,
+      myTrips: authed ? userTrips.filter((t) => t.role === 'owner') : [],
+      sharedTrips: authed ? userTrips.filter((t) => t.role !== 'owner') : [],
+      loaded,
+    }),
+    [userTrips, authed, loaded],
   )
+
+  return <TripsContext.Provider value={value}>{children}</TripsContext.Provider>
 }
 
 export function useTrips() {

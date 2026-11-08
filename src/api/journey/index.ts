@@ -6,6 +6,7 @@ import type {
   CreateJourneyResponse,
   GetJourneyTripResponse,
   GetListJourneyResponse,
+  GetMyJourneysResponse,
   Response,
 } from './type'
 import type { Trip } from '@/types/trip'
@@ -16,7 +17,9 @@ export const getJourneys = async () => {
 }
 
 export const getJourneyBySlug = async (slug: string) => {
-  const { data } = await apiClient.get<GetJourneyTripResponse>(`/api/v1/journeys/${slug}`)
+  const { data } = await apiClient.get<GetJourneyTripResponse>(
+    `/api/v1/journeys/${encodeURIComponent(slug)}`,
+  )
   return data
 }
 
@@ -30,13 +33,25 @@ export const createJourney = async (trip: Trip) => {
 
 export const updateJourney = async (slug: string, trip: Trip) => {
   const { data } = await apiClient.put<Response>(
-    `/api/v1/journeys/${slug}/update`,
+    `/api/v1/journeys/${encodeURIComponent(slug)}/update`,
     toJourneyPayload(trip),
   )
   return data
 }
 
 export const deleteJourney = async (slug: string) => {
-  const { data } = await apiClient.delete<Response>(`/api/v1/journeys/${slug}`)
+  const { data } = await apiClient.delete<Response>(`/api/v1/journeys/${encodeURIComponent(slug)}`)
+  return data
+}
+
+export const getMyJourneys = async () => {
+  const { data } = await apiClient.get<GetMyJourneysResponse>('/api/v1/me/journeys')
+  return data.data ?? []
+}
+
+export const leaveJourney = async (slug: string) => {
+  const { data } = await apiClient.post<Response>(
+    `/api/v1/journeys/${encodeURIComponent(slug)}/leave`,
+  )
   return data
 }
