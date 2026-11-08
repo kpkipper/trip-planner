@@ -44,7 +44,8 @@ export default function TripViewContent({ slug }: { slug: string }) {
 
   const selectedDay = trip.days[selectedDayIndex]
   const coverUrl = safeHttpsUrl(trip.coverUrl)
-  const livePlanIds = new Set((trip.live?.todayPlans ?? []).map((p) => p.id))
+  const todayPlans = trip.live?.todayPlans ?? []
+  const livePlanIds = new Set(todayPlans.map((p) => p.id))
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 py-8">
@@ -112,9 +113,9 @@ export default function TripViewContent({ slug }: { slug: string }) {
                 <Radio size={14} />
                 {liveLabel(trip.live)}
               </p>
-              {(trip.live.todayPlans?.length ?? 0) > 0 && (
+              {todayPlans.length > 0 && (
                 <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                  {trip.live.todayPlans!.map((p) => (
+                  {todayPlans.map((p) => (
                     <li key={p.id} className="flex gap-3">
                       <span className="w-12 shrink-0 font-mono tabular-nums text-green-700">
                         {p.time}

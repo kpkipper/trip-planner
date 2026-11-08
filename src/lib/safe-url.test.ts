@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { safeHttpsUrl } from './safe-url'
+import { safeHttpsUrl, safeHttpUrl } from './safe-url'
 
 describe('safeHttpsUrl', () => {
   it('accepts https URLs', () => {
@@ -18,5 +18,21 @@ describe('safeHttpsUrl', () => {
     expect(safeHttpsUrl('')).toBeNull()
     expect(safeHttpsUrl(null)).toBeNull()
     expect(safeHttpsUrl(undefined)).toBeNull()
+  })
+})
+
+describe('safeHttpUrl', () => {
+  it('accepts http and https', () => {
+    expect(safeHttpUrl('https://maps.google.com/?q=a')).toBe('https://maps.google.com/?q=a')
+    expect(safeHttpUrl('http://example.com')).toBe('http://example.com')
+  })
+
+  it('rejects other schemes and malformed values', () => {
+    expect(safeHttpUrl('javascript:alert(1)')).toBeUndefined()
+    expect(safeHttpUrl(' JavaScript:alert(1)')).toBeUndefined()
+    expect(safeHttpUrl('data:text/html,x')).toBeUndefined()
+    expect(safeHttpUrl('/relative')).toBeUndefined()
+    expect(safeHttpUrl('')).toBeUndefined()
+    expect(safeHttpUrl(null)).toBeUndefined()
   })
 })

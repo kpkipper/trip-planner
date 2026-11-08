@@ -158,7 +158,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
                 <MapPin size={10} />
                 <span className="truncate">
-                  {latestTrip.destination}, {latestTrip.country}
+                  {[latestTrip.destination, latestTrip.country].filter(Boolean).join(', ')}
                 </span>
               </div>
             </div>

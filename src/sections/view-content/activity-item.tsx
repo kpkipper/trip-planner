@@ -1,5 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 
+import { safeHttpUrl } from '@/lib/safe-url'
+
 import type { Activity } from '@/types/trip'
 
 interface ActivityItemProps {
@@ -9,6 +11,8 @@ interface ActivityItemProps {
 }
 
 export default function ActivityItem({ act, highlight, placeNumber }: ActivityItemProps) {
+  const mapHref = safeHttpUrl(act.mapUrl)
+
   return (
     <li className="relative flex gap-4 py-3">
       <span
@@ -37,9 +41,9 @@ export default function ActivityItem({ act, highlight, placeNumber }: ActivityIt
         }`}
       >
         {act.description}
-        {act.mapUrl && (
+        {mapHref && (
           <a
-            href={act.mapUrl}
+            href={mapHref}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-2 inline-flex items-center gap-0.5 text-sm font-normal text-[#0470b9] underline underline-offset-2 hover:text-[#0163a4]"

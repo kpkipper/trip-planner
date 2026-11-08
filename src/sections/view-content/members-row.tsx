@@ -32,7 +32,7 @@ export default function MembersRow({ trip }: { trip: Trip }) {
       </div>
       <span className="text-xs text-gray-500">
         {trip.owner ? `by ${trip.owner.displayName || trip.owner.username}` : ''}
-        {others.length > 0 ? `${trip.owner ? ' · ' : ''}${others.length + 1} people` : ''}
+        {people.length > 1 ? `${trip.owner ? ' · ' : ''}${people.length} people` : ''}
       </span>
     </div>
   )

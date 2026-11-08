@@ -21,10 +21,17 @@ interface TripsContextValue {
   loaded: boolean
 }
 
+const EMPTY_TRIPS: Trip[] = []
+
 const TripsContext = createContext<TripsContextValue | null>(null)
 
 export function TripsProvider({ children }: { children: React.ReactNode }) {
-  const [userTrips, setUserTrips] = useState<Trip[]>([])
+  // The list remembers whether it was fetched logged in, so a stale list is never shown
+  // under the other login state (e.g. the public list under "Shared with me").
+  const [fetched, setFetched] = useState<{ list: Trip[]; authed: boolean }>({
+    list: [],
+    authed: false,
+  })
   const [loaded, setLoaded] = useState(false)
   const pathname = usePathname()
   const { status } = useAuth()
@@ -48,7 +55,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
         : getJourneys().then(({ data }) => toTripList(data ?? []))
     request
       .then((list) => {
-        if (!cancelled) setUserTrips(list)
+        if (!cancelled) setFetched({ list, authed: status === 'authed' })
       })
       .catch((err) => console.error('Failed to load trips:', errorSummary(err)))
       .finally(() => {
@@ -60,6 +67,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, status])
 
   const authed = status === 'authed'
+  const userTrips = fetched.authed === authed ? fetched.list : EMPTY_TRIPS
   const value = useMemo(
     () => ({
       trips: userTrips,

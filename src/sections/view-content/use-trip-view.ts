@@ -43,6 +43,7 @@ export function useTripView(slug: string) {
         const res = await getJourneyBySlug(slug)
         if (cancelled) return
         if (classifyLoadError(undefined, res)) {
+          showToast('Trip not found', 'error')
           setNotFound(true)
           return
         }
@@ -57,6 +58,7 @@ export function useTripView(slug: string) {
         if (cancelled) return
         const kind = classifyLoadError(err)
         if (kind === 'forbidden') showToast("You don't have access", 'error')
+        else if (kind === 'not-found') showToast('Trip not found', 'error')
         else if (kind === 'error') showToast('Something went wrong. Please try again.', 'error')
         // 404 (including hidden trips), 403 and other failures all show the not-found page.
         setNotFound(true)

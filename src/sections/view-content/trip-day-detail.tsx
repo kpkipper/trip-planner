@@ -1,3 +1,5 @@
+import { safeHttpUrl } from '@/lib/safe-url'
+
 import ActivityItem from './activity-item'
 
 import type { TripDay } from '@/types/trip'
@@ -37,7 +39,7 @@ export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePl
               key={act.id}
               act={act}
               highlight={isCurrentActivity(idx) || !!livePlanIds?.has(act.id)}
-              placeNumber={act.mapUrl ? ++placeCount : undefined}
+              placeNumber={safeHttpUrl(act.mapUrl) ? ++placeCount : undefined}
             />
           ))}
         </ul>

@@ -68,7 +68,8 @@ export function useTripForm(slugProp?: string) {
             return
           }
           const trip = toTrip(res.data)
-          if (trip.redacted) {
+          if (trip.redacted || (trip.role !== 'owner' && trip.role !== 'editor')) {
+            showToast("You can't edit this trip", 'error')
             setLoadFailed(true)
             return
           }
