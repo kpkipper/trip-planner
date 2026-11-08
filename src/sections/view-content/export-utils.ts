@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/escape-html'
+
 import type { Trip } from '@/types/trip'
 
 export function exportJSON(trip: Trip) {
@@ -10,20 +12,23 @@ export function exportJSON(trip: Trip) {
   URL.revokeObjectURL(url)
 }
 
-export function exportPDF(trip: Trip) {
+// Every user value is escaped: the page opens as a same-origin blob and could read localStorage.
+// User URLs (map links) are left out on purpose.
+export function buildPdfHtml(trip: Trip): string {
+  const e = escapeHtml
   const daysHTML = trip.days
     .map(
       (day, idx) => `
       <div class="day">
-        <h3>Day ${idx + 1}: ${day.title}</h3>
-        <p class="date">${day.date}</p>
+        <h3>Day ${idx + 1}: ${e(day.title)}</h3>
+        <p class="date">${e(day.date)}</p>
         ${
           day.activities.length === 0
             ? '<p class="empty">No activities</p>'
             : `<ul>${day.activities
                 .map(
                   (act) =>
-                    `<li>${act.time ? `<strong>${act.time}</strong> — ` : ''}${act.description}</li>`,
+                    `<li>${act.time ? `<strong>${e(act.time)}</strong> — ` : ''}${e(act.description)}</li>`,
                 )
                 .join('')}</ul>`
         }
@@ -31,11 +36,11 @@ export function exportPDF(trip: Trip) {
     )
     .join('')
 
-  const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>${trip.title}</title>
+  <title>${e(trip.title)}</title>
   <style>
     body { font-family: sans-serif; max-width: 700px; margin: 40px auto; color: #333; }
     h1 { font-size: 1.8rem; }
@@ -49,13 +54,16 @@ export function exportPDF(trip: Trip) {
   </style>
 </head>
 <body>
-  <h1>${trip.title}</h1>
-  <p class="meta">${trip.destination}, ${trip.country} &nbsp;|&nbsp; ${trip.startDate} – ${trip.endDate}</p>
+  <h1>${e(trip.title)}</h1>
+  <p class="meta">${e(trip.destination)}, ${e(trip.country)} &nbsp;|&nbsp; ${e(trip.startDate)} – ${e(trip.endDate)}</p>
   ${daysHTML}
   <script>window.onload = () => window.print()<\/script>
 </body>
 </html>`
+}
 
+export function exportPDF(trip: Trip) {
+  const html = buildPdfHtml(trip)
   const blob = new Blob([html], { type: 'text/html' })
   const url = URL.createObjectURL(blob)
   window.open(url, '_blank')
