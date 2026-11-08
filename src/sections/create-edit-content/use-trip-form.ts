@@ -344,8 +344,19 @@ export function useTripForm(slugProp?: string) {
     if (!result.ok) {
       const step = describeOp(result.op)
       console.error('Trip sync failed:', result.op.type, errorSummary(result.error))
+      const status = (result.error as { response?: { status?: number } } | null)?.response?.status
+      const rejected = status !== undefined && status >= 400 && status < 500
+      if (result.index === 0 && !rejected) {
+        // No answer or a 5xx: the write may have landed, so show what the server has now.
+        showToast(
+          `Couldn't confirm that ${step} worked${apiMessage(result.error)}. Showing the latest version.`,
+          'error',
+        )
+        await loadTrip(slug)
+        return finishSaving()
+      }
       if (result.index === 0) {
-        // Nothing was written: the snapshot is still valid, so keep the form.
+        // The server rejected the first write: nothing was written: the snapshot is still valid, so keep the form.
         showToast(
           `Couldn't save: ${step} failed${apiMessage(result.error)}. Nothing was changed.`,
           'error',

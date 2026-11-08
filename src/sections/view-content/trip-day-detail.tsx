@@ -38,7 +38,8 @@ export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePl
             <ActivityItem
               key={act.id}
               act={act}
-              highlight={isCurrentActivity(idx) || !!livePlanIds?.has(act.id)}
+              highlight={isCurrentActivity(idx)}
+              today={!!livePlanIds?.has(act.id)}
               placeNumber={safeHttpUrl(act.mapUrl) ? ++placeCount : undefined}
             />
           ))}

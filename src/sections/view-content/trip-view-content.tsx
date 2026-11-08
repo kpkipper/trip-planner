@@ -13,6 +13,7 @@ import ConfirmDialog from '@/components/confirm-dialog'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 import { safeHttpsUrl } from '@/lib/safe-url'
+import { tripActions } from '@/lib/trip-roles'
 import { liveLabel } from '@/lib/trip-status'
 import MembersPanel from '@/sections/members/members-panel'
 import TripSettingsPanel from '@/sections/settings/trip-settings-panel'
@@ -152,12 +153,14 @@ export default function TripViewContent({ slug }: { slug: string }) {
           {trip.days.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
               <p>No days planned yet.</p>
-              <button
-                onClick={() => router.push(`/plans/${slug}/edit`)}
-                className="mt-3 text-[#0163a4] hover:underline text-sm"
-              >
-                Edit plan to add days
-              </button>
+              {tripActions(trip.role, trip.redacted ?? false).edit && (
+                <button
+                  onClick={() => router.push(`/plans/${slug}/edit`)}
+                  className="mt-3 text-[#0163a4] hover:underline text-sm"
+                >
+                  Edit plan to add days
+                </button>
+              )}
             </div>
           ) : (
             <>

@@ -1,9 +1,15 @@
 'use client'
 
+import { useEffect } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { Save } from 'lucide-react'
 
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
+import { useAuth } from '@/contexts/auth-context'
+import { loginPath } from '@/lib/safe-next'
 
 import DayCard from './day-card'
 import TripInfoForm from './trip-info-form'
@@ -45,6 +51,16 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
     handleCancel,
   } = useTripForm(slugProp)
 
+  // Creating needs a login: send anonymous visitors there before they fill in a form that
+  // a 401 on save would throw away.
+  const router = useRouter()
+  const { status } = useAuth()
+  const needsLogin = !slugProp && status === 'anon'
+  useEffect(() => {
+    if (needsLogin) router.replace(loginPath('/plans/create'))
+  }, [needsLogin, router])
+
+  if (!slugProp && status !== 'authed') return <PageLoading />
   if (loadingEdit) return <PageLoading />
   if (loadFailed) return <NotFound />
 

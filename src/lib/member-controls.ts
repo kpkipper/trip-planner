@@ -9,8 +9,8 @@ export interface MemberControls {
   revokeLinks: boolean
 }
 
-// The API is the real gate (editors may only invite when the trip allows it; the trip view
-// does not expose that flag, so editors see the controls and a 403 is shown as a toast).
+// The API is the real gate. Editors get invite controls only when the trip says they may
+// (`editorsCanInvite === true`); unknown hides them.
 export const memberControls = (
   role: string | undefined,
   editorsCanInvite?: boolean,

@@ -74,7 +74,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         )}
         {list.map((trip) => {
-          const href = `/plans/${trip.slug}`
+          const href = `/plans/${encodeURIComponent(trip.slug ?? '')}`
           const badge = statusLabel(trip.status)
           return (
             <a key={trip.slug} href={href} title={trip.title}>
@@ -87,7 +87,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               >
                 <MapPin size={13} className="flex-shrink-0" />
                 {!collapsed && <span className="flex-1 truncate">{trip.title}</span>}
-                {!collapsed && badge && <span aria-label={badge.text}>{badge.emoji}</span>}
+                {!collapsed && badge && (
+                  <span role="img" aria-label={badge.text}>
+                    {badge.emoji}
+                  </span>
+                )}
               </div>
             </a>
           )
@@ -146,10 +150,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-1.5">
             Latest
           </div>
-          <a href={`/plans/${latestTrip.slug}`}>
+          <a href={`/plans/${encodeURIComponent(latestTrip.slug ?? '')}`}>
             <div
               className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
-                pathname === `/plans/${latestTrip.slug}`
+                pathname === `/plans/${encodeURIComponent(latestTrip.slug ?? '')}`
                   ? 'bg-[#edf3f7] border-[#0163a4]/30 text-[#0163a4]'
                   : 'bg-gray-50 border-gray-200 hover:bg-[#edf3f7] text-gray-700'
               }`}
@@ -205,7 +209,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {(isExpanded || collapsed) && (
                 <div className={collapsed ? '' : 'ml-3'}>
                   {tripsForCountry.map((trip) => {
-                    const href = `/plans/${trip.slug}`
+                    const href = `/plans/${encodeURIComponent(trip.slug ?? '')}`
                     return (
                       <a key={trip.id} href={href}>
                         <div

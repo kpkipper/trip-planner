@@ -7,10 +7,12 @@ import type { Activity } from '@/types/trip'
 interface ActivityItemProps {
   act: Activity
   highlight: boolean
+  // Part of today's live plans on the trip owner's day: a subtle marker only.
+  today?: boolean
   placeNumber?: number
 }
 
-export default function ActivityItem({ act, highlight, placeNumber }: ActivityItemProps) {
+export default function ActivityItem({ act, highlight, today, placeNumber }: ActivityItemProps) {
   const mapHref = safeHttpUrl(act.mapUrl)
 
   return (
@@ -37,9 +39,14 @@ export default function ActivityItem({ act, highlight, placeNumber }: ActivityIt
 
       <div
         className={`min-w-0 flex-1 transition-all ${
-          highlight ? 'text-lg font-bold text-gray-900' : 'font-medium text-gray-800'
-        }`}
+          today && !highlight ? 'border-l-2 border-green-500 pl-2' : ''
+        } ${highlight ? 'text-lg font-bold text-gray-900' : 'font-medium text-gray-800'}`}
       >
+        {today && !highlight && (
+          <span className="mr-2 rounded-full bg-green-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-green-700 align-middle">
+            Today
+          </span>
+        )}
         {act.description}
         {mapHref && (
           <a

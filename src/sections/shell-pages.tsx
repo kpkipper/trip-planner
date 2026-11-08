@@ -16,26 +16,26 @@ export function TripViewShell({ slug }: { slug: string }) {
   const value = useShellParam(slug, '/plans')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return <TripViewContent slug={value} />
+  return <TripViewContent slug={value} key={value} />
 }
 
 export function TripEditShell({ slug }: { slug: string }) {
   const value = useShellParam(slug, '/plans')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return <CreateEditContent slug={value} />
+  return <CreateEditContent slug={value} key={value} />
 }
 
 export function ProfileShell({ username }: { username: string }) {
   const value = useShellParam(username, '/u')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return <ProfileContent username={value} />
+  return <ProfileContent username={value} key={value} />
 }
 
 export function JoinShell({ token }: { token: string }) {
   const value = useShellParam(token, '/join')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return <JoinContent token={value} />
+  return <JoinContent token={value} key={value} />
 }

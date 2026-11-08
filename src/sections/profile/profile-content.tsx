@@ -53,7 +53,7 @@ function TripLink({
 }) {
   return (
     <a
-      href={`/plans/${slug}`}
+      href={`/plans/${encodeURIComponent(slug)}`}
       className="block rounded-xl border border-gray-200 bg-white p-3 hover:border-[#16aef2]"
     >
       <span className="block text-sm font-semibold text-gray-800">{title}</span>
@@ -168,7 +168,7 @@ export default function ProfileContent({ username }: { username: string }) {
     (me.username === profile.user.username || (renamedTo !== null && me.username === renamedTo))
   const toggleFollow = async () => {
     if (!me) {
-      router.push(loginPath(`/u/${profile.user.username}`))
+      router.push(loginPath(`/u/${encodeURIComponent(profile.user.username)}`))
       return
     }
     if (busy) return
@@ -201,7 +201,7 @@ export default function ProfileContent({ username }: { username: string }) {
             setEditing(false)
             if (updated.username !== profile.user.username) {
               setRenamedTo(updated.username)
-              router.push(`/u/${updated.username}`)
+              router.push(`/u/${encodeURIComponent(updated.username)}`)
             } else
               setProfile({
                 ...profile,
@@ -258,7 +258,7 @@ export default function ProfileContent({ username }: { username: string }) {
       {profile.now?.live && (
         <Section title="Now">
           <a
-            href={`/plans/${profile.now.slug}`}
+            href={`/plans/${encodeURIComponent(profile.now.slug)}`}
             className="block rounded-2xl border border-green-200 bg-green-50 p-4"
           >
             <span className="flex items-center gap-2 text-sm font-semibold text-green-700">
