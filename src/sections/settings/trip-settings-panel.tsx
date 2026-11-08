@@ -12,17 +12,20 @@ import { timezoneOptions } from '@/lib/timezone'
 import {
   buildSettingsPatch,
   coverError,
+  formFromTrip,
   settingsAccess,
   type SettingsForm,
-  type Tri,
   VISIBILITY_OPTIONS,
 } from '@/lib/trip-settings'
+
+import type { TripSettings } from '@/types/trip'
 
 interface Props {
   slug: string
   role: string | undefined
   visibility: string | undefined
   coverUrl: string | undefined
+  settings: TripSettings | undefined
   // Refetch the trip view after saving.
   onChanged: () => void
 }
@@ -30,55 +33,55 @@ interface Props {
 const inputClass =
   'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#16aef2]'
 
-const TRI: Array<{ value: Tri; label: string }> = [
-  { value: 'keep', label: "Don't change" },
-  { value: 'on', label: 'On' },
-  { value: 'off', label: 'Off' },
-]
-
-function TriSelect({
+function Toggle({
   label,
   hint,
-  value,
+  checked,
   onChange,
 }: {
   label: string
   hint: string
-  value: Tri
-  onChange: (v: Tri) => void
+  checked: boolean
+  onChange: (v: boolean) => void
 }) {
   return (
-    <label className="block">
-      <span className="block text-sm font-medium text-gray-700">{label}</span>
-      <span className="mb-1 block text-xs text-gray-500">{hint}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as Tri)}
-        className={inputClass}
-      >
-        {TRI.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+    <label className="flex cursor-pointer items-start gap-3">
+      <input
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-1 h-4 w-4"
+      />
+      <span>
+        <span className="block text-sm font-medium text-gray-700">{label}</span>
+        <span className="block text-xs text-gray-500">{hint}</span>
+      </span>
     </label>
   )
 }
 
-export default function TripSettingsPanel({ slug, role, visibility, coverUrl, onChanged }: Props) {
-  const access = settingsAccess(role)
+export default function TripSettingsPanel({
+  slug,
+  role,
+  visibility,
+  coverUrl,
+  settings,
+  onChanged,
+}: Props) {
+  const access = settingsAccess(role, !!settings)
   const { showToast } = useToast()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState<SettingsForm>({
-    visibility: visibility ?? 'followers',
-    coverUrl: coverUrl ?? '',
-    timezone: '',
-    hideLiveStatus: 'keep',
-    editorsCanInvite: 'keep',
-    draft: 'keep',
-  })
+  const original = { visibility, coverUrl, settings }
+  const [form, setForm] = useState<SettingsForm>(() => formFromTrip(original))
+  // Re-sync from the refetched trip (not on every render: unsaved edits are kept).
+  const serverKey = JSON.stringify(original)
+  const [syncedKey, setSyncedKey] = useState(serverKey)
+  if (syncedKey !== serverKey) {
+    setSyncedKey(serverKey)
+    setForm(formFromTrip(original))
+  }
 
   if (!Object.values(access).some(Boolean)) return null
 
@@ -88,7 +91,7 @@ export default function TripSettingsPanel({ slug, role, visibility, coverUrl, on
 
   const save = async () => {
     if (saving || coverProblem) return
-    const patch = buildSettingsPatch(role, form, { visibility, coverUrl })
+    const patch = buildSettingsPatch(role, form, original)
     if (Object.keys(patch).length === 0) {
       showToast('No changes to save')
       return
@@ -97,13 +100,6 @@ export default function TripSettingsPanel({ slug, role, visibility, coverUrl, on
     try {
       await patchJourney(slug, patch)
       showToast('Settings saved')
-      setForm((f) => ({
-        ...f,
-        timezone: '',
-        hideLiveStatus: 'keep',
-        editorsCanInvite: 'keep',
-        draft: 'keep',
-      }))
       onChanged()
     } catch (err) {
       showToast(memberErrorMessage(err), 'error')
@@ -154,28 +150,28 @@ export default function TripSettingsPanel({ slug, role, visibility, coverUrl, on
           )}
 
           {access.hideLiveStatus && (
-            <TriSelect
+            <Toggle
               label="Hide live status"
               hint="Followers will not see where you are while the trip is ongoing."
-              value={form.hideLiveStatus}
+              checked={form.hideLiveStatus}
               onChange={(v) => set('hideLiveStatus', v)}
             />
           )}
 
           {access.editorsCanInvite && (
-            <TriSelect
+            <Toggle
               label="Editors can invite"
               hint="Let editors invite people and create invite links."
-              value={form.editorsCanInvite}
+              checked={form.editorsCanInvite}
               onChange={(v) => set('editorsCanInvite', v)}
             />
           )}
 
           {access.draft && (
-            <TriSelect
+            <Toggle
               label="Draft"
               hint="A draft trip shows as Planning, even after its dates start."
-              value={form.draft}
+              checked={form.draft}
               onChange={(v) => set('draft', v)}
             />
           )}
@@ -191,8 +187,7 @@ export default function TripSettingsPanel({ slug, role, visibility, coverUrl, on
                 onChange={(e) => set('timezone', e.target.value)}
                 className={inputClass}
               >
-                <option value="">Don&apos;t change</option>
-                {timezoneOptions().map((z) => (
+                {timezoneOptions(settings?.timezone).map((z) => (
                   <option key={z} value={z}>
                     {z}
                   </option>

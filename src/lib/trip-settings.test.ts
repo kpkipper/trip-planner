@@ -1,8 +1,24 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSettingsPatch, settingsAccess, VISIBILITY_OPTIONS } from './trip-settings'
+import {
+  buildSettingsPatch,
+  coverError,
+  formFromTrip,
+  settingsAccess,
+  VISIBILITY_OPTIONS,
+} from './trip-settings'
 
-const keep = { hideLiveStatus: 'keep', editorsCanInvite: 'keep', draft: 'keep' } as const
+const settings = {
+  isDraft: false,
+  timezone: 'Asia/Bangkok',
+  hideLiveStatus: false,
+  editorsCanInvite: false,
+}
+const original = {
+  visibility: 'followers',
+  coverUrl: 'https://a.example/c.jpg',
+  settings,
+}
 
 describe('VISIBILITY_OPTIONS', () => {
   it('has the four levels with a description each', () => {
@@ -18,7 +34,7 @@ describe('VISIBILITY_OPTIONS', () => {
 
 describe('settingsAccess', () => {
   it('owner sees everything', () => {
-    expect(settingsAccess('owner')).toEqual({
+    expect(settingsAccess('owner', true)).toEqual({
       visibility: true,
       hideLiveStatus: true,
       editorsCanInvite: true,
@@ -28,7 +44,7 @@ describe('settingsAccess', () => {
     })
   })
   it('editor sees only draft and timezone', () => {
-    expect(settingsAccess('editor')).toEqual({
+    expect(settingsAccess('editor', true)).toEqual({
       visibility: false,
       hideLiveStatus: false,
       editorsCanInvite: false,
@@ -37,21 +53,40 @@ describe('settingsAccess', () => {
       timezone: true,
     })
   })
+  it('hides controls whose current value is unknown when settings are absent', () => {
+    expect(settingsAccess('owner', false)).toEqual({
+      visibility: true,
+      hideLiveStatus: false,
+      editorsCanInvite: false,
+      cover: true,
+      draft: false,
+      timezone: false,
+    })
+    expect(Object.values(settingsAccess('editor', false)).some(Boolean)).toBe(false)
+  })
   it('others see nothing', () => {
     for (const role of ['traveler', 'follower', '', undefined]) {
-      expect(Object.values(settingsAccess(role)).some(Boolean)).toBe(false)
+      expect(Object.values(settingsAccess(role, true)).some(Boolean)).toBe(false)
     }
   })
 })
 
+describe('formFromTrip', () => {
+  it('starts from the trip values, never assuming a visibility', () => {
+    expect(formFromTrip(original)).toEqual({
+      visibility: 'followers',
+      coverUrl: 'https://a.example/c.jpg',
+      timezone: 'Asia/Bangkok',
+      hideLiveStatus: false,
+      editorsCanInvite: false,
+      draft: false,
+    })
+    expect(formFromTrip({}).visibility).toBe('')
+  })
+})
+
 describe('buildSettingsPatch', () => {
-  const original = { visibility: 'followers', coverUrl: 'https://a.example/c.jpg' }
-  const base = {
-    visibility: 'followers',
-    coverUrl: 'https://a.example/c.jpg',
-    timezone: '',
-    ...keep,
-  }
+  const base = formFromTrip(original)
 
   it('is empty when nothing changed', () => {
     expect(buildSettingsPatch('owner', base, original)).toEqual({})
@@ -60,19 +95,20 @@ describe('buildSettingsPatch', () => {
     expect(
       buildSettingsPatch(
         'owner',
-        { ...base, visibility: 'private', hideLiveStatus: 'on', timezone: 'Asia/Tokyo' },
+        { ...base, visibility: 'private', hideLiveStatus: true, timezone: 'Asia/Tokyo' },
         original,
       ),
     ).toEqual({ visibility: 'private', hide_live_status: true, timezone: 'Asia/Tokyo' })
   })
-  it('maps off to false and clears the cover with an empty string', () => {
+  it('sends false when a flag is switched off and clears the cover with an empty string', () => {
+    const on = { ...original, settings: { ...settings, editorsCanInvite: true, isDraft: true } }
     expect(
       buildSettingsPatch(
         'owner',
-        { ...base, editorsCanInvite: 'off', draft: 'on', coverUrl: ' ' },
-        original,
+        { ...formFromTrip(on), editorsCanInvite: false, draft: false, coverUrl: ' ' },
+        on,
       ),
-    ).toEqual({ editors_can_invite: false, is_draft: true, cover_url: '' })
+    ).toEqual({ editors_can_invite: false, is_draft: false, cover_url: '' })
   })
   it('never sends owner-only fields for editors', () => {
     expect(
@@ -82,23 +118,37 @@ describe('buildSettingsPatch', () => {
           visibility: 'public',
           coverUrl: 'https://b.example/x.jpg',
           timezone: 'Asia/Seoul',
-          hideLiveStatus: 'on',
-          editorsCanInvite: 'on',
-          draft: 'off',
+          hideLiveStatus: true,
+          editorsCanInvite: true,
+          draft: true,
         },
         original,
       ),
-    ).toEqual({ timezone: 'Asia/Seoul', is_draft: false })
+    ).toEqual({ timezone: 'Asia/Seoul', is_draft: true })
+  })
+  it('sends nothing for settings that are unknown', () => {
+    const noSettings = { visibility: 'followers', coverUrl: '' }
+    expect(
+      buildSettingsPatch(
+        'owner',
+        { ...formFromTrip(noSettings), hideLiveStatus: true },
+        noSettings,
+      ),
+    ).toEqual({})
   })
 })
 
-describe('cover validation', () => {
-  it('accepts empty and https, rejects other schemes', async () => {
-    const { coverError } = await import('./trip-settings')
+describe('coverError', () => {
+  it('accepts empty and https, rejects other schemes', () => {
     expect(coverError('')).toBeNull()
     expect(coverError('https://a.example/x.png')).toBeNull()
     expect(coverError('http://a.example/x.png')).not.toBeNull()
     expect(coverError('javascript:alert(1)')).not.toBeNull()
+  })
+  it('limits the length in bytes, not characters', () => {
     expect(coverError('https://a.example/' + 'x'.repeat(2048))).not.toBeNull()
+    // 1000 two-byte characters fit in characters but not in bytes once the prefix is added.
+    expect(coverError('https://a.example/' + 'é'.repeat(1020))).not.toBeNull()
+    expect(coverError('https://a.example/' + 'x'.repeat(2000))).toBeNull()
   })
 })

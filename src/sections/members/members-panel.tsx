@@ -26,6 +26,8 @@ import type { InviteLink, MemberRole, MemberView } from '@/api/members/type'
 interface Props {
   slug: string
   role: string | undefined
+  // settings.editors_can_invite from the trip view (members only).
+  editorsCanInvite?: boolean
   // Refetch the trip view after a membership change.
   onChanged: () => void
 }
@@ -40,8 +42,8 @@ const expiryLabel = (iso: string) => {
   return `expires ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
 }
 
-export default function MembersPanel({ slug, role, onChanged }: Props) {
-  const controls = memberControls(role)
+export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }: Props) {
+  const controls = memberControls(role, editorsCanInvite)
   const { showToast } = useToast()
   const [members, setMembers] = useState<MemberView[]>([])
   const [links, setLinks] = useState<InviteLink[]>([])

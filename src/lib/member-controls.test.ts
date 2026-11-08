@@ -13,8 +13,8 @@ describe('memberControls', () => {
       revokeLinks: true,
     })
   })
-  it('editor can invite travelers only, create links but not revoke', () => {
-    expect(memberControls('editor')).toEqual({
+  it('editor can invite travelers only, create links but not revoke, when the trip allows it', () => {
+    expect(memberControls('editor', true)).toEqual({
       showPanel: true,
       manageMembers: false,
       invite: true,
@@ -22,6 +22,16 @@ describe('memberControls', () => {
       manageLinks: true,
       revokeLinks: false,
     })
+  })
+  it('editor sees the list only unless editors_can_invite is true', () => {
+    for (const flag of [false, undefined]) {
+      expect(memberControls('editor', flag)).toMatchObject({
+        showPanel: true,
+        invite: false,
+        manageLinks: false,
+        inviteRoles: [],
+      })
+    }
   })
   it('traveler sees the list only', () => {
     expect(memberControls('traveler')).toEqual({

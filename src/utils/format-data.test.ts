@@ -167,3 +167,27 @@ describe('toTripListFromMine', () => {
     expect(t).toMatchObject({ slug: 's', role: 'traveler', startDate: '2026-12-01' })
   })
 })
+
+describe('toTrip settings', () => {
+  const base = { id: 'j', slug: 's', title: 'T', destination: 'X', country: 'Y' } as JourneyView
+  it('maps the member-only settings', () => {
+    const trip = toTrip({
+      ...base,
+      settings: {
+        is_draft: true,
+        timezone: 'Asia/Tokyo',
+        hide_live_status: true,
+        editors_can_invite: false,
+      },
+    })
+    expect(trip.settings).toEqual({
+      isDraft: true,
+      timezone: 'Asia/Tokyo',
+      hideLiveStatus: true,
+      editorsCanInvite: false,
+    })
+  })
+  it('leaves settings undefined when the server omits them', () => {
+    expect(toTrip(base).settings).toBeUndefined()
+  })
+})

@@ -74,6 +74,14 @@ export interface LiveViewType {
   today_plans?: ActivityPlanType[]
 }
 
+// Only returned to members of the trip.
+export interface JourneySettingsType {
+  is_draft: boolean
+  timezone: string
+  hide_live_status: boolean
+  editors_can_invite: boolean
+}
+
 // GET /journeys/:slug. Fields marked optional may be missing; check `redacted` first.
 export interface JourneyView {
   id: string
@@ -94,6 +102,7 @@ export interface JourneyView {
   redacted?: boolean
   role?: string
   live?: LiveViewType
+  settings?: JourneySettingsType
   created_at?: string
   updated_at?: string
 }

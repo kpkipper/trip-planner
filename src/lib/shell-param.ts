@@ -25,3 +25,21 @@ export function slugFromPath(pathname: string, prefix: string): string | null {
 
   return value === SHELL_PARAM ? null : value
 }
+
+/**
+ * The param a shell page should render. Prerendered pages use their own `param`; for the
+ * `_shell` placeholder the real value comes from the router's pathname (it follows soft
+ * navigation) and falls back to the browser location when the router still reports the
+ * placeholder URL itself (Firebase rewrite). `undefined` while not hydrated.
+ */
+export function resolveShellParam(
+  param: string,
+  prefix: string,
+  hydrated: boolean,
+  routerPath: string | null,
+  locationPath: string,
+): string | null | undefined {
+  if (param !== SHELL_PARAM) return param
+  if (!hydrated) return undefined
+  return slugFromPath(routerPath ?? '', prefix) ?? slugFromPath(locationPath, prefix)
+}

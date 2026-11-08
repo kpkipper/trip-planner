@@ -101,11 +101,18 @@ export default function ProfileContent({ username }: { username: string }) {
   const router = useRouter()
   const { showToast } = useToast()
   const { status, user: me } = useAuth()
-  const [profile, setProfile] = useState<ProfileView | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  // The result is tagged with the username it was loaded for, so a new username shows the
+  // loading state instead of the previous profile.
+  const [result, setResult] = useState<{
+    username: string
+    profile?: ProfileView
+    error?: 'not-found' | 'failed'
+  } | null>(null)
+  const [attempt, setAttempt] = useState(0)
   const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
+  // The new username right after the owner renamed themselves (until navigation completes).
+  const [renamedTo, setRenamedTo] = useState<string | null>(null)
 
   // Re-load once auth is known: the token changes what the viewer is allowed to see.
   const authKey = status === 'loading' ? 'loading' : (me?.id ?? 'anon')
@@ -114,27 +121,21 @@ export default function ProfileContent({ username }: { username: string }) {
     let cancelled = false
     getProfile(username)
       .then((p) => {
-        if (cancelled) return
-        setProfile(p)
-        setNotFound(false)
+        if (!cancelled) setResult({ username, profile: p })
       })
       .catch((err) => {
         if (cancelled) return
-        const code = (err as { response?: { status?: number } }).response?.status
-        if (code !== 404) showToast('Could not load this profile', 'error')
-        setNotFound(true)
+        const notFound = (err as { response?: { status?: number } }).response?.status === 404
+        setResult({ username, error: notFound ? 'not-found' : 'failed' })
         console.error('Failed to load profile:', errorSummary(err))
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [username, authKey, showToast])
+  }, [username, authKey, attempt])
 
-  if (loading || status === 'loading') return <PageLoading />
-  if (notFound || !profile) {
+  if (status === 'loading' || !result || result.username !== username) return <PageLoading />
+  if (result.error === 'not-found') {
     return (
       <NotFound
         message="Profile not found"
@@ -142,8 +143,29 @@ export default function ProfileContent({ username }: { username: string }) {
       />
     )
   }
+  if (result.error || !result.profile) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-sm text-gray-600">Could not load this profile.</p>
+        <button
+          type="button"
+          onClick={() => {
+            setResult(null)
+            setAttempt((n) => n + 1)
+          }}
+          className="rounded-lg bg-[#0163a4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0470b9]"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+  const profile = result.profile
+  const setProfile = (p: ProfileView) => setResult({ username, profile: p })
 
-  const own = !!me && me.username === profile.user.username
+  const own =
+    !!me &&
+    (me.username === profile.user.username || (renamedTo !== null && me.username === renamedTo))
   const toggleFollow = async () => {
     if (!me) {
       router.push(loginPath(`/u/${profile.user.username}`))
@@ -177,8 +199,10 @@ export default function ProfileContent({ username }: { username: string }) {
           onClose={() => setEditing(false)}
           onSaved={(updated) => {
             setEditing(false)
-            if (updated.username !== profile.user.username) router.push(`/u/${updated.username}`)
-            else
+            if (updated.username !== profile.user.username) {
+              setRenamedTo(updated.username)
+              router.push(`/u/${updated.username}`)
+            } else
               setProfile({
                 ...profile,
                 user: {

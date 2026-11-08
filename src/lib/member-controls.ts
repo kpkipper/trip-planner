@@ -11,15 +11,19 @@ export interface MemberControls {
 
 // The API is the real gate (editors may only invite when the trip allows it; the trip view
 // does not expose that flag, so editors see the controls and a 403 is shown as a toast).
-export const memberControls = (role: string | undefined): MemberControls => {
+export const memberControls = (
+  role: string | undefined,
+  editorsCanInvite?: boolean,
+): MemberControls => {
   const owner = role === 'owner'
   const editor = role === 'editor'
-  const inviter = owner || editor
+  // Editors invite only when the owner allowed it (unknown counts as no).
+  const inviter = owner || (editor && editorsCanInvite === true)
   return {
     showPanel: owner || editor || role === 'traveler',
     manageMembers: owner,
     invite: inviter,
-    inviteRoles: owner ? ['traveler', 'editor'] : editor ? ['traveler'] : [],
+    inviteRoles: owner ? ['traveler', 'editor'] : inviter ? ['traveler'] : [],
     manageLinks: inviter,
     revokeLinks: owner,
   }

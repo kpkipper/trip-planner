@@ -102,6 +102,14 @@ export const toTrip = (journey: JourneyView): Trip => {
           todayPlans: live.today_plans?.map(toActivity),
         }
       : undefined,
+    settings: journey.settings
+      ? {
+          isDraft: journey.settings.is_draft,
+          timezone: journey.settings.timezone,
+          hideLiveStatus: journey.settings.hide_live_status,
+          editorsCanInvite: journey.settings.editors_can_invite,
+        }
+      : undefined,
     coverUrl: journey.cover_url || undefined,
     monthStart: journey.month_start,
     monthEnd: journey.month_end,

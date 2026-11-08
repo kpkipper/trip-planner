@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { slugFromPath } from './shell-param'
+import { resolveShellParam, slugFromPath } from './shell-param'
 
 describe('slugFromPath', () => {
   it('reads the segment after the prefix', () => {
@@ -37,5 +37,24 @@ describe('slugFromPath', () => {
     expect(slugFromPath('/plans/', '/plans')).toBeNull()
     expect(slugFromPath('/plansabc/x', '/plans')).toBeNull()
     expect(slugFromPath('', '/plans')).toBeNull()
+  })
+})
+
+describe('resolveShellParam', () => {
+  it('uses the prop for prerendered pages', () => {
+    expect(resolveShellParam('abc', '/plans', false, null, '')).toBe('abc')
+  })
+  it('is undefined before hydration in the shell', () => {
+    expect(resolveShellParam('_shell', '/u', false, '/u/alice', '/u/alice')).toBeUndefined()
+  })
+  it('follows the router pathname on soft navigation', () => {
+    expect(resolveShellParam('_shell', '/u', true, '/u/bob', '/u/alice')).toBe('bob')
+  })
+  it('falls back to the location when the router reports the placeholder', () => {
+    expect(resolveShellParam('_shell', '/u', true, '/u/_shell', '/u/alice')).toBe('alice')
+    expect(resolveShellParam('_shell', '/u', true, null, '/u/alice')).toBe('alice')
+  })
+  it('is null when neither has a value', () => {
+    expect(resolveShellParam('_shell', '/u', true, '/u/_shell', '/u/_shell')).toBeNull()
   })
 })

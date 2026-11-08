@@ -204,15 +204,20 @@ export default function TripViewContent({ slug }: { slug: string }) {
       )}
 
       <TripSettingsPanel
-        key={`${trip.visibility}|${trip.coverUrl}`}
         slug={slug}
         role={trip.role}
         visibility={trip.visibility}
         coverUrl={trip.coverUrl}
+        settings={trip.settings}
         onChanged={refresh}
       />
 
-      <MembersPanel slug={slug} role={trip.role} onChanged={refresh} />
+      <MembersPanel
+        slug={slug}
+        role={trip.role}
+        editorsCanInvite={trip.settings?.editorsCanInvite}
+        onChanged={refresh}
+      />
     </div>
   )
 }

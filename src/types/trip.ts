@@ -36,6 +36,13 @@ export interface TripLive {
   todayPlans?: Activity[]
 }
 
+export interface TripSettings {
+  isDraft: boolean
+  timezone: string
+  hideLiveStatus: boolean
+  editorsCanInvite: boolean
+}
+
 export interface Trip {
   id?: string
   slug?: string
@@ -51,6 +58,8 @@ export interface Trip {
   role?: string
   visibility?: string
   timezone?: string
+  // Members only; absent for followers and strangers.
+  settings?: TripSettings
   status?: JourneyStatusType
   owner?: TripPerson
   members?: TripMember[]
