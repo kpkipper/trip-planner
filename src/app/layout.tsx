@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Outfit } from 'next/font/google'
 
 import ClientLayout from '@/components/client-layout'
 import { siteConfig } from '@/config/site'
+import { AuthProvider } from '@/contexts/auth-context'
 import { ToastProvider } from '@/contexts/toast-context'
 import { TripsProvider } from '@/contexts/trips-context'
 
@@ -108,9 +109,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ToastProvider>
-          <TripsProvider>
-            <ClientLayout>{children}</ClientLayout>
-          </TripsProvider>
+          <AuthProvider>
+            <TripsProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </TripsProvider>
+          </AuthProvider>
         </ToastProvider>
       </body>
     </html>

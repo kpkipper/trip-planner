@@ -15,12 +15,32 @@ export const withAuthHeader = (
   return config
 }
 
+type FailedRequest = {
+  response?: { status?: number }
+  config?: { headers?: Record<string, unknown> & { get?: (name: string) => unknown } }
+} | null
+
+const sentToken = (error: FailedRequest): string | null => {
+  const headers = error?.config?.headers
+  const header =
+    typeof headers?.get === 'function' ? headers.get('Authorization') : headers?.Authorization
+  if (typeof header !== 'string' || !header.startsWith('Bearer ')) return null
+  return header.slice('Bearer '.length) || null
+}
+
+// A 401 only ends the session it was sent with. If the stored token changed since the
+// request left (a login replaced it, or logout cleared it), the 401 is about an old session
+// and must not wipe the new one or bounce the user to the login page.
 export const handleUnauthorized = (
   error: unknown,
-  deps: { clearToken: () => void; dispatch: (eventName: string) => void },
+  deps: {
+    clearToken: () => void
+    dispatch: (eventName: string) => void
+    getToken: () => string | null
+  },
 ): Promise<never> => {
-  const status = (error as { response?: { status?: number } } | null)?.response?.status
-  if (status === 401) {
+  const failed = error as FailedRequest
+  if (failed?.response?.status === 401 && sentToken(failed) === deps.getToken()) {
     deps.clearToken()
     deps.dispatch(UNAUTHORIZED_EVENT)
   }
@@ -43,6 +63,7 @@ apiClient.interceptors.response.use(
   (error) =>
     handleUnauthorized(error, {
       clearToken,
+      getToken,
       dispatch: (name) => {
         if (isBrowser()) window.dispatchEvent(new Event(name))
       },

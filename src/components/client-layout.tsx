@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 
+import { usePathname } from 'next/navigation'
+
 import { Menu } from 'lucide-react'
 
 import Logo from './logo'
@@ -10,6 +12,14 @@ import Sidebar from './sidebar'
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+  const [openedAt, setOpenedAt] = useState(pathname)
+
+  // Close the mobile sidebar after navigating (e.g. Log in, Create Plan, Profile).
+  if (openedAt !== pathname) {
+    setOpenedAt(pathname)
+    setMobileOpen(false)
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
