@@ -11,7 +11,7 @@ import { SHELL_PARAM } from './shell-param'
 export async function tripStaticParams(): Promise<Array<{ slug: string }>> {
   try {
     const { data } = await getJourneys()
-    const slugs = data.flatMap((country) => country.plan.map((trip) => trip.slug))
+    const slugs = data.flatMap((country) => (country.plan ?? []).map((trip) => trip.slug))
     return [...slugs.filter((s) => s !== SHELL_PARAM), SHELL_PARAM].map((slug) => ({ slug }))
   } catch (err) {
     console.error('generateStaticParams: failed to load journeys:', errorSummary(err))

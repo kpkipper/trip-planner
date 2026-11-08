@@ -10,6 +10,9 @@ import { toTrip } from '@/utils/format-data'
 
 import type { Metadata } from 'next'
 
+// Prerendered pages outlive a trip's visibility (a trip made private after the build keeps
+// its page until the next deploy), so only title, place and cover are baked in: no dates and
+// no day count in the description, JSON-LD or OG image.
 // Cached so generateMetadata and the page render share a single fetch per slug.
 const getTrip = cache(async (slug: string) => {
   const { data } = await getJourneyBySlug(slug)
@@ -30,10 +33,8 @@ export async function generateMetadata({
     const trip = await getTrip(slug)
     const place = [trip.destination, trip.country].filter(Boolean).join(', ')
     const title = trip.title || 'Trip Plan'
-    const dayCount = trip.days?.length ?? 0
     const description =
       `${title}${place ? ` — a travel itinerary for ${place}` : ''}. ` +
-      `${dayCount ? `A ${dayCount}-day plan. ` : ''}` +
       `Plan and explore your trip with ${siteConfig.name}.`
     const url = `/plans/${slug}`
 
@@ -65,8 +66,6 @@ export default async function TripPage({ params }: { params: Promise<{ slug: str
         name: trip.title,
         description: [trip.destination, trip.country].filter(Boolean).join(', '),
         url: `${siteConfig.url}/plans/${slug}`,
-        ...(trip.startDate ? { startDate: trip.startDate } : {}),
-        ...(trip.endDate ? { endDate: trip.endDate } : {}),
         ...(trip.country
           ? { touristType: 'Leisure', itinerary: { '@type': 'Place', name: trip.country } }
           : {}),

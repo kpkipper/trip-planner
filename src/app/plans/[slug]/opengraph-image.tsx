@@ -12,6 +12,7 @@ export const alt = `Trip itinerary on ${siteConfig.name}`
 
 export const generateStaticParams = tripStaticParams
 
+// Title and place only (no dates), see the note in page.tsx.
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 

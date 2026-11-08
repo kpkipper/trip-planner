@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data } = await getJourneys()
     trips = data.flatMap((country) =>
-      country.plan
+      (country.plan ?? [])
         .filter((trip) => trip.slug !== SHELL_PARAM)
         .map((trip) => ({
           url: `${siteConfig.url}/plans/${trip.slug}`,

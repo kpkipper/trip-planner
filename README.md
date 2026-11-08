@@ -32,3 +32,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Static pages & privacy
+
+The app is a static export served by Firebase Hosting. Public trips are prerendered at build time (page, Open Graph image, sitemap entry); only the title, destination/country and cover are baked in, never dates or day counts.
+
+- A trip made private (or deleted) after a build keeps its prerendered page, OG image and sitemap entry until the next deploy. Visibility changes and deletes need a redeploy to remove them.
+- A trip made public after a build is served by the client shell (`_shell`): `noindex`, generic OG image, until the next build prerenders it.
+- Private and unknown trips are always loaded in the browser with the viewer's token, so the API stays the real access gate.
+
+## Local development notes
+
+`next dev` cannot open trips that were not returned by `generateStaticParams` (`output: 'export'`). To test new or private trips locally, build and serve the real output, where the Firebase rewrites route them to the shells:
+
+```bash
+pnpm build
+firebase serve --only hosting
+```
