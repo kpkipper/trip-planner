@@ -124,7 +124,18 @@ export function useTripView(slug: string) {
     }
   }
 
+  // Silent refetch after a membership change (keeps the selected day, no loading screen).
+  const refresh = async () => {
+    try {
+      const res = await getJourneyBySlug(slug)
+      if (!classifyLoadError(undefined, res)) setTrip(toTrip(res.data))
+    } catch (err) {
+      console.error('Failed to refresh trip:', errorSummary(err))
+    }
+  }
+
   return {
+    refresh,
     trip,
     selectedDayIndex,
     setSelectedDayIndex,

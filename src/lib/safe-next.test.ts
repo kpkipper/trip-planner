@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { loginPath, safeNext } from './safe-next'
 
 describe('safeNext', () => {
+  it('accepts an invite link path so login can return to it', () => {
+    expect(safeNext('/join/abc_DEF-123')).toBe('/join/abc_DEF-123')
+    expect(loginPath('/join/abc_DEF-123')).toBe('/login?next=%2Fjoin%2Fabc_DEF-123')
+  })
+
   it('accepts same-origin relative paths', () => {
     expect(safeNext('/plans/tokyo')).toBe('/plans/tokyo')
     expect(safeNext('/plans/create?x=1#top')).toBe('/plans/create?x=1#top')

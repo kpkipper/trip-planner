@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import { Inbox, LogIn, LogOut, UserRound } from 'lucide-react'
 
 import { useAuth } from '@/contexts/auth-context'
+import { useInvites } from '@/contexts/invites-context'
 import { loginPath } from '@/lib/safe-next'
 
 import UserAvatar from './user-avatar'
@@ -22,6 +23,8 @@ const itemClass =
 export default function AccountMenu({ collapsed }: Props) {
   const pathname = usePathname()
   const { status, user, logout } = useAuth()
+  const { invites } = useInvites()
+  const inviteCount = invites.length
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -60,10 +63,17 @@ export default function AccountMenu({ collapsed }: Props) {
         className={`flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 hover:bg-gray-100 transition-colors ${
           collapsed ? 'justify-center' : ''
         }`}
-        aria-label="Account menu"
+        aria-label={
+          inviteCount > 0 ? `Account menu, ${inviteCount} pending invites` : 'Account menu'
+        }
         aria-expanded={menuOpen}
       >
-        <UserAvatar user={user} size={28} />
+        <span className="relative flex-shrink-0">
+          <UserAvatar user={user} size={28} />
+          {inviteCount > 0 && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+          )}
+        </span>
         {!collapsed && (
           <span className="flex-1 min-w-0 text-left">
             <span className="block text-sm font-medium text-gray-700 truncate">
@@ -91,6 +101,11 @@ export default function AccountMenu({ collapsed }: Props) {
           <Link href="/invites" onClick={close} className={itemClass}>
             <Inbox size={14} />
             Invites
+            {inviteCount > 0 && (
+              <span className="ml-auto rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">
+                {inviteCount}
+              </span>
+            )}
           </Link>
           <div className="border-t border-gray-100" />
           <button

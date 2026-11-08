@@ -5,6 +5,7 @@ import PageLoading from '@/components/page-loading'
 import { useShellParam } from '@/lib/use-shell-param'
 
 import CreateEditContent from './create-edit-content/create-edit-content'
+import JoinContent from './join/join-content'
 import TripViewContent from './view-content/trip-view-content'
 
 // Each wrapper resolves the real route param: prerendered pages get it as a
@@ -40,9 +41,5 @@ export function JoinShell({ token }: { token: string }) {
   const value = useShellParam(token, '/join')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold">Invite link coming soon</h1>
-    </div>
-  )
+  return <JoinContent token={value} />
 }

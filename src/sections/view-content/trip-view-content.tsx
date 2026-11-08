@@ -14,6 +14,7 @@ import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 import { safeHttpsUrl } from '@/lib/safe-url'
 import { liveLabel } from '@/lib/trip-status'
+import MembersPanel from '@/sections/members/members-panel'
 
 import MembersRow from './members-row'
 import StatusBadge from './status-badge'
@@ -37,6 +38,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
     leaveOpen,
     setLeaveOpen,
     handleLeave,
+    refresh,
   } = useTripView(slug)
 
   if (loading || deleting) return <PageLoading />
@@ -199,6 +201,8 @@ export default function TripViewContent({ slug }: { slug: string }) {
           )}
         </>
       )}
+
+      <MembersPanel slug={slug} role={trip.role} onChanged={refresh} />
     </div>
   )
 }
