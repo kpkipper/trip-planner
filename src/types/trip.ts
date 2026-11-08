@@ -50,6 +50,7 @@ export interface Trip {
   redacted?: boolean
   role?: string
   visibility?: string
+  timezone?: string
   status?: JourneyStatusType
   owner?: TripPerson
   members?: TripMember[]

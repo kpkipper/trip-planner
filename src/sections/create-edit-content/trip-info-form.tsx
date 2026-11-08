@@ -1,3 +1,5 @@
+import { VISIBILITY_OPTIONS } from '@/lib/trip-settings'
+
 import { Autocomplete } from './helper'
 import { COUNTRY_NAMES } from './helper'
 
@@ -8,6 +10,9 @@ interface TripInfoFormProps {
   startDate: string
   endDate: string
   errors: Record<string, string>
+  // Only passed on create; the visibility of an existing trip is changed in its settings.
+  visibility?: string
+  onVisibilityChange: (v: string) => void
   destinationOptions: string[]
   onTitleChange: (v: string) => void
   onCountryChange: (v: string) => void
@@ -23,6 +28,8 @@ export default function TripInfoForm({
   startDate,
   endDate,
   errors,
+  visibility,
+  onVisibilityChange,
   destinationOptions,
   onTitleChange,
   onCountryChange,
@@ -108,6 +115,23 @@ export default function TripInfoForm({
             {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
           </div>
         </div>
+
+        {visibility !== undefined && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+            <select
+              value={visibility}
+              onChange={(e) => onVisibilityChange(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+            >
+              {VISIBILITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label} — {o.description}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
     </div>
   )

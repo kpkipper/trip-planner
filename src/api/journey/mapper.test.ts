@@ -42,4 +42,17 @@ describe('toJourneyPayload', () => {
     })
     expect(payload.visibility).toBeUndefined()
   })
+
+  it('sends the timezone when set and omits it otherwise', () => {
+    const base = {
+      title: 'T',
+      destination: 'Tokyo',
+      country: 'Japan',
+      startDate: '',
+      endDate: '',
+      days: [],
+    }
+    expect(toJourneyPayload({ ...base, timezone: 'Asia/Tokyo' }).timezone).toBe('Asia/Tokyo')
+    expect(toJourneyPayload(base).timezone).toBeUndefined()
+  })
 })

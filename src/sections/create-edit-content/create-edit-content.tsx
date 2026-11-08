@@ -14,6 +14,8 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
     title,
     destination,
     country,
+    visibility,
+    setVisibility,
     startDate,
     endDate,
     days,
@@ -61,6 +63,8 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
         startDate={startDate}
         endDate={endDate}
         errors={errors}
+        visibility={slugProp ? undefined : visibility}
+        onVisibilityChange={setVisibility}
         destinationOptions={destinationOptions}
         onTitleChange={onTitleChange}
         onCountryChange={onCountryChange}

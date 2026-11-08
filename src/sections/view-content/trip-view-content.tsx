@@ -15,6 +15,7 @@ import PageLoading from '@/components/page-loading'
 import { safeHttpsUrl } from '@/lib/safe-url'
 import { liveLabel } from '@/lib/trip-status'
 import MembersPanel from '@/sections/members/members-panel'
+import TripSettingsPanel from '@/sections/settings/trip-settings-panel'
 
 import MembersRow from './members-row'
 import StatusBadge from './status-badge'
@@ -201,6 +202,15 @@ export default function TripViewContent({ slug }: { slug: string }) {
           )}
         </>
       )}
+
+      <TripSettingsPanel
+        key={`${trip.visibility}|${trip.coverUrl}`}
+        slug={slug}
+        role={trip.role}
+        visibility={trip.visibility}
+        coverUrl={trip.coverUrl}
+        onChanged={refresh}
+      />
 
       <MembersPanel slug={slug} role={trip.role} onChanged={refresh} />
     </div>

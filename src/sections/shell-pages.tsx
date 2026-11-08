@@ -6,6 +6,7 @@ import { useShellParam } from '@/lib/use-shell-param'
 
 import CreateEditContent from './create-edit-content/create-edit-content'
 import JoinContent from './join/join-content'
+import ProfileContent from './profile/profile-content'
 import TripViewContent from './view-content/trip-view-content'
 
 // Each wrapper resolves the real route param: prerendered pages get it as a
@@ -29,12 +30,7 @@ export function ProfileShell({ username }: { username: string }) {
   const value = useShellParam(username, '/u')
   if (value === undefined) return <PageLoading />
   if (value === null) return <NotFound />
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold">Profile coming soon</h1>
-      <p className="text-gray-600">@{value}</p>
-    </div>
-  )
+  return <ProfileContent username={value} />
 }
 
 export function JoinShell({ token }: { token: string }) {

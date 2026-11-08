@@ -7,6 +7,13 @@ export interface JourneyPatchBody {
   country?: string
   departure_date?: string
   return_date?: string
+  cover_url?: string
+  // visibility, hide_live_status and editors_can_invite are owner-only.
+  visibility?: string
+  hide_live_status?: boolean
+  editors_can_invite?: boolean
+  is_draft?: boolean
+  timezone?: string
 }
 
 export interface DayBody {

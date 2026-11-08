@@ -8,6 +8,7 @@ import { createJourney, getJourneyBySlug } from '@/api/journey'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { classifyLoadError } from '@/lib/load-error'
+import { guessTimezone } from '@/lib/timezone'
 import { toTrip } from '@/utils/format-data'
 
 import { ALL_COUNTRIES, generateDays, uid } from './helper'
@@ -31,6 +32,7 @@ export function useTripForm(slugProp?: string) {
   const [title, setTitle] = useState('')
   const [destination, setDestination] = useState('')
   const [country, setCountry] = useState('')
+  const [visibility, setVisibility] = useState('followers')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [days, setDays] = useState<TripDay[]>([])
@@ -374,7 +376,16 @@ export function useTripForm(slugProp?: string) {
       if (slugProp) {
         await saveEdits(slugProp, cleanDays)
       } else {
-        const trip: Trip = { title, destination, country, startDate, endDate, days: cleanDays }
+        const trip: Trip = {
+          title,
+          destination,
+          country,
+          startDate,
+          endDate,
+          days: cleanDays,
+          visibility,
+          timezone: guessTimezone(country),
+        }
         const { data } = await createJourney(trip)
         showToast('Trip created successfully!')
         router.push(`/plans/${data.slug}`)
@@ -392,6 +403,8 @@ export function useTripForm(slugProp?: string) {
     title,
     destination,
     country,
+    visibility,
+    setVisibility,
     startDate,
     endDate,
     days,

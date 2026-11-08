@@ -12,6 +12,7 @@ export const toJourneyPayload = (trip: Trip) => ({
   departure_date: toISODate(trip.startDate),
   return_date: toISODate(trip.endDate),
   visibility: trip.visibility || undefined,
+  timezone: trip.timezone || undefined,
   itinerary_days: trip.days.map((day) => ({
     date: day.date,
     date_iso: toISODate(day.dateISO),
