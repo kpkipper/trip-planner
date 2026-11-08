@@ -31,14 +31,6 @@ export const createJourney = async (trip: Trip) => {
   return data
 }
 
-export const updateJourney = async (slug: string, trip: Trip) => {
-  const { data } = await apiClient.put<Response>(
-    `/api/v1/journeys/${encodeURIComponent(slug)}/update`,
-    toJourneyPayload(trip),
-  )
-  return data
-}
-
 export const deleteJourney = async (slug: string) => {
   const { data } = await apiClient.delete<Response>(`/api/v1/journeys/${encodeURIComponent(slug)}`)
   return data

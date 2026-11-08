@@ -5,6 +5,16 @@ import { TimeAutocomplete } from './helper'
 import type { Activity } from '@/types/trip'
 import type { DragEvent } from 'react'
 
+// API plan categories. "stay" plans are hidden from people outside the trip.
+const CATEGORY_OPTIONS = [
+  { value: '', label: 'No category' },
+  { value: 'stay', label: 'Stay (members only)' },
+  { value: 'food', label: 'Food' },
+  { value: 'sight', label: 'Sight' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'other', label: 'Other' },
+]
+
 interface ActivityRowProps {
   act: Activity
   aIdx: number
@@ -48,6 +58,18 @@ export default function ActivityRow({
           <GripVertical size={16} />
         </span>
         <TimeAutocomplete value={act.time} onChange={(v) => onUpdate('time', v)} />
+        <select
+          value={act.category ?? ''}
+          onChange={(e) => onUpdate('category', e.target.value)}
+          aria-label="Category"
+          className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+        >
+          {CATEGORY_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
         <div className="flex-1" />
         <button
           onClick={() => onMove('up')}

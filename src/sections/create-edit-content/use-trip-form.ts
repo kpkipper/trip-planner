@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation'
 
 import { State } from 'country-state-city'
 
-import { createJourney, getJourneyBySlug, updateJourney } from '@/api/journey'
+import { createJourney, getJourneyBySlug } from '@/api/journey'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { classifyLoadError } from '@/lib/load-error'
 import { toTrip } from '@/utils/format-data'
 
 import { ALL_COUNTRIES, generateDays, uid } from './helper'
+import { describeOp, dropEmptyNewActivities, findBlankActivity, planSync, runSync } from './sync'
 
 import type { Activity, Trip, TripDay } from '@/types/trip'
 import type { DragEvent } from 'react'
@@ -34,6 +35,9 @@ export function useTripForm(slugProp?: string) {
 
   const dragItem = useRef<{ dayId: string; index: number } | null>(null)
   const savingRef = useRef(false)
+  // The trip as loaded at edit start. Saves diff against this (never a fresh fetch), so
+  // days/plans other people add meanwhile are unknown to the diff and never deleted.
+  const originalRef = useRef<Trip | null>(null)
 
   const destinationOptions = useMemo(() => {
     const isoCode = ALL_COUNTRIES.find((c) => c.name === country)?.isoCode
@@ -49,6 +53,7 @@ export function useTripForm(slugProp?: string) {
   }, [country])
 
   const applyTrip = useCallback((trip: Trip) => {
+    originalRef.current = structuredClone(trip)
     setTitle(trip.title)
     setDestination(trip.destination)
     setCountry(trip.country)
@@ -97,10 +102,18 @@ export function useTripForm(slugProp?: string) {
     loadTrip(slugProp)
   }, [slugProp, loadTrip])
 
-  // Rebuild the day list when the user changes the date range (keeps existing days).
+  // Rebuild the day list when the user changes the date range (keeps existing days). A
+  // loaded day that was dropped and comes back is restored, so it keeps its server id.
   const regenerateDays = (start: string, end: string) => {
     if (!start || !end || start > end) return
-    setDays((prev) => generateDays(start, end, prev))
+    setDays((prev) => {
+      const inForm = new Set(prev.flatMap((d) => d.activities.map((a) => a.id)))
+      const loaded = (originalRef.current?.days ?? []).map((d) => ({
+        ...d,
+        activities: d.activities.filter((a) => !inForm.has(a.id)),
+      }))
+      return generateDays(start, end, [...prev, ...loaded])
+    })
   }
 
   const clearError = (key: string) => {
@@ -156,7 +169,10 @@ export function useTripForm(slugProp?: string) {
         d.id === dayId
           ? {
               ...d,
-              activities: [...d.activities, { id: uid(), time: '', description: '', mapUrl: '' }],
+              activities: [
+                ...d.activities,
+                { id: uid(), time: '', description: '', mapUrl: '', category: '' },
+              ],
             }
           : d,
       ),
@@ -241,37 +257,69 @@ export function useTripForm(slugProp?: string) {
     return Object.keys(errs).length === 0
   }
 
+  const serverPlanIds = () =>
+    new Set(originalRef.current?.days.flatMap((d) => d.activities.map((a) => a.id)) ?? [])
+
+  const finishSaving = () => {
+    savingRef.current = false
+    setSaving(false)
+  }
+
+  const saveEdits = async (slug: string, cleanDays: TripDay[]) => {
+    const original = originalRef.current
+    if (!original) return finishSaving()
+    const edited: Trip = {
+      ...original,
+      title,
+      destination,
+      country,
+      startDate,
+      endDate,
+      days: cleanDays,
+    }
+    const ops = planSync(original, edited)
+    const result = await runSync(slug, ops)
+    if (!result.ok) {
+      const reason = (result.error as { response?: { data?: { message?: unknown } } }).response
+        ?.data?.message
+      showToast(
+        `Couldn't save (stopped while ${describeOp(result.op)}${
+          typeof reason === 'string' && reason ? `: ${reason}` : ''
+        }). Showing the latest version.`,
+        'error',
+      )
+      console.error('Trip sync failed:', result.op.type, errorSummary(result.error))
+      await loadTrip(slug)
+      return finishSaving()
+    }
+    showToast(ops.length ? 'Trip updated successfully!' : 'No changes to save')
+    router.push(`/plans/${slug}`)
+  }
+
   const handleSave = async () => {
     if (savingRef.current || !validate()) return
+    const cleanDays = dropEmptyNewActivities(days, serverPlanIds())
+    const blank = findBlankActivity(cleanDays)
+    if (blank) {
+      showToast(`Day ${blank.dayIndex + 1}: every activity needs a description`, 'error')
+      setExpandedDays((prev) => new Set(prev).add(cleanDays[blank.dayIndex].id))
+      return
+    }
     savingRef.current = true
     setSaving(true)
     try {
       if (slugProp) {
-        const { code } = await updateJourney(slugProp, {
-          title,
-          destination,
-          country,
-          startDate,
-          endDate,
-          days,
-        })
-        if (code === 'JOURNEY-404000') {
-          showToast('Trip not found', 'error')
-          savingRef.current = false
-          setSaving(false)
-          return
-        }
-        showToast('Trip updated successfully!')
-        router.push(`/plans/${slugProp}`)
+        await saveEdits(slugProp, cleanDays)
       } else {
-        const trip: Trip = { id: uid(), title, destination, country, startDate, endDate, days }
+        const trip: Trip = { title, destination, country, startDate, endDate, days: cleanDays }
         const { data } = await createJourney(trip)
         showToast('Trip created successfully!')
         router.push(`/plans/${data.slug}`)
       }
-    } catch {
-      savingRef.current = false
-      setSaving(false)
+    } catch (err) {
+      showToast('Something went wrong while saving', 'error')
+      console.error('Failed to save trip:', errorSummary(err))
+      finishSaving()
     }
   }
 
