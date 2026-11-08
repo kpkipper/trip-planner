@@ -2,22 +2,31 @@
 
 import { createContext, useCallback, useContext, useState } from 'react'
 
-import AppSnackbar from '@/components/snackbar'
+import AppSnackbar, { type SnackbarAction } from '@/components/snackbar'
 
 interface ToastContextValue {
-  showToast: (message: string, severity?: 'success' | 'error') => void
+  showToast: (
+    message: string,
+    severity?: 'success' | 'error',
+    options?: { action?: SnackbarAction },
+  ) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(
-    null,
-  )
+  const [toast, setToast] = useState<{
+    message: string
+    severity: 'success' | 'error'
+    action?: SnackbarAction
+  } | null>(null)
 
-  const showToast = useCallback((message: string, severity: 'success' | 'error' = 'success') => {
-    setToast({ message, severity })
-  }, [])
+  const showToast = useCallback<ToastContextValue['showToast']>(
+    (message, severity = 'success', options) => {
+      setToast({ message, severity, action: options?.action })
+    },
+    [],
+  )
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -26,6 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         open={!!toast}
         message={toast?.message ?? ''}
         severity={toast?.severity}
+        action={toast?.action}
         onClose={() => setToast(null)}
       />
     </ToastContext.Provider>

@@ -4,33 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Country } from 'country-state-city'
 
-import type { TripDay } from '@/types/trip'
-
-export function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
-
-function formatDateDisplay(isoDate: string): string {
-  const d = new Date(isoDate + 'T12:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' })
-}
-
-export function generateDays(startDate: string, endDate: string, existing: TripDay[]): TripDay[] {
-  const days: TripDay[] = []
-  const start = new Date(startDate + 'T12:00:00')
-  const end = new Date(endDate + 'T12:00:00')
-  const cur = new Date(start)
-  let i = 0
-  while (cur <= end && i < 60) {
-    const dateISO = cur.toISOString().split('T')[0]
-    const dateDisplay = formatDateDisplay(dateISO)
-    const prev = existing.find((d) => d.dateISO === dateISO)
-    days.push(prev ?? { id: uid(), date: dateDisplay, dateISO, title: dateDisplay, activities: [] })
-    cur.setDate(cur.getDate() + 1)
-    i++
-  }
-  return days
-}
+export { generateDays, uid } from './days'
 
 export const ALL_COUNTRIES = Country.getAllCountries()
 export const COUNTRY_NAMES = ALL_COUNTRIES.map((c: { name: string }) => c.name)

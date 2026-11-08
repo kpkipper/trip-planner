@@ -81,6 +81,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
               dayIdx={idx}
               isExpanded={expandedDays.has(day.id)}
               dragOver={dragOver}
+              errors={errors}
               onToggle={() => toggleDay(day.id)}
               onUpdateTitle={(t) => updateDayTitle(day.id, t)}
               onAddActivity={() => addActivity(day.id)}

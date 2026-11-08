@@ -159,6 +159,9 @@ export type SyncApi = Pick<
   | 'reorderPlans'
 >
 
+const httpStatus = (error: unknown) =>
+  (error as { response?: { status?: number } } | null)?.response?.status
+
 export type SyncResult = { ok: true } | { ok: false; index: number; op: SyncOp; error: unknown }
 
 // Runs ops one by one; stops at the first failure (the caller reloads the trip).
@@ -215,6 +218,9 @@ export async function runSync(
           break
       }
     } catch (error) {
+      // Deleting something that is already gone is the outcome we wanted.
+      if ((op.type === 'deletePlan' || op.type === 'deleteDay') && httpStatus(error) === 404)
+        continue
       return { ok: false, index, op, error }
     }
   }
@@ -245,11 +251,108 @@ export const dropEmptyNewActivities = (days: TripDay[], serverPlanIds: Set<strin
     activities: d.activities.filter((a) => serverPlanIds.has(a.id) || !isEmptyActivity(a)),
   }))
 
-// The API requires a description on every plan.
-export const findBlankActivity = (days: TripDay[]) => {
-  for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
-    const activityIndex = days[dayIndex].activities.findIndex((a) => !a.description?.trim())
-    if (activityIndex !== -1) return { dayIndex, activityIndex }
+const MAX_URL_BYTES = 2048
+
+// Mirrors the backend's map_url rule: empty is fine; a value without a scheme (and no
+// "host:port" head) gets https:// prefixed; then only http(s) with a host, at most 2048
+// bytes. Returns the normalized URL, or null when the backend would reject it.
+export const normalizeMapUrl = (raw: string): string | null => {
+  let s = raw
+  if (s === '') return ''
+  if (!s.includes('://') && !s.split('/')[0].includes(':')) s = `https://${s}`
+  if (new TextEncoder().encode(s).length > MAX_URL_BYTES) return null
+  // WHATWG URL is laxer than Go's url.Parse (e.g. "http:///x"), so check the shape first.
+  if (!/^https?:\/\/[^/\\?#\s]+/i.test(s)) return null
+  try {
+    const u = new URL(s)
+    if ((u.protocol !== 'http:' && u.protocol !== 'https:') || !u.host) return null
+  } catch {
+    return null
   }
-  return null
+  return s
+}
+
+export const activityErrorKey = (id: string, field: 'description' | 'mapUrl') =>
+  `activity.${id}.${field}`
+
+// Field errors for plans the API would reject. Only new plans and fields the user changed
+// are checked, so untouched legacy plans (blank or odd data) never block a save.
+// `original` is the edit snapshot, or null when creating.
+export const validateActivities = (
+  days: TripDay[],
+  original: Trip | null,
+): Record<string, string> => {
+  const before = new Map<string, Activity>()
+  for (const d of original?.days ?? []) for (const a of d.activities) before.set(a.id, a)
+  const errors: Record<string, string> = {}
+  for (const d of days)
+    for (const a of d.activities) {
+      const o = before.get(a.id)
+      if ((!o || a.description !== o.description) && !a.description?.trim())
+        errors[activityErrorKey(a.id, 'description')] = 'Description is required'
+      const url = a.mapUrl ?? ''
+      if ((!o || url !== (o.mapUrl ?? '')) && normalizeMapUrl(url) === null)
+        errors[activityErrorKey(a.id, 'mapUrl')] = 'Enter an http(s) link'
+    }
+  return errors
+}
+
+// Preflight, run against a fresh GET right before any write. Returns problems (empty =
+// safe to sync). Each one means someone else changed something our ops depend on:
+// (a) a day we reorder must still hold exactly its snapshot plans (our computed order
+//     assumes it, and the API wants the exact set);
+// (b) a day we delete may only hold snapshot plans of that day (deleting it cascades);
+// (c) every server id we update, add to, move or reorder must still exist. Delete targets
+//     are exempt: already gone is fine (a 404 on delete counts as success).
+export const checkPreconditions = (original: Trip, fresh: Trip, ops: SyncOp[]): string[] => {
+  const planIds = (t: Trip) =>
+    new Map(t.days.map((d) => [d.id, new Set(d.activities.map((a) => a.id))]))
+  const snap = planIds(original)
+  const now = planIds(fresh)
+  const freshPlans = new Set([...now.values()].flatMap((ids) => [...ids]))
+  const problems = new Set<string>()
+  const needDay = (id: string) => {
+    if (!now.has(id)) problems.add(`missing:${id}`)
+  }
+  const needPlan = (id: string) => {
+    if (!freshPlans.has(id)) problems.add(`missing:${id}`)
+  }
+  const needRef = (ref: Ref, kind: 'day' | 'plan') => {
+    if ('server' in ref) (kind === 'day' ? needDay : needPlan)(ref.server)
+  }
+  const sameSet = (a: Set<string>, b: Set<string>) =>
+    a.size === b.size && [...a].every((id) => b.has(id))
+
+  for (const op of ops) {
+    switch (op.type) {
+      case 'updateDay':
+        needDay(op.dayId)
+        break
+      case 'addPlan':
+        needRef(op.day, 'day')
+        break
+      case 'updatePlan':
+        needPlan(op.planId)
+        if (op.moveTo) needRef(op.moveTo, 'day')
+        break
+      case 'reorder': {
+        needRef(op.day, 'day')
+        op.plans.forEach((p) => needRef(p, 'plan'))
+        if ('server' in op.day) {
+          const current = now.get(op.day.server)
+          if (current && !sameSet(current, snap.get(op.day.server) ?? new Set()))
+            problems.add(`reorder:${op.day.server}`)
+        }
+        break
+      }
+      case 'deleteDay': {
+        const current = now.get(op.dayId)
+        const allowed = snap.get(op.dayId) ?? new Set<string>()
+        if (current && [...current].some((id) => !allowed.has(id)))
+          problems.add(`deleteDay:${op.dayId}`)
+        break
+      }
+    }
+  }
+  return [...problems]
 }

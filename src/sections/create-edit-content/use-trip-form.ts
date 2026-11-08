@@ -11,7 +11,15 @@ import { classifyLoadError } from '@/lib/load-error'
 import { toTrip } from '@/utils/format-data'
 
 import { ALL_COUNTRIES, generateDays, uid } from './helper'
-import { describeOp, dropEmptyNewActivities, findBlankActivity, planSync, runSync } from './sync'
+import {
+  activityErrorKey,
+  checkPreconditions,
+  describeOp,
+  dropEmptyNewActivities,
+  planSync,
+  runSync,
+  validateActivities,
+} from './sync'
 
 import type { Activity, Trip, TripDay } from '@/types/trip'
 import type { DragEvent } from 'react'
@@ -190,6 +198,7 @@ export function useTripForm(slugProp?: string) {
           : d,
       ),
     )
+    if (field === 'description' || field === 'mapUrl') clearError(activityErrorKey(actId, field))
   }
 
   const removeActivity = (dayId: string, actId: string) => {
@@ -244,7 +253,7 @@ export function useTripForm(slugProp?: string) {
     setDragOver(null)
   }
 
-  const validate = () => {
+  const validate = (cleanDays: TripDay[]) => {
     const errs: Record<string, string> = {}
     if (!title.trim()) errs.title = 'Trip title is required'
     if (!destination.trim()) errs.destination = 'Destination is required'
@@ -253,8 +262,20 @@ export function useTripForm(slugProp?: string) {
     if (!endDate) errs.endDate = 'End date is required'
     if (startDate && endDate && startDate > endDate)
       errs.endDate = 'End date must be after start date'
-    setErrors(errs)
-    return Object.keys(errs).length === 0
+    const activityErrs = validateActivities(cleanDays, originalRef.current)
+    if (Object.keys(activityErrs).length > 0) {
+      const badDays = cleanDays.filter((d) =>
+        d.activities.some(
+          (a) =>
+            activityErrs[activityErrorKey(a.id, 'description')] ||
+            activityErrs[activityErrorKey(a.id, 'mapUrl')],
+        ),
+      )
+      setExpandedDays((prev) => new Set([...prev, ...badDays.map((d) => d.id)]))
+      showToast('Some activities need fixing before saving', 'error')
+    }
+    setErrors({ ...errs, ...activityErrs })
+    return Object.keys(errs).length === 0 && Object.keys(activityErrs).length === 0
   }
 
   const serverPlanIds = () =>
@@ -264,6 +285,14 @@ export function useTripForm(slugProp?: string) {
     savingRef.current = false
     setSaving(false)
   }
+
+  const apiMessage = (error: unknown) => {
+    const m = (error as { response?: { data?: { message?: unknown } } } | null)?.response?.data
+      ?.message
+    return typeof m === 'string' && m ? `: ${m}` : ''
+  }
+
+  const reloadAction = (slug: string) => ({ label: 'Reload', onClick: () => void loadTrip(slug) })
 
   const saveEdits = async (slug: string, cleanDays: TripDay[]) => {
     const original = originalRef.current
@@ -278,33 +307,67 @@ export function useTripForm(slugProp?: string) {
       days: cleanDays,
     }
     const ops = planSync(original, edited)
+    if (ops.length === 0) {
+      showToast('No changes to save')
+      router.push(`/plans/${slug}`)
+      return
+    }
+
+    // Preflight: nothing is written unless the server still matches what our ops assume.
+    // On any doubt keep the user's form as-is and let them choose to reload.
+    let fresh: Trip
+    try {
+      const res = await getJourneyBySlug(slug)
+      if (classifyLoadError(undefined, res)) throw new Error('Trip not found')
+      fresh = toTrip(res.data)
+    } catch (err) {
+      console.error('Trip preflight failed:', errorSummary(err))
+      showToast("Couldn't check the latest version of this trip. Nothing was saved.", 'error')
+      return finishSaving()
+    }
+    if (fresh.redacted || (fresh.role !== 'owner' && fresh.role !== 'editor')) {
+      showToast("You can't edit this trip anymore. Nothing was saved.", 'error')
+      return finishSaving()
+    }
+    const problems = checkPreconditions(original, fresh, ops)
+    if (problems.length > 0) {
+      console.warn('Trip changed elsewhere:', problems.join(', '))
+      showToast('This trip was changed by someone else — reload to see their changes', 'error', {
+        action: reloadAction(slug),
+      })
+      return finishSaving()
+    }
+
     const result = await runSync(slug, ops)
     if (!result.ok) {
-      const reason = (result.error as { response?: { data?: { message?: unknown } } }).response
-        ?.data?.message
+      const step = describeOp(result.op)
+      console.error('Trip sync failed:', result.op.type, errorSummary(result.error))
+      if (result.index === 0) {
+        // Nothing was written: the snapshot is still valid, so keep the form.
+        showToast(
+          `Couldn't save: ${step} failed${apiMessage(result.error)}. Nothing was changed.`,
+          'error',
+          {
+            action: reloadAction(slug),
+          },
+        )
+        return finishSaving()
+      }
       showToast(
-        `Couldn't save (stopped while ${describeOp(result.op)}${
-          typeof reason === 'string' && reason ? `: ${reason}` : ''
-        }). Showing the latest version.`,
+        `Some changes were saved, but ${step} failed${apiMessage(result.error)}. Showing the latest version.`,
         'error',
       )
-      console.error('Trip sync failed:', result.op.type, errorSummary(result.error))
       await loadTrip(slug)
       return finishSaving()
     }
-    showToast(ops.length ? 'Trip updated successfully!' : 'No changes to save')
+    showToast('Trip updated successfully!')
     router.push(`/plans/${slug}`)
   }
 
   const handleSave = async () => {
-    if (savingRef.current || !validate()) return
+    if (savingRef.current) return
     const cleanDays = dropEmptyNewActivities(days, serverPlanIds())
-    const blank = findBlankActivity(cleanDays)
-    if (blank) {
-      showToast(`Day ${blank.dayIndex + 1}: every activity needs a description`, 'error')
-      setExpandedDays((prev) => new Set(prev).add(cleanDays[blank.dayIndex].id))
-      return
-    }
+    if (!validate(cleanDays)) return
     savingRef.current = true
     setSaving(true)
     try {

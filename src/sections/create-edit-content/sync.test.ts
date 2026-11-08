@@ -1,13 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  activityErrorKey,
+  checkPreconditions,
   describeOp,
   dropEmptyNewActivities,
-  findBlankActivity,
+  normalizeMapUrl,
   planSync,
   runSync,
   type SyncApi,
   type SyncOp,
+  validateActivities,
 } from './sync'
 
 import type { Activity, Trip, TripDay } from '@/types/trip'
@@ -336,25 +339,199 @@ describe('planSync', () => {
   })
 })
 
-describe('dropEmptyNewActivities / findBlankActivity', () => {
+describe('dropEmptyNewActivities', () => {
   it('drops untouched new rows but keeps server plans', () => {
     const days = [
       day('d1', '2026-12-01', [act('p1', { description: '' }), act('n', { description: '' })]),
     ]
     const out = dropEmptyNewActivities(days, new Set(['p1']))
     expect(out[0].activities.map((a) => a.id)).toEqual(['p1'])
-    expect(findBlankActivity(out)).toEqual({ dayIndex: 0, activityIndex: 0 })
   })
 
   it('keeps a new row that has anything filled in', () => {
     const days = [day('d1', '2026-12-01', [act('n', { description: ' ', time: '09:00' })])]
-    const out = dropEmptyNewActivities(days, new Set())
-    expect(out[0].activities).toHaveLength(1)
-    expect(findBlankActivity(out)).toEqual({ dayIndex: 0, activityIndex: 0 })
+    expect(dropEmptyNewActivities(days, new Set())[0].activities).toHaveLength(1)
+  })
+})
+
+describe('normalizeMapUrl (mirrors the backend)', () => {
+  it.each([
+    ['', ''],
+    ['https://maps.google.com/?q=x', 'https://maps.google.com/?q=x'],
+    ['http://a.example', 'http://a.example'],
+    ['HTTPS://A.example/x', 'HTTPS://A.example/x'],
+    ['maps.app.goo.gl/abc', 'https://maps.app.goo.gl/abc'],
+  ])('accepts %j', (input, out) => {
+    expect(normalizeMapUrl(input)).toBe(out)
   })
 
-  it('finds nothing when every activity has a description', () => {
-    expect(findBlankActivity(snapshot().days)).toBeNull()
+  it.each([
+    ['javascript scheme', 'javascript:alert(1)'],
+    ['ftp scheme', 'ftp://files.example/x'],
+    ['no host', 'https://'],
+    ['empty host', 'http:///nohost'],
+    ['host:port without scheme', 'localhost:3000/x'],
+    ['data scheme', 'data:text/html,hi'],
+    ['space in host', 'https://exa mple.com'],
+    ['over 2048 bytes', `https://a.example/${'x'.repeat(2040)}`],
+    ['over 2048 bytes in UTF-8 (712 chars)', `https://a.example/${'ก'.repeat(700)}`],
+  ])('rejects %s', (_label, input) => {
+    expect(normalizeMapUrl(input)).toBeNull()
+  })
+})
+
+describe('validateActivities', () => {
+  const k = activityErrorKey
+
+  it('checks new plans: blank description and bad map URL', () => {
+    const edited = clone(snapshot())
+    dayOf(edited, 'd1').activities.push(
+      act('n1', { description: ' ' }),
+      act('n2', { mapUrl: 'javascript:alert(1)' }),
+      act('n3', { mapUrl: 'maps.app.goo.gl/ok' }),
+    )
+    expect(validateActivities(edited.days, snapshot())).toEqual({
+      [k('n1', 'description')]: expect.any(String),
+      [k('n2', 'mapUrl')]: expect.any(String),
+    })
+  })
+
+  it('does not block on legacy blank or invalid plans the user did not touch', () => {
+    const original = snapshot()
+    dayOf(original, 'd1').activities[0] = act('p1', { description: '', mapUrl: 'notaurl:x' })
+    expect(validateActivities(clone(original).days, original)).toEqual({})
+  })
+
+  it('checks server plans whose description or map URL changed', () => {
+    const edited = clone(snapshot())
+    const d1 = dayOf(edited, 'd1')
+    d1.activities[0] = { ...d1.activities[0], description: '  ' }
+    d1.activities[1] = { ...d1.activities[1], mapUrl: 'ftp://x.example' }
+    expect(validateActivities(edited.days, snapshot())).toEqual({
+      [k('p1', 'description')]: expect.any(String),
+      [k('p2', 'mapUrl')]: expect.any(String),
+    })
+  })
+
+  it('checks every plan when creating (no snapshot)', () => {
+    const days = [day('n', '2026-12-01', [act('a', { description: '' })])]
+    expect(Object.keys(validateActivities(days, null))).toEqual([k('a', 'description')])
+  })
+})
+
+describe('checkPreconditions', () => {
+  // fresh = what the server holds right before we write.
+  const ops = (edit: (t: Trip) => void) => {
+    const edited = clone(snapshot())
+    edit(edited)
+    return planSync(snapshot(), edited)
+  }
+  const reorderD1 = (t: Trip) => {
+    const d1 = dayOf(t, 'd1')
+    d1.activities = [d1.activities[2], d1.activities[0], d1.activities[1]]
+  }
+
+  it('passes when nobody else changed what we touch', () => {
+    const o = ops((t) => {
+      reorderD1(t)
+      t.days = t.days.filter((d) => d.id !== 'd2')
+      dayOf(t, 'd3').title = 'x'
+    })
+    expect(checkPreconditions(snapshot(), snapshot(), o)).toEqual([])
+  })
+
+  it('(a) fails when a day we reorder gained a plan from someone else', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd1').activities.push(act('pX'))
+    expect(checkPreconditions(snapshot(), fresh, ops(reorderD1))).toEqual(['reorder:d1'])
+  })
+
+  it('(a) fails when a day we reorder lost a plan', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd1').activities.splice(1, 1)
+    expect(checkPreconditions(snapshot(), fresh, ops(reorderD1))).toContain('reorder:d1')
+  })
+
+  it('(a) ignores changes on days we do not reorder', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd2').activities.push(act('pX'))
+    expect(checkPreconditions(snapshot(), fresh, ops(reorderD1))).toEqual([])
+  })
+
+  it('(b) fails when a day we delete holds a plan outside the snapshot', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd2').activities.push(act('pX'))
+    const o = ops((t) => {
+      t.days = t.days.filter((d) => d.id !== 'd2')
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual(['deleteDay:d2'])
+  })
+
+  it('(b) fails when someone moved a snapshot plan into a day we delete', () => {
+    const fresh = snapshot()
+    const p1 = dayOf(fresh, 'd1').activities.shift()!
+    dayOf(fresh, 'd3').activities.push(p1)
+    const o = ops((t) => {
+      t.days = t.days.filter((d) => d.id !== 'd3')
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual(['deleteDay:d3'])
+  })
+
+  it('(b) passes when the day we delete is already gone', () => {
+    const fresh = snapshot()
+    fresh.days = fresh.days.filter((d) => d.id !== 'd3')
+    const o = ops((t) => {
+      t.days = t.days.filter((d) => d.id !== 'd3')
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual([])
+  })
+
+  it('(c) fails when a plan we update is gone', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd1').activities.shift()
+    const o = ops((t) => {
+      dayOf(t, 'd1').activities[0].time = '07:00'
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual(['missing:p1'])
+  })
+
+  it('(c) fails when a day we add to, update or move into is gone', () => {
+    const fresh = snapshot()
+    fresh.days = fresh.days.filter((d) => d.id === 'd2')
+    const o = ops((t) => {
+      dayOf(t, 'd3').activities.push(act('n'))
+      dayOf(t, 'd3').title = 'x'
+      const p4 = dayOf(t, 'd2').activities.pop()!
+      dayOf(t, 'd1').activities.push(p4)
+    })
+    expect(checkPreconditions(snapshot(), fresh, o).sort()).toEqual(['missing:d1', 'missing:d3'])
+  })
+
+  it('(c) fails when a plan we move is gone', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd2').activities = []
+    const o = ops((t) => {
+      const p4 = dayOf(t, 'd2').activities.pop()!
+      dayOf(t, 'd1').activities.push(p4)
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual(['missing:p4'])
+  })
+
+  it('(c) a plan we delete that is already gone is fine', () => {
+    const fresh = snapshot()
+    dayOf(fresh, 'd1').activities.splice(1, 1)
+    const o = ops((t) => {
+      dayOf(t, 'd1').activities.splice(1, 1)
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual([])
+  })
+
+  it('fails everything on a redacted/empty fresh copy', () => {
+    const fresh = { ...snapshot(), days: [] }
+    const o = ops((t) => {
+      dayOf(t, 'd1').activities[0].time = '07:00'
+    })
+    expect(checkPreconditions(snapshot(), fresh, o)).toEqual(['missing:p1'])
   })
 })
 
@@ -426,6 +603,38 @@ describe('runSync', () => {
     const result = await runSync('s', bad, api as unknown as SyncApi)
     expect(result).toMatchObject({ ok: false, index: 0 })
     expect(api.addPlan).not.toHaveBeenCalled()
+  })
+
+  it('treats a 404 on delete as already gone and continues', async () => {
+    const api = fakeApi()
+    const notFound = Object.assign(new Error('404'), { response: { status: 404 } })
+    api.deletePlan.mockReset().mockRejectedValue(notFound)
+    api.deleteDay.mockReset().mockRejectedValue(notFound)
+    const del: SyncOp[] = [
+      { type: 'deletePlan', planId: 'p2' },
+      { type: 'deleteDay', dayId: 'd3' },
+      { type: 'deleteDay', dayId: 'd2' },
+    ]
+    await expect(runSync('s', del, api as unknown as SyncApi)).resolves.toEqual({ ok: true })
+    expect(api.deleteDay).toHaveBeenCalledTimes(2)
+  })
+
+  it('still stops on other delete errors and on a 404 elsewhere', async () => {
+    const api = fakeApi()
+    const forbidden = Object.assign(new Error('403'), { response: { status: 403 } })
+    const notFound = Object.assign(new Error('404'), { response: { status: 404 } })
+    api.deletePlan.mockReset().mockRejectedValue(forbidden)
+    api.updatePlan.mockReset().mockRejectedValue(notFound)
+    await expect(
+      runSync('s', [{ type: 'deletePlan', planId: 'p2' }], api as unknown as SyncApi),
+    ).resolves.toMatchObject({ ok: false, index: 0 })
+    await expect(
+      runSync(
+        's',
+        [{ type: 'updatePlan', planId: 'p1', body: { time: 'x' } }],
+        api as unknown as SyncApi,
+      ),
+    ).resolves.toMatchObject({ ok: false, index: 0 })
   })
 
   it('describes each op for the error toast', () => {

@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
 
 import ActivityRow from './activity-row'
+import { activityErrorKey } from './sync'
 
 import type { Activity, TripDay } from '@/types/trip'
 import type { DragEvent } from 'react'
@@ -10,6 +11,7 @@ interface DayCardProps {
   dayIdx: number
   isExpanded: boolean
   dragOver: { dayId: string; index: number } | null
+  errors: Record<string, string>
   onToggle: () => void
   onUpdateTitle: (title: string) => void
   onAddActivity: () => void
@@ -27,6 +29,7 @@ export default function DayCard({
   dayIdx,
   isExpanded,
   dragOver,
+  errors,
   onToggle,
   onUpdateTitle,
   onAddActivity,
@@ -78,6 +81,8 @@ export default function DayCard({
                 act={act}
                 aIdx={aIdx}
                 totalActivities={day.activities.length}
+                descriptionError={errors[activityErrorKey(act.id, 'description')]}
+                mapUrlError={errors[activityErrorKey(act.id, 'mapUrl')]}
                 isOver={dragOver?.dayId === day.id && dragOver?.index === aIdx}
                 onDragStart={() => onDragStart(aIdx)}
                 onDragOver={(e) => onDragOver(e, aIdx)}

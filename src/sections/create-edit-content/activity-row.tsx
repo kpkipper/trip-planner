@@ -19,6 +19,8 @@ interface ActivityRowProps {
   act: Activity
   aIdx: number
   totalActivities: number
+  descriptionError?: string
+  mapUrlError?: string
   isOver: boolean
   onDragStart: () => void
   onDragOver: (e: DragEvent<HTMLDivElement>) => void
@@ -33,6 +35,8 @@ export default function ActivityRow({
   act,
   aIdx,
   totalActivities,
+  descriptionError,
+  mapUrlError,
   isOver,
   onDragStart,
   onDragOver,
@@ -97,8 +101,10 @@ export default function ActivityRow({
         value={act.description}
         onChange={(e) => onUpdate('description', e.target.value)}
         placeholder="What are you doing?"
-        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+        aria-invalid={!!descriptionError}
+        className={`w-full border ${descriptionError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition`}
       />
+      {descriptionError && <p className="text-xs text-red-500">{descriptionError}</p>}
       <div className="flex items-center gap-1.5">
         <MapPin size={13} className="text-gray-400 flex-shrink-0" />
         <input
@@ -106,9 +112,11 @@ export default function ActivityRow({
           value={act.mapUrl ?? ''}
           onChange={(e) => onUpdate('mapUrl', e.target.value)}
           placeholder="Maps URL (optional)"
-          className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+          aria-invalid={!!mapUrlError}
+          className={`flex-1 border ${mapUrlError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition`}
         />
       </div>
+      {mapUrlError && <p className="text-xs text-red-500">{mapUrlError}</p>}
     </div>
   )
 }
