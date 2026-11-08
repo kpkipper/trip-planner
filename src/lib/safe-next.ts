@@ -15,7 +15,11 @@ export const safeNext = (next: string | null | undefined, fallback = '/'): strin
     const url = new URL(next, PROBE_ORIGIN)
     if (url.origin !== PROBE_ORIGIN) return fallback
     if (isAuthPage(url.pathname)) return fallback
-    return `${url.pathname}${url.search}${url.hash}`
+    // Normalising can collapse dot-segments into "//" ("/..//evil.com" → "//evil.com"),
+    // so check the value we actually return, not only the raw input.
+    const out = `${url.pathname}${url.search}${url.hash}`
+    if (out.startsWith('//') || out.startsWith('/\\')) return fallback
+    return out
   } catch {
     return fallback
   }

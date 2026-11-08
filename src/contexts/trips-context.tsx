@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { getJourneys } from '@/api/journey'
+import { errorSummary } from '@/lib/error-summary'
 import { toTripList } from '@/utils/format-data'
 
 import { useAuth } from './auth-context'
@@ -41,7 +42,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
       .then(({ data }) => {
         if (!cancelled) setUserTrips(toTripList(data ?? []))
       })
-      .catch((err) => console.error('Failed to load trips', err))
+      .catch((err) => console.error('Failed to load trips:', errorSummary(err)))
       .finally(() => {
         if (!cancelled) setLoaded(true)
       })

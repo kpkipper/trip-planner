@@ -1,5 +1,6 @@
 import { getJourneys } from '@/api/journey'
 import { siteConfig } from '@/config/site'
+import { errorSummary } from '@/lib/error-summary'
 
 import type { MetadataRoute } from 'next'
 
@@ -18,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
     )
   } catch (err) {
-    console.error('sitemap: failed to load journeys', err)
+    console.error('sitemap: failed to load journeys:', errorSummary(err))
   }
 
   return [

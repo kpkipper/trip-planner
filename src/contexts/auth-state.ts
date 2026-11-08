@@ -36,14 +36,10 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
   }
 }
 
-// Where to send the user after the API rejected their session; null = stay.
-// While hydrating, a 401 only means the stored token expired: the user may just be reading
-// a public trip, so they become anonymous without being bounced to the login page.
-export const unauthorizedRedirect = (
-  status: AuthStatus,
-  pathname: string,
-  search: string,
-): string | null => {
-  if (status === 'loading' || isAuthPath(pathname)) return null
+// Where to send the user after the API rejected their session; null = stay (auth pages, to
+// avoid loops). Requests that must not redirect (hydration, logout) opt out per request
+// with `skipAuthRedirect`, so no event reaches this.
+export const unauthorizedRedirect = (pathname: string, search: string): string | null => {
+  if (isAuthPath(pathname)) return null
   return loginPath(`${pathname}${search}`)
 }

@@ -18,6 +18,14 @@ describe('me api', () => {
     apiClient.defaults.adapter = fake.adapter
     await expect(getMe()).resolves.toEqual(user)
     expect(fake.requests[0]).toMatchObject({ method: 'get', url: '/api/v1/me' })
+    expect(fake.requests[0].skipAuthRedirect).toBeUndefined()
+  })
+
+  it('getMe can opt out of the 401 login redirect (hydration)', async () => {
+    const fake = fakeAdapter({ code: 'JOURNEY-200000', message: 'Success', data: user })
+    apiClient.defaults.adapter = fake.adapter
+    await getMe({ skipAuthRedirect: true })
+    expect(fake.requests[0].skipAuthRedirect).toBe(true)
   })
 
   it('updateMe patches only the given fields', async () => {

@@ -61,5 +61,6 @@ describe('auth api', () => {
     await logout('old-session')
     expect(fake.requests[0]).toMatchObject({ method: 'post', url: '/api/v1/auth/logout' })
     expect(fake.requests[0].headers.Authorization).toBe('Bearer old-session')
+    expect(fake.requests[0].skipAuthRedirect).toBe(true)
   })
 })

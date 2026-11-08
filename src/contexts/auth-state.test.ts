@@ -62,25 +62,21 @@ describe('authReducer', () => {
 })
 
 describe('unauthorizedRedirect', () => {
-  it('sends an authed or anon user to login with the current page as next', () => {
-    expect(unauthorizedRedirect('authed', '/plans/tokyo', '')).toBe('/login?next=%2Fplans%2Ftokyo')
-    expect(unauthorizedRedirect('anon', '/plans/create', '?a=1')).toBe(
+  it('sends the user to login with the current page as next', () => {
+    expect(unauthorizedRedirect('/plans/tokyo', '')).toBe('/login?next=%2Fplans%2Ftokyo')
+    expect(unauthorizedRedirect('/plans/create', '?a=1')).toBe(
       '/login?next=%2Fplans%2Fcreate%3Fa%3D1',
     )
   })
 
-  it('does not redirect while hydrating (stale stored token on a public page)', () => {
-    expect(unauthorizedRedirect('loading', '/plans/tokyo', '')).toBeNull()
-  })
-
   it('does not redirect from the auth pages (no loops)', () => {
-    expect(unauthorizedRedirect('authed', '/login', '?next=%2Fplans')).toBeNull()
-    expect(unauthorizedRedirect('anon', '/login/', '')).toBeNull()
-    expect(unauthorizedRedirect('authed', '/auth/verify', '')).toBeNull()
-    expect(unauthorizedRedirect('anon', '/auth/verify/', '')).toBeNull()
+    expect(unauthorizedRedirect('/login', '?next=%2Fplans')).toBeNull()
+    expect(unauthorizedRedirect('/login/', '')).toBeNull()
+    expect(unauthorizedRedirect('/auth/verify', '')).toBeNull()
+    expect(unauthorizedRedirect('/auth/verify/', '')).toBeNull()
   })
 
   it('drops next for the home page', () => {
-    expect(unauthorizedRedirect('authed', '/', '')).toBe('/login')
+    expect(unauthorizedRedirect('/', '')).toBe('/login')
   })
 })

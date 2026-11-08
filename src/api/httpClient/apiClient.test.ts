@@ -30,6 +30,7 @@ describe('handleUnauthorized', () => {
     clearToken: vi.fn(),
     dispatch: vi.fn(),
     getToken: () => current,
+    lastCleared: { current: null as string | null },
   })
 
   it('clears the token, dispatches the event and rejects on 401', async () => {

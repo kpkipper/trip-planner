@@ -32,6 +32,15 @@ describe('safeNext', () => {
     expect(safeNext(' //evil.com')).toBe('/')
   })
 
+  it('rejects dot-segments that normalise into a protocol-relative URL', () => {
+    expect(safeNext('/..//evil.com')).toBe('/')
+    expect(safeNext('/.//evil.com/x')).toBe('/')
+    expect(safeNext('/%2e%2e//evil.com')).toBe('/')
+    expect(safeNext('/a/..//evil.com')).toBe('/')
+    expect(safeNext('/\\evil.com')).toBe('/')
+    expect(loginPath('/..//evil.com')).toBe('/login')
+  })
+
   it('does not send the user back to the auth pages', () => {
     expect(safeNext('/login')).toBe('/')
     expect(safeNext('/login?next=/plans')).toBe('/')

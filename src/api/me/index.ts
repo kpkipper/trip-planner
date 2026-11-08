@@ -2,8 +2,8 @@ import { apiClient } from '@/api/httpClient/apiClient'
 
 import type { GetMeResponse, ProfilePatch } from './type'
 
-export const getMe = async () => {
-  const { data } = await apiClient.get<GetMeResponse>('/api/v1/me')
+export const getMe = async (options: { skipAuthRedirect?: boolean } = {}) => {
+  const { data } = await apiClient.get<GetMeResponse>('/api/v1/me', options)
   return data.data
 }
 

@@ -18,12 +18,12 @@ export const verifyEmailLogin = async (token: string) => {
 }
 
 // Takes the session token explicitly: the caller clears the stored token first, so the
-// interceptor has nothing to attach.
+// interceptor has nothing to attach. A 401 here (already expired) must not redirect.
 export const logout = async (sessionToken: string) => {
   const { data } = await apiClient.post<EmptyResponse>(
     '/api/v1/auth/logout',
     {},
-    { headers: { Authorization: `Bearer ${sessionToken}` } },
+    { headers: { Authorization: `Bearer ${sessionToken}` }, skipAuthRedirect: true },
   )
   return data
 }

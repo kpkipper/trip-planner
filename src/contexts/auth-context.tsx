@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
+import { createContext, useCallback, useContext, useEffect, useReducer } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -27,30 +27,22 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [state, dispatch] = useReducer(authReducer, initialAuthState)
-  const statusRef = useRef<AuthStatus>(state.status)
-
-  useEffect(() => {
-    statusRef.current = state.status
-  }, [state.status])
-
   // Hydrate after mount: the token only exists in the browser.
   useEffect(() => {
     if (!getToken()) {
       dispatch({ type: 'hydrated', user: null })
       return
     }
-    getMe()
+    // An expired stored token only makes the user anonymous: they may be reading a public
+    // trip, so this request opts out of the 401 → login redirect.
+    getMe({ skipAuthRedirect: true })
       .then((user) => dispatch({ type: 'hydrated', user }))
       .catch(() => dispatch({ type: 'hydrated', user: null }))
   }, [])
 
   useEffect(() => {
     const onUnauthorized = () => {
-      const target = unauthorizedRedirect(
-        statusRef.current,
-        window.location.pathname,
-        window.location.search,
-      )
+      const target = unauthorizedRedirect(window.location.pathname, window.location.search)
       dispatch({ type: 'unauthorized' })
       if (target) router.push(target)
     }
