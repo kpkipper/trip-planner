@@ -19,7 +19,8 @@ export const withAuthHeader = (
 ): InternalAxiosRequestConfig => {
   if (!isBrowser) return config
   const token = getTokenFn()
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  // A header the caller set explicitly (e.g. logout with a specific token) wins.
+  if (token && !config.headers.Authorization) config.headers.Authorization = `Bearer ${token}`
   return config
 }
 

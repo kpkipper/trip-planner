@@ -1,6 +1,6 @@
 const KEY = 'jp.session'
 
-const storage = (): Storage | null => {
+export const storage = (): Storage | null => {
   if (typeof window === 'undefined') return null
   try {
     return window.localStorage ?? null
@@ -8,6 +8,9 @@ const storage = (): Storage | null => {
     return null
   }
 }
+
+// `null` is a storage event for clear().
+export const isSessionKey = (key: string | null): boolean => key === null || key === KEY
 
 export const getToken = (): string | null => {
   try {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { authReducer, initialAuthState, unauthorizedRedirect } from './auth-state'
+import { authReducer, hydrationStep, initialAuthState, unauthorizedRedirect } from './auth-state'
 
 import type { AuthState } from './auth-state'
 import type { User } from '@/api/me/type'
@@ -78,5 +78,29 @@ describe('unauthorizedRedirect', () => {
 
   it('drops next for the home page', () => {
     expect(unauthorizedRedirect('/', '')).toBe('/login')
+  })
+})
+
+describe('hydration failure', () => {
+  it('only a 401 makes the user anonymous right away', () => {
+    expect(hydrationStep({ response: { status: 401 } }, 0)).toBe('anon')
+    expect(hydrationStep({ response: { status: 401 } }, 1)).toBe('anon')
+  })
+
+  it('retries once on network errors and 5xx, then gives up without anon-ing the token', () => {
+    for (const err of [new Error('Network Error'), { response: { status: 503 } }, null]) {
+      expect(hydrationStep(err, 0)).toBe('retry')
+      expect(hydrationStep(err, 1)).toBe('unknown')
+    }
+  })
+
+  it('hydrateFailed shows anonymous UI only while loading', () => {
+    expect(authReducer(initialAuthState, { type: 'hydrateFailed' })).toEqual(anon)
+    expect(authReducer(authed(alice), { type: 'hydrateFailed' })).toEqual(authed(alice))
+  })
+
+  it('reset goes back to loading (session changed in another tab)', () => {
+    expect(authReducer(authed(alice), { type: 'reset' })).toEqual(initialAuthState)
+    expect(authReducer(anon, { type: 'reset' })).toEqual(initialAuthState)
   })
 })

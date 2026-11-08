@@ -19,8 +19,9 @@ const Snackbar = ({ open, message, severity = 'success', action, onClose }: Snac
   return (
     <MuiSnackbar
       open={open}
-      // A toast with a button stays long enough to use it and ignores outside clicks.
-      autoHideDuration={action ? 10000 : 1500}
+      // A toast with a button stays long enough to use it and ignores outside clicks; errors
+      // stay long enough to read.
+      autoHideDuration={action ? 10000 : severity === 'error' ? 6000 : 1500}
       onClose={(_, reason) => {
         if (action && reason === 'clickaway') return
         onClose()

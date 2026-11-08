@@ -10,7 +10,7 @@ import { LinkIcon } from 'lucide-react'
 import { verifyEmailLogin } from '@/api/auth'
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
-import { safeNext } from '@/lib/safe-next'
+import { consumeLoginNext } from '@/lib/login-next'
 
 import { verifyErrorMessage } from './errors'
 import { consumeVerifyToken } from './verify-token'
@@ -28,13 +28,12 @@ export default function VerifyContent() {
     const { token, cleanUrl } = consumeVerifyToken(window.location.href)
     // Drop the one-time token from the address bar and history before any request.
     window.history.replaceState(null, '', cleanUrl)
-    const next = safeNext(new URL(cleanUrl, window.location.origin).searchParams.get('next'))
 
     const verify = token ? verifyEmailLogin(token) : Promise.reject(null)
     verify
       .then((session) => {
         login(session.token, session.user)
-        router.replace(next)
+        router.replace(consumeLoginNext())
       })
       .catch((err) => setError(verifyErrorMessage(err)))
   }, [login, router])

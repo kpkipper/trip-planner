@@ -10,6 +10,7 @@ import { loginWithGoogle, startEmailLogin } from '@/api/auth'
 import Logo from '@/components/logo'
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
+import { storeLoginNext } from '@/lib/login-next'
 import { safeNext } from '@/lib/safe-next'
 
 import { emailStartErrorMessage, loginErrorMessage } from './errors'
@@ -51,6 +52,8 @@ export default function LoginContent() {
     if (!value || sending) return
     setError(null)
     setSending(true)
+    // The emailed link can't carry the destination, so remember it for /auth/verify.
+    storeLoginNext(next)
     startEmailLogin(value)
       .then(() => setSentTo(value))
       .catch((err) => setError(emailStartErrorMessage(err)))

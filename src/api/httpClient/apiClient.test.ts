@@ -19,6 +19,14 @@ describe('withAuthHeader', () => {
     expect(config.headers.Authorization).toBe('Bearer abc')
   })
 
+  it('keeps an Authorization header the caller set explicitly', () => {
+    const config = makeConfig()
+    config.headers.Authorization = 'Bearer explicit'
+    expect(withAuthHeader(config, () => 'stored', true).headers.Authorization).toBe(
+      'Bearer explicit',
+    )
+  })
+
   it('attaches nothing when there is no token', () => {
     const config = withAuthHeader(makeConfig(), () => null, true)
     expect(config.headers.Authorization).toBeUndefined()
