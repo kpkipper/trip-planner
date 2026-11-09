@@ -5,7 +5,16 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { ChevronDown, ChevronRight, FolderOpen, MapPin, Menu, Plus, X } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  FolderOpen,
+  MapPin,
+  Menu,
+  Newspaper,
+  Plus,
+  X,
+} from 'lucide-react'
 
 import { useAuth } from '@/contexts/auth-context'
 import { useTrips } from '@/contexts/trips-context'
@@ -143,6 +152,23 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </Link>
         )}
       </div>
+
+      {authed && (
+        <div className="px-3 pb-2">
+          <Link
+            href="/feed"
+            title="Feed"
+            className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
+              pathname === '/feed' || pathname === '/feed/'
+                ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                : 'hover:bg-gray-50 text-gray-600'
+            } ${collapsed ? 'justify-center' : ''}`}
+          >
+            <Newspaper size={15} className="flex-shrink-0" />
+            {!collapsed && 'Feed'}
+          </Link>
+        </div>
+      )}
 
       {/* Latest Trip */}
       {!collapsed && latestTrip && (

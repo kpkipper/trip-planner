@@ -15,6 +15,10 @@ export default function Home() {
   const { status } = useAuth()
 
   useEffect(() => {
+    if (status === 'authed') {
+      router.replace('/feed')
+      return
+    }
     if (!loaded || status === 'loading') return
     const latest = trips
       .slice()
@@ -24,7 +28,7 @@ export default function Home() {
           (a.updatedAt ? new Date(a.updatedAt).getTime() : 0),
       )[0]
     // Nothing to show: creating a plan needs a login, so anonymous visitors go there first.
-    const empty = status === 'authed' ? '/plans/create' : loginPath('/plans/create')
+    const empty = loginPath('/plans/create')
     router.replace(latest ? `/plans/${encodeURIComponent(latest.slug ?? '')}` : empty)
   }, [loaded, status, trips, router])
 
