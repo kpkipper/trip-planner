@@ -20,7 +20,7 @@ import {
 import { listFollowRequests } from '@/api/follows'
 import { useAuth } from '@/contexts/auth-context'
 import { useTrips } from '@/contexts/trips-context'
-import { badgeLabel } from '@/lib/follow-requests'
+import { badgeLabel, FOLLOW_REQUESTS_CHANGED } from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
 import { statusLabel } from '@/lib/trip-status'
 
@@ -41,6 +41,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [pending, setPending] = useState(0)
 
   // Pending follow-request count: refreshed on navigation; errors never show or redirect.
+  const [refreshTick, setRefreshTick] = useState(0)
+
+  // The requests page answers requests without changing the path: it fires this event.
+  useEffect(() => {
+    const onChanged = () => setRefreshTick((n) => n + 1)
+    window.addEventListener(FOLLOW_REQUESTS_CHANGED, onChanged)
+    return () => window.removeEventListener(FOLLOW_REQUESTS_CHANGED, onChanged)
+  }, [])
+
   useEffect(() => {
     if (status !== 'authed') return
     let cancelled = false
@@ -54,7 +63,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return () => {
       cancelled = true
     }
-  }, [status, pathname])
+  }, [status, pathname, refreshTick])
 
   const [seenTrips, setSeenTrips] = useState(trips)
 
@@ -94,6 +103,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   const allCountries = Object.keys(tripsByCountry)
   const authed = status === 'authed'
+  // Not authed: nothing pending (a stale count from a previous session must not show).
+  const shownPending = authed ? pending : 0
 
   const renderTripGroup = (heading: string, list: typeof trips) =>
     list.length > 0 && (
@@ -199,14 +210,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <UserPlus size={15} className="flex-shrink-0" />
             {!collapsed && <span className="flex-1">Follow requests</span>}
-            {badgeLabel(pending) && (
+            {badgeLabel(shownPending) && (
               <span
-                aria-label={`${pending} pending`}
+                role="status"
+                aria-label={`${shownPending} pending`}
                 className={`rounded-full bg-[#0163a4] px-1.5 text-xs font-semibold text-white ${
                   collapsed ? 'absolute -right-0.5 -top-0.5 text-[10px]' : ''
                 }`}
               >
-                {badgeLabel(pending)}
+                {badgeLabel(shownPending)}
               </span>
             )}
           </Link>

@@ -71,7 +71,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
         <ConfirmDialog
           open={confirmOpen}
           title="Delete this trip?"
-          description="This action cannot be undone. The trip and all its data will be permanently removed. รูปและวิดีโอทั้งหมดของสมาชิกทุกคนในทริปนี้จะถูกลบไปด้วย"
+          description="This action cannot be undone. The trip and all its data will be permanently removed. All photos and videos from every member of this trip will be deleted too."
           confirmLabel="Delete"
           onConfirm={handleDelete}
           onCancel={() => setConfirmOpen(false)}

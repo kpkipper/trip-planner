@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { createReport } from '@/api/safety'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { MAX_NOTE, REPORT_REASONS, reportErrorMessage, validateReport } from '@/lib/report-form'
+import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { ReportReason, ReportTargetType } from '@/api/safety/type'
 
@@ -22,6 +23,8 @@ export default function ReportDialog({ targetType, target, onClose }: Props) {
   const [note, setNote] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useModalA11y(dialogRef, { open: true, onClose, canClose: !busy })
 
   const submit = async () => {
     if (busy) return
@@ -50,8 +53,9 @@ export default function ReportDialog({ targetType, target, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={() => !busy && onClose()} />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="รายงาน"
@@ -101,7 +105,8 @@ export default function ReportDialog({ targetType, target, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            disabled={busy}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
           >
             ยกเลิก
           </button>

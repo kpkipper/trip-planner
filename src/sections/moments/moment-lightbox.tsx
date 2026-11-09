@@ -10,6 +10,7 @@ import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { momentControls } from '@/lib/moment-controls'
 import { safeMediaUrl } from '@/lib/safe-url'
+import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { MomentView } from '@/api/moments/type'
 import type { TripSettings } from '@/types/trip'
@@ -52,7 +53,7 @@ export default function MomentLightbox({
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
-  const closeRef = useRef<HTMLButtonElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const m = moments[index]
 
   const go = (delta: number) => {
@@ -61,17 +62,19 @@ export default function MomentLightbox({
     onIndexChange((index + delta + moments.length) % moments.length)
   }
 
-  useEffect(() => {
-    closeRef.current?.focus()
-  }, [])
+  // Escape / focus trap / scroll lock; paused while the report dialog or an inner prompt is up.
+  useModalA11y(rootRef, {
+    open: !suspended,
+    onClose,
+    canClose: !confirmOpen && !editing,
+  })
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (suspended || confirmOpen || editing) return
       const t = e.target as HTMLElement | null
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
-      if (e.key === 'Escape') onClose()
-      else if (e.key === 'ArrowLeft') go(-1)
+      if (e.key === 'ArrowLeft') go(-1)
       else if (e.key === 'ArrowRight') go(1)
     }
     window.addEventListener('keydown', onKey)
@@ -121,6 +124,7 @@ export default function MomentLightbox({
 
   return (
     <div
+      ref={rootRef}
       role="dialog"
       aria-modal="true"
       aria-label="รูปและวิดีโอ"
@@ -156,7 +160,6 @@ export default function MomentLightbox({
             </button>
           )}
           <button
-            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="ปิด"

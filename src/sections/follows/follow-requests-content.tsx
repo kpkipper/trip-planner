@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,7 +18,7 @@ import UserAvatar from '@/components/user-avatar'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
-import { isGone, removeEntry } from '@/lib/follow-requests'
+import { isGone, notifyFollowRequestsChanged, removeEntry } from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
 
 import type { FollowEntry } from '@/api/follows/type'
@@ -53,6 +53,13 @@ export default function FollowRequestsContent() {
   const [attempt, setAttempt] = useState(0)
   const [busy, setBusy] = useState<string | null>(null)
   const [removing, setRemoving] = useState<string | null>(null)
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
 
   useEffect(() => {
     if (status === 'anon') router.replace(loginPath('/follow-requests'))
@@ -90,13 +97,17 @@ export default function FollowRequestsContent() {
       if (accept) {
         // Reload so the new follower shows up in the Followers section.
         listFollowers()
-          .then(setFollowers)
+          .then((list) => {
+            if (mounted.current) setFollowers(list)
+          })
           .catch((err) => console.error('Failed to refresh followers:', errorSummary(err)))
       }
+      notifyFollowRequestsChanged()
       showToast(accept ? `Accepted @${username}` : `Declined @${username}`)
     } catch (err) {
       if (isGone(err)) {
         setRequests((list) => (list ? removeEntry(list, username) : list))
+        notifyFollowRequestsChanged()
         showToast('That request is no longer available')
       } else {
         showToast(
@@ -210,7 +221,7 @@ export default function FollowRequestsContent() {
       <ConfirmDialog
         open={removing !== null}
         title="Remove follower"
-        description={`Remove @${removing} as a follower? They won't be told.`}
+        description={`Remove @${removing ?? ''} as a follower? They won't be told.`}
         confirmLabel="Remove"
         onConfirm={() => removing && void remove(removing)}
         onCancel={() => setRemoving(null)}
