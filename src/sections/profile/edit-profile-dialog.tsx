@@ -35,6 +35,8 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
   })
   const [errors, setErrors] = useState<ProfileErrors>({})
   const [saving, setSaving] = useState(false)
+  const wasApproving = user.follow_approval !== false
+  const [approve, setApprove] = useState(wasApproving)
 
   const set = (key: keyof ProfileForm, value: string) => {
     setForm((f) => ({ ...f, [key]: value }))
@@ -53,6 +55,7 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
       bio: user.bio ?? '',
       avatar_url: user.avatar_url ?? '',
     })
+    if (approve !== wasApproving) patch.follow_approval = approve
     if (Object.keys(patch).length === 0) {
       onClose()
       return
@@ -138,6 +141,29 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
             <span className="mt-1 block text-xs text-red-500">{errors.avatarUrl}</span>
           )}
         </label>
+
+        <div>
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={approve}
+              onChange={(e) => setApprove(e.target.checked)}
+              className="mt-1 h-4 w-4"
+            />
+            <span>
+              <span className="block text-sm font-medium text-gray-700">Approve followers</span>
+              <span className="block text-xs text-gray-400">
+                People must ask before following you.
+              </span>
+            </span>
+          </label>
+          {wasApproving && !approve && (
+            <p role="status" className="mt-2 text-xs text-amber-600">
+              Pending requests will all be accepted.
+            </p>
+          )}
+        </div>
 
         <div className="flex justify-end gap-2">
           <button

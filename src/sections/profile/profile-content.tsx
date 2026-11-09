@@ -14,6 +14,7 @@ import UserAvatar from '@/components/user-avatar'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
+import { followButton } from '@/lib/follow-button'
 import { groupCalendar } from '@/lib/profile-calendar'
 import { loginPath } from '@/lib/safe-next'
 import { liveLabel } from '@/lib/trip-status'
@@ -168,6 +169,7 @@ export default function ProfileContent({ username }: { username: string }) {
   const own =
     !!me &&
     (me.username === profile.user.username || (renamedTo !== null && me.username === renamedTo))
+  const followState = followButton(profile)
   const toggleFollow = async () => {
     if (!me) {
       router.push(loginPath(`/u/${encodeURIComponent(profile.user.username)}`))
@@ -176,10 +178,17 @@ export default function ProfileContent({ username }: { username: string }) {
     if (busy) return
     setBusy(true)
     try {
-      const state = profile.is_following
-        ? await unfollowUser(profile.user.username)
-        : await followUser(profile.user.username)
-      setProfile({ ...profile, is_following: state.is_following, followers: state.followers })
+      const { action } = followButton(profile)
+      const state =
+        action === 'follow'
+          ? await followUser(profile.user.username)
+          : await unfollowUser(profile.user.username)
+      setProfile({
+        ...profile,
+        is_following: state.is_following,
+        follow_requested: state.requested ?? false,
+        followers: state.followers,
+      })
     } catch (err) {
       showToast('Could not update follow', 'error')
       console.error('Failed to update follow:', errorSummary(err))
@@ -265,12 +274,12 @@ export default function ProfileContent({ username }: { username: string }) {
             onClick={toggleFollow}
             disabled={busy}
             className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
-              profile.is_following
+              followState.action !== 'follow'
                 ? 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                 : 'bg-[#0163a4] text-white hover:bg-[#0470b9]'
             }`}
           >
-            {profile.is_following ? 'Unfollow' : 'Follow'}
+            {followState.label}
           </button>
         )}
         {!own && me && (

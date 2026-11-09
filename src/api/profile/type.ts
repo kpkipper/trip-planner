@@ -16,6 +16,9 @@ export interface ProfileView {
   followers: number
   following: number
   is_following: boolean
+  // Absent on older servers.
+  follow_requested?: boolean
+  follow_approval?: boolean
   is_blocked?: boolean
   now: JourneyView | null
   upcoming: JourneyView[] | null
@@ -26,6 +29,7 @@ export interface ProfileView {
 
 export interface FollowState {
   is_following: boolean
+  requested?: boolean
   followers: number
 }
 
