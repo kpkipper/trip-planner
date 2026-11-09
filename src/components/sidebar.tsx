@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -13,11 +13,14 @@ import {
   Menu,
   Newspaper,
   Plus,
+  UserPlus,
   X,
 } from 'lucide-react'
 
+import { listFollowRequests } from '@/api/follows'
 import { useAuth } from '@/contexts/auth-context'
 import { useTrips } from '@/contexts/trips-context'
+import { badgeLabel } from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
 import { statusLabel } from '@/lib/trip-status'
 
@@ -34,6 +37,24 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { trips, myTrips, sharedTrips } = useTrips()
   const { status } = useAuth()
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set())
+
+  const [pending, setPending] = useState(0)
+
+  // Pending follow-request count: refreshed on navigation; errors never show or redirect.
+  useEffect(() => {
+    if (status !== 'authed') return
+    let cancelled = false
+    listFollowRequests({ skipAuthRedirect: true })
+      .then(({ count }) => {
+        if (!cancelled) setPending(count)
+      })
+      .catch(() => {
+        if (!cancelled) setPending(0)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [status, pathname])
 
   const [seenTrips, setSeenTrips] = useState(trips)
 
@@ -166,6 +187,28 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <Newspaper size={15} className="flex-shrink-0" />
             {!collapsed && 'Feed'}
+          </Link>
+          <Link
+            href="/follow-requests"
+            title="Follow requests"
+            className={`relative mt-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
+              pathname === '/follow-requests' || pathname === '/follow-requests/'
+                ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                : 'hover:bg-gray-50 text-gray-600'
+            } ${collapsed ? 'justify-center' : ''}`}
+          >
+            <UserPlus size={15} className="flex-shrink-0" />
+            {!collapsed && <span className="flex-1">Follow requests</span>}
+            {badgeLabel(pending) && (
+              <span
+                aria-label={`${pending} pending`}
+                className={`rounded-full bg-[#0163a4] px-1.5 text-xs font-semibold text-white ${
+                  collapsed ? 'absolute -right-0.5 -top-0.5 text-[10px]' : ''
+                }`}
+              >
+                {badgeLabel(pending)}
+              </span>
+            )}
           </Link>
         </div>
       )}

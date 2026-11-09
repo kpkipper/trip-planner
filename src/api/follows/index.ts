@@ -1,6 +1,7 @@
 import { apiClient } from '@/api/httpClient/apiClient'
 
-import type { Envelope, FollowEntry } from './type'
+import type { FollowEntry } from './type'
+import type { Envelope } from '@/api/profile/type'
 
 const seg = encodeURIComponent
 
@@ -21,9 +22,8 @@ export const declineFollowRequest = async (username: string) => {
 }
 
 export const listFollowers = async () => {
-  const { data } = await apiClient.get<Envelope<{ items: FollowEntry[] | null }>>(
-    '/api/v1/me/followers',
-  )
+  const { data } =
+    await apiClient.get<Envelope<{ items: FollowEntry[] | null }>>('/api/v1/me/followers')
   return data.data?.items ?? []
 }
 

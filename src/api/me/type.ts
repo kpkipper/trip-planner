@@ -11,7 +11,8 @@ export interface User {
   updated_at: string
 }
 
-export type ProfilePatch = Partial<Pick<User, 'username' | 'display_name' | 'bio' | 'avatar_url' | 'follow_approval'>
+export type ProfilePatch = Partial<
+  Pick<User, 'username' | 'display_name' | 'bio' | 'avatar_url' | 'follow_approval'>
 >
 
 export interface GetMeResponse {

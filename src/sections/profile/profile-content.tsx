@@ -178,9 +178,8 @@ export default function ProfileContent({ username }: { username: string }) {
     if (busy) return
     setBusy(true)
     try {
-      const { action } = followButton(profile)
       const state =
-        action === 'follow'
+        followState.action === 'follow'
           ? await followUser(profile.user.username)
           : await unfollowUser(profile.user.username)
       setProfile({
