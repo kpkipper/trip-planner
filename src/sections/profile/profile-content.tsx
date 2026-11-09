@@ -276,7 +276,7 @@ export default function ProfileContent({ username }: { username: string }) {
             onClick={toggleFollow}
             disabled={busy}
             title={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
-            aria-label={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
+            aria-label={followState.action === 'cancel' ? 'Requested, cancel follow request' : undefined}
             className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
               followState.action !== 'follow'
                 ? 'border border-gray-300 text-gray-700 hover:bg-gray-50'
