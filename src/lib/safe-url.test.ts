@@ -39,7 +39,10 @@ describe('safeHttpUrl', () => {
 })
 
 describe('safeMediaUrl', () => {
-  afterEach(() => vi.unstubAllEnvs())
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
+  })
 
   it('accepts https always', () => {
     vi.stubEnv('NODE_ENV', 'production')
@@ -61,6 +64,21 @@ describe('safeMediaUrl', () => {
   it('rejects http localhost in production', () => {
     vi.stubEnv('NODE_ENV', 'production')
     expect(safeMediaUrl('http://localhost:8080/a.jpg')).toBeNull()
+    expect(safeMediaUrl('http://127.0.0.1/a.jpg')).toBeNull()
+  })
+
+  it('accepts http localhost in a production build when the page is served from localhost', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubGlobal('window', { location: { hostname: 'localhost' } })
+    expect(safeMediaUrl('http://localhost:18090/a.jpg')).toBe('http://localhost:18090/a.jpg')
+    expect(safeMediaUrl('http://localhost.evil.com/a.jpg')).toBeNull()
+    expect(safeMediaUrl('http://example.com/a.jpg')).toBeNull()
+  })
+
+  it('rejects http localhost in a production build when the page is on the deployed site', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubGlobal('window', { location: { hostname: 'jourlyplan.web.app' } })
+    expect(safeMediaUrl('http://localhost:18090/a.jpg')).toBeNull()
     expect(safeMediaUrl('http://127.0.0.1/a.jpg')).toBeNull()
   })
 

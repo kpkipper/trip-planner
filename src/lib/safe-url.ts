@@ -21,8 +21,12 @@ export const safeHttpUrl = (url: string | null | undefined): string | undefined 
 
 const DEV_MEDIA_HOSTS = ['localhost', '127.0.0.1']
 
-// Signed media URLs (moment photos/videos): https, or http on localhost outside production
-// (the local dev backend serves uploads itself).
+const pageIsLocal = (): boolean =>
+  typeof window !== 'undefined' && DEV_MEDIA_HOSTS.includes(window.location.hostname)
+
+// Signed media URLs (moment photos/videos): https always; http on localhost / 127.0.0.1 only
+// outside production builds or when the page itself is served from localhost (the local dev
+// backend serves uploads itself, and `pnpm build` inlines NODE_ENV=production).
 export const safeMediaUrl = (url: string | null | undefined): string | null => {
   if (!url) return null
   try {
@@ -30,8 +34,8 @@ export const safeMediaUrl = (url: string | null | undefined): string | null => {
     if (u.protocol === 'https:') return url
     if (
       u.protocol === 'http:' &&
-      process.env.NODE_ENV !== 'production' &&
-      DEV_MEDIA_HOSTS.includes(u.hostname)
+      DEV_MEDIA_HOSTS.includes(u.hostname) &&
+      (process.env.NODE_ENV !== 'production' || pageIsLocal())
     )
       return url
     return null
