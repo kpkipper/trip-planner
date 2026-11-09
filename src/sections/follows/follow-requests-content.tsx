@@ -18,7 +18,12 @@ import UserAvatar from '@/components/user-avatar'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
-import { isGone, notifyFollowRequestsChanged, removeEntry } from '@/lib/follow-requests'
+import {
+  dropRemoved,
+  isGone,
+  notifyFollowRequestsChanged,
+  removeEntry,
+} from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
 
 import type { FollowEntry } from '@/api/follows/type'
@@ -54,6 +59,9 @@ export default function FollowRequestsContent() {
   const [busy, setBusy] = useState<string | null>(null)
   const [removing, setRemoving] = useState<string | null>(null)
   const mounted = useRef(true)
+  // Followers refetches: only the latest may land, minus anyone removed since it started.
+  const followersSeq = useRef(0)
+  const removedLog = useRef<string[]>([])
   useEffect(() => {
     mounted.current = true
     return () => {
@@ -96,9 +104,12 @@ export default function FollowRequestsContent() {
       setRequests((list) => (list ? removeEntry(list, username) : list))
       if (accept) {
         // Reload so the new follower shows up in the Followers section.
+        const seq = ++followersSeq.current
+        const mark = removedLog.current.length
         listFollowers()
           .then((list) => {
-            if (mounted.current) setFollowers(list)
+            if (!mounted.current || seq !== followersSeq.current) return
+            setFollowers(dropRemoved(list, removedLog.current.slice(mark)))
           })
           .catch((err) => console.error('Failed to refresh followers:', errorSummary(err)))
       }
@@ -127,10 +138,12 @@ export default function FollowRequestsContent() {
     setBusy(username)
     try {
       await removeFollower(username)
+      removedLog.current.push(username)
       setFollowers((list) => (list ? removeEntry(list, username) : list))
       showToast(`Removed @${username}`)
     } catch (err) {
       if (isGone(err)) {
+        removedLog.current.push(username)
         setFollowers((list) => (list ? removeEntry(list, username) : list))
       } else {
         showToast('Could not remove follower', 'error')

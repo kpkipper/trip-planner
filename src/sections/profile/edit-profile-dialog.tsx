@@ -6,6 +6,7 @@ import { updateMe } from '@/api/me'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
+import { notifyFollowRequestsChanged } from '@/lib/follow-requests'
 import {
   buildProfilePatch,
   type ProfileErrors,
@@ -18,7 +19,8 @@ import type { User } from '@/api/me/type'
 interface Props {
   user: User
   onClose: () => void
-  onSaved: (user: User) => void
+  // acceptedPending: approval was turned off, so the server accepted every pending request.
+  onSaved: (user: User, info: { acceptedPending: boolean }) => void
 }
 
 const inputClass =
@@ -64,8 +66,10 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
     try {
       const updated = await updateMe(patch)
       setUser(updated)
+      const acceptedPending = patch.follow_approval === false
+      if (acceptedPending) notifyFollowRequestsChanged()
       showToast('Profile updated')
-      onSaved(updated)
+      onSaved(updated, { acceptedPending })
     } catch (err) {
       const status = (err as { response?: { status?: number } }).response?.status
       if (status === 409) setErrors({ username: 'That username is taken' })

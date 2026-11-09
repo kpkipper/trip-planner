@@ -16,6 +16,13 @@ export const badgeLabel = (count: number): string => {
 export const removeEntry = (list: FollowEntry[], username: string): FollowEntry[] =>
   list.filter((e) => e.user.username !== username)
 
+// Drops usernames removed while a fetch was in flight, so a late result cannot bring them back.
+export const dropRemoved = (list: FollowEntry[], removed: readonly string[]): FollowEntry[] => {
+  if (removed.length === 0) return list
+  const gone = new Set(removed)
+  return list.filter((e) => !gone.has(e.user.username))
+}
+
 // 404 means the requester is gone or blocked us meanwhile.
 export const isGone = (error: unknown): boolean =>
   (error as { response?: { status?: number } } | null)?.response?.status === 404

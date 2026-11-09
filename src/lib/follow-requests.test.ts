@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { badgeLabel, isGone, removeEntry } from './follow-requests'
+import { badgeLabel, dropRemoved, isGone, removeEntry } from './follow-requests'
 
 const entry = (username: string) => ({
   user: { username } as never,
@@ -27,6 +27,17 @@ describe('removeEntry', () => {
     const list = [entry('a'), entry('b')]
     expect(removeEntry(list, 'a').map((e) => e.user.username)).toEqual(['b'])
     expect(removeEntry(list, 'zzz')).toHaveLength(2)
+  })
+})
+
+describe('dropRemoved', () => {
+  it('drops every removed username and keeps the rest', () => {
+    const list = [entry('a'), entry('b'), entry('c')]
+    expect(dropRemoved(list, ['a', 'c']).map((e) => e.user.username)).toEqual(['b'])
+  })
+  it('returns the same list when nothing was removed', () => {
+    const list = [entry('a')]
+    expect(dropRemoved(list, [])).toBe(list)
   })
 })
 

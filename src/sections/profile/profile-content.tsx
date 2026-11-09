@@ -225,11 +225,14 @@ export default function ProfileContent({ username }: { username: string }) {
         <EditProfileDialog
           user={me}
           onClose={() => setEditing(false)}
-          onSaved={(updated) => {
+          onSaved={(updated, { acceptedPending }) => {
             setEditing(false)
             if (updated.username !== profile.user.username) {
               setRenamedTo(updated.username)
               router.push(`/u/${encodeURIComponent(updated.username)}`)
+            } else if (acceptedPending) {
+              // Pending requests became followers: refetch in place for the new count.
+              setAttempt((n) => n + 1)
             } else
               setProfile({
                 ...profile,
@@ -272,6 +275,8 @@ export default function ProfileContent({ username }: { username: string }) {
             type="button"
             onClick={toggleFollow}
             disabled={busy}
+            title={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
+            aria-label={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
             className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
               followState.action !== 'follow'
                 ? 'border border-gray-300 text-gray-700 hover:bg-gray-50'
