@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "release": "next build && firebase deploy"
+    "release": "next build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
