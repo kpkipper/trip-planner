@@ -39,7 +39,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       )}
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto min-w-0">
+      <main data-scroll-root className="flex-1 overflow-y-auto min-w-0">
         {/* Mobile header */}
         <div className="md:hidden flex items-center px-4 py-3 border-b border-gray-200 bg-white">
           <button

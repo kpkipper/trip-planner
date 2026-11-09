@@ -28,6 +28,8 @@ export default function BlockMenu({ username, isBlocked, onChanged }: Props) {
   const [reporting, setReporting] = useState(false)
   const [busy, setBusy] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  // The menu items unmount when a dialog opens, so dialogs hand focus back to the trigger.
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -58,6 +60,7 @@ export default function BlockMenu({ username, isBlocked, onChanged }: Props) {
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="เมนู"
@@ -106,9 +109,15 @@ export default function BlockMenu({ username, isBlocked, onChanged }: Props) {
         confirmLabel="Block"
         onConfirm={() => void run('block')}
         onCancel={() => setConfirmOpen(false)}
+        returnFocus={triggerRef}
       />
       {reporting && (
-        <ReportDialog targetType="user" target={username} onClose={() => setReporting(false)} />
+        <ReportDialog
+          targetType="user"
+          target={username}
+          onClose={() => setReporting(false)}
+          returnFocus={triggerRef}
+        />
       )}
     </div>
   )

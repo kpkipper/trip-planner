@@ -54,6 +54,7 @@ export default function MomentLightbox({
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const m = moments[index]
 
   const go = (delta: number) => {
@@ -62,11 +63,14 @@ export default function MomentLightbox({
     onIndexChange((index + delta + moments.length) % moments.length)
   }
 
-  // Escape / focus trap / scroll lock; paused while the report dialog or an inner prompt is up.
+  // Escape / focus trap / scroll lock. The trap pauses while the report dialog or the delete
+  // prompt (which has its own trap) is on top; focus then returns to where it was.
   useModalA11y(rootRef, {
-    open: !suspended,
+    open: true,
+    active: !suspended && !confirmOpen,
     onClose,
-    canClose: !confirmOpen && !editing,
+    canClose: !editing,
+    initialFocus: closeRef,
   })
 
   useEffect(() => {
@@ -160,6 +164,7 @@ export default function MomentLightbox({
             </button>
           )}
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="ปิด"

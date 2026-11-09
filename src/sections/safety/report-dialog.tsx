@@ -9,22 +9,25 @@ import { MAX_NOTE, REPORT_REASONS, reportErrorMessage, validateReport } from '@/
 import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { ReportReason, ReportTargetType } from '@/api/safety/type'
+import type { RefObject } from 'react'
 
 interface Props {
   targetType: ReportTargetType
   target: string
   onClose: () => void
+  // Focused on close when the opener is gone (e.g. it was a menu item).
+  returnFocus?: RefObject<HTMLElement | null>
 }
 
 // Mount it only while open: the form state starts fresh each time.
-export default function ReportDialog({ targetType, target, onClose }: Props) {
+export default function ReportDialog({ targetType, target, onClose, returnFocus }: Props) {
   const { showToast } = useToast()
   const [reason, setReason] = useState<ReportReason | ''>('')
   const [note, setNote] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
-  useModalA11y(dialogRef, { open: true, onClose, canClose: !busy })
+  useModalA11y(dialogRef, { open: true, onClose, canClose: !busy, returnFocus })
 
   const submit = async () => {
     if (busy) return

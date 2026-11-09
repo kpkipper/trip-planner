@@ -27,6 +27,8 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
   const [reporting, setReporting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  // The menu items unmount when the report dialog opens, so it hands focus back to the trigger.
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -49,6 +51,7 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
   return (
     <div className="relative" ref={menuRef}>
       <button
+        ref={triggerRef}
         onClick={() => setMenuOpen((v) => !v)}
         className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 transition-colors"
         aria-label="Actions"
@@ -143,7 +146,12 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
         </div>
       )}
       {reporting && (
-        <ReportDialog targetType="journey" target={slug} onClose={() => setReporting(false)} />
+        <ReportDialog
+          targetType="journey"
+          target={slug}
+          onClose={() => setReporting(false)}
+          returnFocus={triggerRef}
+        />
       )}
     </div>
   )
