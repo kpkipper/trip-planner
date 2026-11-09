@@ -178,6 +178,7 @@ describe('toTrip settings', () => {
         timezone: 'Asia/Tokyo',
         hide_live_status: true,
         editors_can_invite: false,
+        members_can_post: true,
       },
     })
     expect(trip.settings).toEqual({
@@ -185,6 +186,7 @@ describe('toTrip settings', () => {
       timezone: 'Asia/Tokyo',
       hideLiveStatus: true,
       editorsCanInvite: false,
+      membersCanPost: true,
     })
   })
   it('leaves settings undefined when the server omits them', () => {

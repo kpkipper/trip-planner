@@ -80,6 +80,7 @@ export interface JourneySettingsType {
   timezone: string
   hide_live_status: boolean
   editors_can_invite: boolean
+  members_can_post: boolean
 }
 
 // GET /journeys/:slug. Fields marked optional may be missing; check `redacted` first.

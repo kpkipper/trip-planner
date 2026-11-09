@@ -637,6 +637,40 @@ describe('runSync', () => {
     ).resolves.toMatchObject({ ok: false, index: 0 })
   })
 
+  it('turns a 409 "day has moments" on deleteDay into a Thai failure and stops', async () => {
+    const api = fakeApi()
+    const conflict = Object.assign(new Error('409'), {
+      response: { status: 409, data: { message: 'day has moments' } },
+    })
+    api.deleteDay.mockReset().mockRejectedValueOnce(conflict)
+    const del: SyncOp[] = [
+      { type: 'deleteDay', dayId: 'd2' },
+      { type: 'deleteDay', dayId: 'd3' },
+    ]
+    const result = await runSync('s', del, api as unknown as SyncApi)
+    expect(result).toMatchObject({
+      ok: false,
+      index: 0,
+      message: 'ลบวันที่มีรูปไม่ได้ ลบรูปในวันนั้นก่อน',
+    })
+    expect(api.deleteDay).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not rewrite other 409s', async () => {
+    const api = fakeApi()
+    const conflict = Object.assign(new Error('409'), {
+      response: { status: 409, data: { message: 'something else' } },
+    })
+    api.deleteDay.mockReset().mockRejectedValueOnce(conflict)
+    const result = await runSync(
+      's',
+      [{ type: 'deleteDay', dayId: 'd2' }],
+      api as unknown as SyncApi,
+    )
+    expect(result).toMatchObject({ ok: false })
+    expect('message' in result).toBe(false)
+  })
+
   it('describes each op for the error toast', () => {
     expect(ops.map(describeOp)).toEqual([
       'updating trip details',

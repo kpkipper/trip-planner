@@ -1,17 +1,36 @@
 import { safeHttpUrl } from '@/lib/safe-url'
+import MomentsGallery from '@/sections/moments/moments-gallery'
 
 import ActivityItem from './activity-item'
 
-import type { TripDay } from '@/types/trip'
+import type { MomentView } from '@/api/moments/type'
+import type { TripDay, TripSettings } from '@/types/trip'
+
+export interface DayMoments {
+  slug: string
+  role: string | undefined
+  settings: TripSettings | undefined
+  dayMoments: MomentView[]
+  planMoments: Map<string, MomentView[]>
+  reload: () => void
+  onMediaError: () => void
+}
 
 interface Props {
   day: TripDay
   dayIndex: number
   isCurrentActivity: (actIdx: number) => boolean
   livePlanIds?: Set<string>
+  moments?: DayMoments
 }
 
-export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePlanIds }: Props) {
+export default function TripDayDetail({
+  day,
+  dayIndex,
+  isCurrentActivity,
+  livePlanIds,
+  moments,
+}: Props) {
   let placeCount = 0
 
   return (
@@ -28,6 +47,20 @@ export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePl
         </div>
       </div>
 
+      {moments && (
+        <div className="mb-4">
+          <MomentsGallery
+            slug={moments.slug}
+            dayId={day.id}
+            moments={moments.dayMoments}
+            role={moments.role}
+            settings={moments.settings}
+            reload={moments.reload}
+            onMediaError={moments.onMediaError}
+          />
+        </div>
+      )}
+
       {day.activities.length === 0 ? (
         <div className="py-8 text-center text-sm text-gray-400">
           No activities for this day yet.
@@ -41,7 +74,20 @@ export default function TripDayDetail({ day, dayIndex, isCurrentActivity, livePl
               highlight={isCurrentActivity(idx)}
               today={!!livePlanIds?.has(act.id)}
               placeNumber={safeHttpUrl(act.mapUrl) ? ++placeCount : undefined}
-            />
+            >
+              {moments && (
+                <MomentsGallery
+                  slug={moments.slug}
+                  dayId={day.id}
+                  planId={act.id}
+                  moments={moments.planMoments.get(act.id) ?? []}
+                  role={moments.role}
+                  settings={moments.settings}
+                  reload={moments.reload}
+                  onMediaError={moments.onMediaError}
+                />
+              )}
+            </ActivityItem>
           ))}
         </ul>
       )}

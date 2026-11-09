@@ -13,6 +13,7 @@ const settings = {
   timezone: 'Asia/Bangkok',
   hideLiveStatus: false,
   editorsCanInvite: false,
+  membersCanPost: false,
 }
 const original = {
   visibility: 'followers',
@@ -38,6 +39,7 @@ describe('settingsAccess', () => {
       visibility: true,
       hideLiveStatus: true,
       editorsCanInvite: true,
+      membersCanPost: true,
       cover: true,
       draft: true,
       timezone: true,
@@ -48,6 +50,7 @@ describe('settingsAccess', () => {
       visibility: false,
       hideLiveStatus: false,
       editorsCanInvite: false,
+      membersCanPost: false,
       cover: false,
       draft: true,
       timezone: true,
@@ -58,6 +61,7 @@ describe('settingsAccess', () => {
       visibility: true,
       hideLiveStatus: false,
       editorsCanInvite: false,
+      membersCanPost: false,
       cover: true,
       draft: false,
       timezone: false,
@@ -79,6 +83,7 @@ describe('formFromTrip', () => {
       timezone: 'Asia/Bangkok',
       hideLiveStatus: false,
       editorsCanInvite: false,
+      membersCanPost: false,
       draft: false,
     })
     expect(formFromTrip({}).visibility).toBe('')
@@ -110,6 +115,12 @@ describe('buildSettingsPatch', () => {
       ),
     ).toEqual({ editors_can_invite: false, is_draft: false, cover_url: '' })
   })
+  it('sends members_can_post only when it changed, and only for the owner', () => {
+    const form = { ...formFromTrip(original), membersCanPost: true }
+    expect(buildSettingsPatch('owner', form, original)).toEqual({ members_can_post: true })
+    expect(buildSettingsPatch('editor', form, original)).toEqual({})
+    expect(buildSettingsPatch('owner', formFromTrip(original), original)).toEqual({})
+  })
   it('never sends owner-only fields for editors', () => {
     expect(
       buildSettingsPatch(
@@ -120,6 +131,7 @@ describe('buildSettingsPatch', () => {
           timezone: 'Asia/Seoul',
           hideLiveStatus: true,
           editorsCanInvite: true,
+          membersCanPost: true,
           draft: true,
         },
         original,

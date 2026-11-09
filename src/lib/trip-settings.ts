@@ -17,6 +17,7 @@ export interface SettingsAccess {
   visibility: boolean
   hideLiveStatus: boolean
   editorsCanInvite: boolean
+  membersCanPost: boolean
   cover: boolean
   draft: boolean
   timezone: boolean
@@ -32,6 +33,7 @@ export const settingsAccess = (role: string | undefined, hasSettings: boolean): 
     visibility: owner,
     hideLiveStatus: owner && hasSettings,
     editorsCanInvite: owner && hasSettings,
+    membersCanPost: owner && hasSettings,
     cover: owner,
     draft: (owner || editor) && hasSettings,
     timezone: (owner || editor) && hasSettings,
@@ -55,6 +57,7 @@ export interface SettingsForm {
   timezone: string
   hideLiveStatus: boolean
   editorsCanInvite: boolean
+  membersCanPost: boolean
   draft: boolean
 }
 
@@ -70,6 +73,7 @@ export const formFromTrip = (o: SettingsOriginal): SettingsForm => ({
   timezone: o.settings?.timezone ?? '',
   hideLiveStatus: o.settings?.hideLiveStatus ?? false,
   editorsCanInvite: o.settings?.editorsCanInvite ?? false,
+  membersCanPost: o.settings?.membersCanPost ?? false,
   draft: o.settings?.isDraft ?? false,
 })
 
@@ -79,6 +83,7 @@ export interface SettingsPatch {
   timezone?: string
   hide_live_status?: boolean
   editors_can_invite?: boolean
+  members_can_post?: boolean
   is_draft?: boolean
 }
 
@@ -105,6 +110,9 @@ export const buildSettingsPatch = (
   }
   if (access.editorsCanInvite && form.editorsCanInvite !== s?.editorsCanInvite) {
     patch.editors_can_invite = form.editorsCanInvite
+  }
+  if (access.membersCanPost && form.membersCanPost !== s?.membersCanPost) {
+    patch.members_can_post = form.membersCanPost
   }
   if (access.draft && form.draft !== s?.isDraft) patch.is_draft = form.draft
   return patch

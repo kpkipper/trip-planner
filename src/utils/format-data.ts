@@ -108,6 +108,7 @@ export const toTrip = (journey: JourneyView): Trip => {
           timezone: journey.settings.timezone,
           hideLiveStatus: journey.settings.hide_live_status,
           editorsCanInvite: journey.settings.editors_can_invite,
+          membersCanPost: journey.settings.members_can_post ?? false,
         }
       : undefined,
     coverUrl: journey.cover_url || undefined,

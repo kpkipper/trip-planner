@@ -54,6 +54,8 @@ export const putFile = (
       else reject(new Error(`upload failed with status ${xhr.status}`))
     }
     xhr.onerror = () => reject(new Error('upload failed'))
+    xhr.onabort = () => reject(new Error('upload aborted'))
+    xhr.ontimeout = () => reject(new Error('upload timed out'))
     xhr.send(file)
   })
 

@@ -41,6 +41,7 @@ export interface TripSettings {
   timezone: string
   hideLiveStatus: boolean
   editorsCanInvite: boolean
+  membersCanPost: boolean
 }
 
 export interface Trip {

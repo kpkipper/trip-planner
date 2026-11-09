@@ -167,6 +167,15 @@ export default function TripSettingsPanel({
             />
           )}
 
+          {access.membersCanPost && (
+            <Toggle
+              label="ให้สมาชิกแปะรูปได้"
+              hint="ถ้าปิด จะมีแค่เจ้าของทริปที่แปะรูปและวิดีโอได้"
+              checked={form.membersCanPost}
+              onChange={(v) => set('membersCanPost', v)}
+            />
+          )}
+
           {access.draft && (
             <Toggle
               label="Draft"

@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { safeHttpUrl } from '@/lib/safe-url'
 
 import type { Activity } from '@/types/trip'
+import type { ReactNode } from 'react'
 
 interface ActivityItemProps {
   act: Activity
@@ -10,9 +11,17 @@ interface ActivityItemProps {
   // Part of today's live plans on the trip owner's day: a subtle marker only.
   today?: boolean
   placeNumber?: number
+  // Rendered under the description (the plan's moments).
+  children?: ReactNode
 }
 
-export default function ActivityItem({ act, highlight, today, placeNumber }: ActivityItemProps) {
+export default function ActivityItem({
+  act,
+  highlight,
+  today,
+  placeNumber,
+  children,
+}: ActivityItemProps) {
   const mapHref = safeHttpUrl(act.mapUrl)
 
   return (
@@ -59,6 +68,7 @@ export default function ActivityItem({ act, highlight, today, placeNumber }: Act
             <ArrowUpRight size={14} />
           </a>
         )}
+        {children && <div className="mt-1 text-base font-normal">{children}</div>}
       </div>
     </li>
   )

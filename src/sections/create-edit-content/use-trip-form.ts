@@ -346,6 +346,12 @@ export function useTripForm(slugProp?: string) {
       console.error('Trip sync failed:', result.op.type, errorSummary(result.error))
       const status = (result.error as { response?: { status?: number } } | null)?.response?.status
       const rejected = status !== undefined && status >= 400 && status < 500
+      if (result.message) {
+        // The user can fix this (remove the photos first); show what the server has now.
+        showToast(result.message, 'error')
+        await loadTrip(slug)
+        return finishSaving()
+      }
       if (result.index === 0 && !rejected) {
         // No answer or a 5xx: the write may have landed, so show what the server has now.
         showToast(

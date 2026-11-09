@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { afterEach, vi } from 'vitest'
 
-import { safeHttpsUrl, safeHttpUrl } from './safe-url'
+import { safeHttpsUrl, safeHttpUrl, safeMediaUrl } from './safe-url'
 
 describe('safeHttpsUrl', () => {
   it('accepts https URLs', () => {
@@ -34,5 +35,45 @@ describe('safeHttpUrl', () => {
     expect(safeHttpUrl('/relative')).toBeUndefined()
     expect(safeHttpUrl('')).toBeUndefined()
     expect(safeHttpUrl(null)).toBeUndefined()
+  })
+})
+
+describe('safeMediaUrl', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('accepts https always', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    expect(safeMediaUrl('https://storage.googleapis.com/b/o?sig=1')).toBe(
+      'https://storage.googleapis.com/b/o?sig=1',
+    )
+  })
+
+  it('accepts http only for localhost / 127.0.0.1 outside production', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    expect(safeMediaUrl('http://localhost:8080/api/v1/media/local/a.jpg')).toBe(
+      'http://localhost:8080/api/v1/media/local/a.jpg',
+    )
+    expect(safeMediaUrl('http://127.0.0.1:8080/a.jpg')).toBe('http://127.0.0.1:8080/a.jpg')
+    expect(safeMediaUrl('http://example.com/a.jpg')).toBeNull()
+    expect(safeMediaUrl('http://localhost.evil.com/a.jpg')).toBeNull()
+  })
+
+  it('rejects http localhost in production', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    expect(safeMediaUrl('http://localhost:8080/a.jpg')).toBeNull()
+    expect(safeMediaUrl('http://127.0.0.1/a.jpg')).toBeNull()
+  })
+
+  it('rejects other schemes and bad values', () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    for (const v of [
+      'javascript:alert(1)',
+      'data:image/png;base64,AA',
+      '/rel.png',
+      '',
+      null,
+      undefined,
+    ])
+      expect(safeMediaUrl(v)).toBeNull()
   })
 })

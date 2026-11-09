@@ -162,7 +162,17 @@ export type SyncApi = Pick<
 const httpStatus = (error: unknown) =>
   (error as { response?: { status?: number } } | null)?.response?.status
 
-export type SyncResult = { ok: true } | { ok: false; index: number; op: SyncOp; error: unknown }
+// `message`: a ready-to-show explanation for failures the user can act on.
+export type SyncResult =
+  { ok: true } | { ok: false; index: number; op: SyncOp; error: unknown; message?: string }
+
+export const DAY_HAS_MOMENTS_MESSAGE = 'ลบวันที่มีรูปไม่ได้ ลบรูปในวันนั้นก่อน'
+
+const isDayHasMoments = (op: SyncOp, error: unknown) =>
+  op.type === 'deleteDay' &&
+  httpStatus(error) === 409 &&
+  (error as { response?: { data?: { message?: unknown } } }).response?.data?.message ===
+    'day has moments'
 
 // Runs ops one by one; stops at the first failure (the caller reloads the trip).
 export async function runSync(
@@ -221,6 +231,8 @@ export async function runSync(
       // Deleting something that is already gone is the outcome we wanted.
       if ((op.type === 'deletePlan' || op.type === 'deleteDay') && httpStatus(error) === 404)
         continue
+      if (isDayHasMoments(op, error))
+        return { ok: false, index, op, error, message: DAY_HAS_MOMENTS_MESSAGE }
       return { ok: false, index, op, error }
     }
   }

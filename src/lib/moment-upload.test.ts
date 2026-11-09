@@ -48,6 +48,8 @@ class FakeXhr {
   upload: { onprogress: ((e: unknown) => void) | null } = { onprogress: null }
   onload: (() => void) | null = null
   onerror: (() => void) | null = null
+  onabort: (() => void) | null = null
+  ontimeout: (() => void) | null = null
   open(method: string, url: string) {
     this.method = method
     this.url = url
@@ -93,6 +95,18 @@ describe('putFile', () => {
       () => xhr as unknown as XMLHttpRequest,
     )
     xhr.onload?.()
+    await expect(p).rejects.toBeTruthy()
+  })
+
+  it.each(['onabort', 'ontimeout'] as const)('rejects on %s', async (hook) => {
+    const xhr = new FakeXhr()
+    const p = putFile(
+      target,
+      file('image/jpeg'),
+      () => {},
+      () => xhr as unknown as XMLHttpRequest,
+    )
+    xhr[hook]?.()
     await expect(p).rejects.toBeTruthy()
   })
 

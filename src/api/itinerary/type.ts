@@ -8,10 +8,11 @@ export interface JourneyPatchBody {
   departure_date?: string
   return_date?: string
   cover_url?: string
-  // visibility, hide_live_status and editors_can_invite are owner-only.
+  // visibility, hide_live_status, editors_can_invite and members_can_post are owner-only.
   visibility?: string
   hide_live_status?: boolean
   editors_can_invite?: boolean
+  members_can_post?: boolean
   is_draft?: boolean
   timezone?: string
 }

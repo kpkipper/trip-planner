@@ -18,3 +18,24 @@ export const safeHttpUrl = (url: string | null | undefined): string | undefined 
     return undefined
   }
 }
+
+const DEV_MEDIA_HOSTS = ['localhost', '127.0.0.1']
+
+// Signed media URLs (moment photos/videos): https, or http on localhost outside production
+// (the local dev backend serves uploads itself).
+export const safeMediaUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    if (u.protocol === 'https:') return url
+    if (
+      u.protocol === 'http:' &&
+      process.env.NODE_ENV !== 'production' &&
+      DEV_MEDIA_HOSTS.includes(u.hostname)
+    )
+      return url
+    return null
+  } catch {
+    return null
+  }
+}

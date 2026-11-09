@@ -1,6 +1,6 @@
 'use client'
 
-import { type SyntheticEvent } from 'react'
+import { type SyntheticEvent, useMemo } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -12,10 +12,12 @@ import { MapPin, Radio } from 'lucide-react'
 import ConfirmDialog from '@/components/confirm-dialog'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
+import { groupMoments } from '@/lib/moments-by-day'
 import { safeHttpsUrl } from '@/lib/safe-url'
 import { tripActions } from '@/lib/trip-roles'
 import { liveLabel } from '@/lib/trip-status'
 import MembersPanel from '@/sections/members/members-panel'
+import { useMoments } from '@/sections/moments/use-moments'
 import TripSettingsPanel from '@/sections/settings/trip-settings-panel'
 
 import MembersRow from './members-row'
@@ -42,6 +44,10 @@ export default function TripViewContent({ slug }: { slug: string }) {
     handleLeave,
     refresh,
   } = useTripView(slug)
+
+  const showMoments = !!trip && !trip.redacted
+  const { moments, reload: reloadMoments, onMediaError } = useMoments(slug, showMoments)
+  const grouped = useMemo(() => groupMoments(moments), [moments])
 
   if (loading || deleting) return <PageLoading />
   if (notFound || !trip) return <NotFound />
@@ -199,6 +205,15 @@ export default function TripViewContent({ slug }: { slug: string }) {
                   dayIndex={selectedDayIndex}
                   isCurrentActivity={(actIdx) => isCurrentActivity(selectedDayIndex, actIdx)}
                   livePlanIds={livePlanIds}
+                  moments={{
+                    slug,
+                    role: trip.role,
+                    settings: trip.settings,
+                    dayMoments: grouped.byDay.get(selectedDay.id) ?? [],
+                    planMoments: grouped.byPlan,
+                    reload: reloadMoments,
+                    onMediaError,
+                  }}
                 />
               )}
             </>
