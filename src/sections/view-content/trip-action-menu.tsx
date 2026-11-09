@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Edit2, FileJson, FileText, LogOut, MoreVertical, Trash2 } from 'lucide-react'
+import { Edit2, FileJson, FileText, Flag, LogOut, MoreVertical, Trash2 } from 'lucide-react'
 
+import { useAuth } from '@/contexts/auth-context'
 import { tripActions } from '@/lib/trip-roles'
+import ReportDialog from '@/sections/safety/report-dialog'
 
 import { exportJSON, exportPDF } from './export-utils'
 
@@ -21,6 +23,8 @@ interface Props {
 
 export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props) {
   const router = useRouter()
+  const { user } = useAuth()
+  const [reporting, setReporting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -37,7 +41,10 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
 
   const close = () => setMenuOpen(false)
   const actions = tripActions(trip.role, trip.redacted ?? false)
-  if (!actions.edit && !actions.delete && !actions.leave && !actions.export) return null
+  const canReport = !!user && trip.role !== 'owner'
+  if (!actions.edit && !actions.delete && !actions.leave && !actions.export && !canReport) {
+    return null
+  }
 
   return (
     <div className="relative" ref={menuRef}>
@@ -88,6 +95,21 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
               </button>
             </>
           )}
+          {canReport && (
+            <>
+              {(actions.edit || actions.export) && <div className="border-t border-gray-100" />}
+              <button
+                onClick={() => {
+                  setReporting(true)
+                  close()
+                }}
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <Flag size={14} />
+                Report
+              </button>
+            </>
+          )}
           {actions.leave && (
             <>
               <div className="border-t border-gray-100" />
@@ -119,6 +141,9 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
             </>
           )}
         </div>
+      )}
+      {reporting && (
+        <ReportDialog targetType="journey" target={slug} onClose={() => setReporting(false)} />
       )}
     </div>
   )

@@ -98,6 +98,9 @@ describe('feedText', () => {
       ),
     ).toBe('Ann แปะ 3 รูปใน วันที่ 2')
   })
+  it('moments_added without moments omits the dangling count', () => {
+    expect(text(base({ type: 'moments_added' }))).toBe('Ann แปะรูป')
+  })
   it('trip_completed', () => {
     expect(text(base({ type: 'trip_completed' }))).toBe('Ann เที่ยว Tokyo จบแล้ว ✅')
   })

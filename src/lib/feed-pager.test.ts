@@ -19,6 +19,23 @@ describe('createFeedPager', () => {
     expect(pager.loading).toBe(false)
   })
 
+  it('treats a missing next_before as the end and tracks the first load', async () => {
+    const pager = createFeedPager(async () => ({ items: [item('a')] }) as FeedPage)
+    expect(pager.loaded).toBe(false)
+    await pager.loadMore()
+    expect(pager.loaded).toBe(true)
+    expect(pager.hasMore).toBe(false)
+  })
+
+  it('marks loaded even when the first load fails', async () => {
+    const pager = createFeedPager(async () => {
+      throw new Error('x')
+    })
+    await pager.loadMore()
+    expect(pager.loaded).toBe(true)
+    expect(pager.error).not.toBeNull()
+  })
+
   it('passes the cursor and stops when next_before is null', async () => {
     const seen: Array<string | undefined> = []
     const pages: FeedPage[] = [

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { ImageIcon, Inbox, LogIn, LogOut, UserRound } from 'lucide-react'
+import { Ban, ImageIcon, Inbox, LogIn, LogOut, UserRound } from 'lucide-react'
 
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
@@ -101,6 +101,10 @@ export default function AccountMenu({ collapsed }: Props) {
           <Link href="/me/moments" onClick={close} className={itemClass}>
             <ImageIcon size={14} />
             รูปของฉัน
+          </Link>
+          <Link href="/blocks" onClick={close} className={itemClass}>
+            <Ban size={14} />
+            คนที่ block
           </Link>
           <Link href="/invites" onClick={close} className={itemClass}>
             <Inbox size={14} />

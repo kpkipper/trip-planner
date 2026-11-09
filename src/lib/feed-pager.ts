@@ -5,6 +5,8 @@ export interface FeedPager {
   readonly hasMore: boolean
   readonly loading: boolean
   readonly error: unknown
+  // True once a first load has finished (success or failure).
+  readonly loaded: boolean
   loadMore(): Promise<void>
 }
 
@@ -18,8 +20,12 @@ export const createFeedPager = (
   let hasMore = true
   let loading = false
   let error: unknown = null
+  let loaded = false
 
   return {
+    get loaded() {
+      return loaded
+    },
     get items() {
       return items
     },
@@ -43,11 +49,12 @@ export const createFeedPager = (
         fresh.forEach((i) => seen.add(i.id))
         items = [...items, ...fresh]
         cursor = page.next_before ?? undefined
-        hasMore = page.next_before !== null
+        hasMore = page.next_before != null
       } catch (err) {
         error = err
       } finally {
         loading = false
+        loaded = true
         onChange?.()
       }
     },

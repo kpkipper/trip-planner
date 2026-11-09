@@ -24,8 +24,8 @@ export default function FeedContent() {
 
   if (status !== 'authed') return <PageLoading />
 
-  const firstLoad = feed.loading && feed.items.length === 0
-  const empty = !feed.loading && !feed.error && feed.items.length === 0
+  const firstLoad = !feed.loaded && feed.items.length === 0 && feed.error == null
+  const empty = feed.loaded && !feed.loading && !feed.error && feed.items.length === 0
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-6">

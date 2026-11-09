@@ -50,6 +50,7 @@ export default function TripDayDetail({
       {moments && (
         <div className="mb-4">
           <MomentsGallery
+            key={day.id}
             slug={moments.slug}
             dayId={day.id}
             moments={moments.dayMoments}

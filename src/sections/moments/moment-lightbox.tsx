@@ -21,11 +21,13 @@ interface Props {
   onClose: () => void
   // Reload the moments after a delete / caption edit.
   onChanged: () => void
+  // Drop a deleted moment from the parent's list right away.
+  onRemoved?: (id: string) => void
   onMediaError: () => void
   role: string | undefined
   settings: TripSettings | undefined
   currentUsername: string | undefined
-  // Report handler (added with the safety UI); the button shows only when given.
+  // Report handler; the button shows only when given and the viewer is not the uploader.
   onReport?: (m: MomentView) => void
 }
 
@@ -35,6 +37,7 @@ export default function MomentLightbox({
   onIndexChange,
   onClose,
   onChanged,
+  onRemoved,
   onMediaError,
   role,
   settings,
@@ -86,6 +89,7 @@ export default function MomentLightbox({
     try {
       await deleteMoment(m.id)
       showToast('ลบรูปแล้ว')
+      onRemoved?.(m.id)
       onChanged()
       if (moments.length > 1) onIndexChange(Math.min(index, moments.length - 2))
     } catch (err) {
@@ -125,7 +129,7 @@ export default function MomentLightbox({
             : ''}
         </span>
         <div className="flex items-center gap-1">
-          {onReport && (
+          {onReport && currentUsername && m.uploader.username !== currentUsername && (
             <button
               type="button"
               onClick={() => onReport(m)}

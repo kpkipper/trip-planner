@@ -16,6 +16,7 @@ export interface ProfileView {
   followers: number
   following: number
   is_following: boolean
+  is_blocked?: boolean
   now: JourneyView | null
   upcoming: JourneyView[] | null
   calendar: CalendarItemType[] | null

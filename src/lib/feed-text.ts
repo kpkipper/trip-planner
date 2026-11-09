@@ -72,13 +72,12 @@ export const feedText = (item: FeedItem): { parts: FeedPart[] } => {
     }
     case 'trip_started':
       return { parts: [actor, { text: ' เริ่มทริป ' }, dest, { text: ' แล้ว 🟢' }] }
-    case 'moments_added':
+    case 'moments_added': {
+      const m = item.moments
       return {
-        parts: [
-          actor,
-          { text: ` แปะ ${item.moments?.count ?? 0} รูปใน ${item.moments?.day_title ?? ''}` },
-        ],
+        parts: [actor, { text: m ? ` แปะ ${m.count} รูปใน ${m.day_title}` : ' แปะรูป' }],
       }
+    }
     case 'trip_completed':
       return { parts: [actor, { text: ' เที่ยว ' }, dest, { text: ' จบแล้ว ✅' }] }
   }

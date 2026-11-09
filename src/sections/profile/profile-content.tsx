@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { MapPin, Radio } from 'lucide-react'
 
 import { followUser, getProfile, unfollowUser } from '@/api/profile'
+import { unblockUser } from '@/api/safety'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 import UserAvatar from '@/components/user-avatar'
@@ -16,6 +17,7 @@ import { errorSummary } from '@/lib/error-summary'
 import { groupCalendar } from '@/lib/profile-calendar'
 import { loginPath } from '@/lib/safe-next'
 import { liveLabel } from '@/lib/trip-status'
+import BlockMenu from '@/sections/safety/block-menu'
 
 import EditProfileDialog from './edit-profile-dialog'
 
@@ -186,6 +188,24 @@ export default function ProfileContent({ username }: { username: string }) {
     }
   }
 
+  const reloadProfile = () => {
+    setResult(null)
+    setAttempt((n) => n + 1)
+  }
+  const unblock = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      await unblockUser(profile.user.username)
+      reloadProfile()
+    } catch (err) {
+      showToast('Unblock ไม่สำเร็จ', 'error')
+      console.error('Failed to unblock:', errorSummary(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const { years, hidden } = groupCalendar(profile.calendar)
   const upcoming = profile.upcoming ?? []
   const past = profile.past ?? []
@@ -239,7 +259,7 @@ export default function ProfileContent({ username }: { username: string }) {
           >
             Edit profile
           </button>
-        ) : (
+        ) : profile.is_blocked ? null : (
           <button
             type="button"
             onClick={toggleFollow}
@@ -253,9 +273,30 @@ export default function ProfileContent({ username }: { username: string }) {
             {profile.is_following ? 'Unfollow' : 'Follow'}
           </button>
         )}
+        {!own && me && (
+          <BlockMenu
+            username={profile.user.username}
+            isBlocked={!!profile.is_blocked}
+            onChanged={reloadProfile}
+          />
+        )}
       </header>
 
-      {profile.now?.live && (
+      {profile.is_blocked && !own && (
+        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="mb-3 text-sm text-gray-600">คุณ block คนนี้อยู่</p>
+          <button
+            type="button"
+            onClick={() => void unblock()}
+            disabled={busy}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Unblock
+          </button>
+        </div>
+      )}
+
+      {!profile.is_blocked && profile.now?.live && (
         <Section title="Now">
           <a
             href={`/plans/${encodeURIComponent(profile.now.slug)}`}
@@ -274,13 +315,13 @@ export default function ProfileContent({ username }: { username: string }) {
         </Section>
       )}
 
-      {upcoming.length > 0 && (
+      {!profile.is_blocked && upcoming.length > 0 && (
         <Section title="Upcoming">
           <TripList trips={upcoming} />
         </Section>
       )}
 
-      {(years.length > 0 || hidden.length > 0) && (
+      {!profile.is_blocked && (years.length > 0 || hidden.length > 0) && (
         <Section title="Calendar">
           <div className="space-y-5">
             {years.map((y) => (
@@ -314,7 +355,7 @@ export default function ProfileContent({ username }: { username: string }) {
         </Section>
       )}
 
-      {(past.length > 0 || stats.trips > 0) && (
+      {!profile.is_blocked && (past.length > 0 || stats.trips > 0) && (
         <Section title="Past">
           <p className="mb-3 text-sm text-gray-600">
             {stats.countries} {stats.countries === 1 ? 'country' : 'countries'} · {stats.cities}{' '}

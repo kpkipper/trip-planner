@@ -49,3 +49,12 @@ The app is a static export served by Firebase Hosting. Public trips are prerende
 pnpm build
 firebase serve --only hosting
 ```
+
+## Moments, feed and safety
+
+- **Uploads.** Photos and videos ("moments") are attached to a trip day or plan. The browser asks the API to start an upload (`POST /journeys/:slug/moments/uploads`), PUTs the file straight to the returned signed URL using exactly the returned method and headers (never an `Authorization` header), then calls `.../complete`. Up to 3 files upload at once, 20 per selection; images are JPEG/PNG/WebP up to 10 MB, videos MP4/MOV up to 100 MB and 60 s. The client checks these first, the backend checks again.
+- **Signed media URLs** expire after about an hour, so the moments list reloads when the tab becomes visible after 50+ minutes and (at most once per 5 minutes) when an image or video fails to load.
+- **Bucket CORS and lifecycle.** Uploads are cross-origin PUTs to the storage bucket, so the bucket needs a CORS policy (and a lifecycle rule for abandoned pending uploads). That setup lives in the backend (`journey-service`) README, not here.
+- **Firebase Storage rules** (`storage.rules`) deny all client access: the web app never talks to Storage directly, only through signed URLs issued by the API. Deploy with `firebase deploy --only storage`.
+- **Feed** (`/feed`) shows activity from people you follow plus a "now travelling" row. Logged-in users who open `/` are redirected there.
+- **Block and report.** Users can block/unblock from a profile menu or the `/blocks` page, and report users, trips and moments (reasons: spam, harassment, inappropriate, privacy, other).

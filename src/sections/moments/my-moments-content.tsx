@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -27,15 +27,25 @@ export default function MyMomentsContent() {
   const [moments, setMoments] = useState<MomentView[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [target, setTarget] = useState<MomentView | null>(null)
-  const [lastErrorRefresh, setLastErrorRefresh] = useState<number | null>(null)
+  const lastErrorRefresh = useRef<number | null>(null)
+  const mounted = useRef(true)
+
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
 
   const load = useCallback(() => {
     listMyMoments()
       .then((list) => {
+        if (!mounted.current) return
         setMoments(list)
         setFailed(false)
       })
       .catch((err) => {
+        if (!mounted.current) return
         setFailed(true)
         console.error('Failed to load my moments:', errorSummary(err))
       })
@@ -78,8 +88,8 @@ export default function MyMomentsContent() {
 
   const onImageError = () => {
     const now = Date.now()
-    if (!shouldRefreshOnError(lastErrorRefresh, now)) return
-    setLastErrorRefresh(now)
+    if (!shouldRefreshOnError(lastErrorRefresh.current, now)) return
+    lastErrorRefresh.current = now
     load()
   }
 
@@ -128,14 +138,16 @@ export default function MyMomentsContent() {
                       ▶ {formatDuration(m.duration_ms)}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => setTarget(m)}
-                    aria-label="ลบรูป"
-                    className="absolute top-1 right-1 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {m.can_delete && (
+                    <button
+                      type="button"
+                      onClick={() => setTarget(m)}
+                      aria-label="ลบรูป"
+                      className="absolute top-1 right-1 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
                 <div className="p-2 text-xs">
                   {m.journey ? (

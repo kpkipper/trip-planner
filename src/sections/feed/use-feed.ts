@@ -31,6 +31,7 @@ export const useFeed = (enabled: boolean) => {
     hasMore: pager.hasMore,
     loading: pager.loading,
     error: pager.error,
+    loaded: pager.loaded,
     loadMore,
     travelers,
   }

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { momentControls } from '@/lib/moment-controls'
 import { formatDuration } from '@/lib/moments-by-day'
 import { safeMediaUrl } from '@/lib/safe-url'
+import ReportDialog from '@/sections/safety/report-dialog'
 
 import MomentLightbox from './moment-lightbox'
 import MomentUploader from './moment-uploader'
@@ -24,7 +25,6 @@ interface Props {
   settings: TripSettings | undefined
   reload: () => void
   onMediaError: () => void
-  onReport?: (m: MomentView) => void
 }
 
 // Thumbnails of one day's (or one plan's) moments, plus the post button for those allowed.
@@ -32,15 +32,18 @@ export default function MomentsGallery({
   slug,
   dayId,
   planId,
-  moments,
+  moments: allMoments,
   role,
   settings,
   reload,
   onMediaError,
-  onReport,
 }: Props) {
   const { user } = useAuth()
   const [open, setOpen] = useState<number | null>(null)
+  const [reportId, setReportId] = useState<string | null>(null)
+  // Deleted ids are hidden at once, even if the follow-up reload fails.
+  const [removed, setRemoved] = useState<Set<string>>(() => new Set())
+  const moments = removed.size ? allMoments.filter((m) => !removed.has(m.id)) : allMoments
   const { canPost } = momentControls(role, settings, user?.username)
 
   if (moments.length === 0 && !canPost) return null
@@ -96,12 +99,17 @@ export default function MomentsGallery({
           onIndexChange={setOpen}
           onClose={() => setOpen(null)}
           onChanged={reload}
+          onRemoved={(id) => setRemoved((s) => new Set(s).add(id))}
           onMediaError={onMediaError}
           role={role}
           settings={settings}
           currentUsername={user?.username}
-          onReport={onReport}
+          onReport={user ? (m) => setReportId(m.id) : undefined}
         />
+      )}
+
+      {reportId && (
+        <ReportDialog targetType="moment" target={reportId} onClose={() => setReportId(null)} />
       )}
     </div>
   )
