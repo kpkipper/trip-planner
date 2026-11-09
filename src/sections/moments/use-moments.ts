@@ -10,7 +10,6 @@ import type { MomentView } from '@/api/moments/type'
 // comes back after 50+ minutes and (at most once per 5 minutes) when media fails to load.
 export function useMoments(slug: string, enabled = true) {
   const [moments, setMoments] = useState<MomentView[]>([])
-  const [loading, setLoading] = useState(enabled)
   const lastLoadAt = useRef(0)
   const lastErrorRefreshAt = useRef<number | null>(null)
 
@@ -21,8 +20,6 @@ export function useMoments(slug: string, enabled = true) {
       setMoments(list)
     } catch (err) {
       console.error('Failed to load moments:', errorSummary(err))
-    } finally {
-      setLoading(false)
     }
   }, [slug])
 
@@ -36,7 +33,6 @@ export function useMoments(slug: string, enabled = true) {
         setMoments(list)
       })
       .catch((err) => console.error('Failed to load moments:', errorSummary(err)))
-      .finally(() => !cancelled && setLoading(false))
     return () => {
       cancelled = true
     }
@@ -62,5 +58,5 @@ export function useMoments(slug: string, enabled = true) {
     void reload()
   }, [reload])
 
-  return { moments, reload, loading, onMediaError }
+  return { moments, reload, onMediaError }
 }

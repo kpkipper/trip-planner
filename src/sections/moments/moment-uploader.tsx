@@ -1,37 +1,31 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 
 import { Camera } from 'lucide-react'
 
-import { MAX_FILES, uploadAll, type UploadItem } from '@/lib/moment-upload'
+import { MAX_FILES } from '@/lib/moment-upload'
+
+import { useUploads } from './upload-context'
 
 interface Props {
   slug: string
   dayId: string
   planId?: string
-  // Called once the whole batch has finished (some files may have failed).
-  onDone: () => void
 }
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime'
 
-export default function MomentUploader({ slug, dayId, planId, onDone }: Props) {
+export default function MomentUploader({ slug, dayId, planId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [items, setItems] = useState<UploadItem[]>([])
-  const [busy, setBusy] = useState(false)
+  const { items, busy, store, key } = useUploads(dayId, planId)
 
-  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // The upload runs in the trip-level store, so it outlives this component (day tab switch).
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     e.target.value = ''
     if (files.length === 0 || busy) return
-    setBusy(true)
-    try {
-      await uploadAll(files, { slug, dayId, planId }, undefined, setItems)
-    } finally {
-      setBusy(false)
-      onDone()
-    }
+    void store.start({ slug, dayId, planId }, files)
   }
 
   const failed = items.filter((i) => i.state === 'error')
@@ -85,7 +79,7 @@ export default function MomentUploader({ slug, dayId, planId, onDone }: Props) {
             <li>
               <button
                 type="button"
-                onClick={() => setItems([])}
+                onClick={() => store.dismiss(key)}
                 className="text-xs text-gray-500 underline"
               >
                 {failed.length > 0 ? 'ปิด' : 'ซ่อนรายการ'}
