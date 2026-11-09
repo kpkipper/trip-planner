@@ -29,6 +29,8 @@ interface Props {
   currentUsername: string | undefined
   // Report handler; the button shows only when given and the viewer is not the uploader.
   onReport?: (m: MomentView) => void
+  // Keyboard shortcuts do nothing while true (e.g. the report dialog is open).
+  suspended?: boolean
 }
 
 export default function MomentLightbox({
@@ -43,6 +45,7 @@ export default function MomentLightbox({
   settings,
   currentUsername,
   onReport,
+  suspended = false,
 }: Props) {
   const { showToast } = useToast()
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -64,7 +67,9 @@ export default function MomentLightbox({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (confirmOpen || editing) return
+      if (suspended || confirmOpen || editing) return
+      const t = e.target as HTMLElement | null
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
       if (e.key === 'Escape') onClose()
       else if (e.key === 'ArrowLeft') go(-1)
       else if (e.key === 'ArrowRight') go(1)

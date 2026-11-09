@@ -85,6 +85,24 @@ describe('putFile', () => {
     expect(onProgress).toHaveBeenCalledWith(0.5)
   })
 
+  it.each(['http://example.com/a', 'javascript:alert(1)', 'not a url', ''])(
+    'refuses an unsafe target url before sending: %s',
+    async (url) => {
+      const xhr = new FakeXhr()
+      const open = vi.spyOn(xhr, 'open')
+      await expect(
+        putFile(
+          { ...target, url },
+          file('image/jpeg'),
+          () => {},
+          () => xhr as unknown as XMLHttpRequest,
+        ),
+      ).rejects.toBeTruthy()
+      expect(open).not.toHaveBeenCalled()
+      expect(xhr.sent).toBeUndefined()
+    },
+  )
+
   it('rejects on a non-2xx status', async () => {
     const xhr = new FakeXhr()
     xhr.status = 403

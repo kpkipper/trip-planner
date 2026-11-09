@@ -46,6 +46,11 @@ export default function MomentsGallery({
   const moments = removed.size ? allMoments.filter((m) => !removed.has(m.id)) : allMoments
   const { canPost } = momentControls(role, settings, user?.username)
 
+  // Never leave a stale open index behind: an empty list or out-of-range index resets it, so
+  // the lightbox cannot pop open later when moments arrive.
+  const stale = open !== null && open >= moments.length
+  if (stale) setOpen(null)
+
   if (moments.length === 0 && !canPost) return null
 
   return (
@@ -88,14 +93,14 @@ export default function MomentsGallery({
 
       {canPost && (
         <div className={moments.length > 0 ? 'mt-2' : ''}>
-          <MomentUploader slug={slug} dayId={dayId} planId={planId} onDone={reload} />
+          <MomentUploader slug={slug} dayId={dayId} planId={planId} />
         </div>
       )}
 
-      {open !== null && (
+      {open !== null && !stale && (
         <MomentLightbox
           moments={moments}
-          index={Math.min(open, moments.length - 1)}
+          index={open}
           onIndexChange={setOpen}
           onClose={() => setOpen(null)}
           onChanged={reload}
@@ -105,6 +110,7 @@ export default function MomentsGallery({
           settings={settings}
           currentUsername={user?.username}
           onReport={user ? (m) => setReportId(m.id) : undefined}
+          suspended={reportId !== null}
         />
       )}
 

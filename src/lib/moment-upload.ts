@@ -1,5 +1,6 @@
 import { completeUpload, startUpload } from '@/api/moments'
 import { momentErrorMessage } from '@/lib/moment-errors'
+import { safeMediaUrl } from '@/lib/safe-url'
 
 import type { MomentKind, MomentView, StartUploadInput, UploadTarget } from '@/api/moments/type'
 
@@ -41,6 +42,11 @@ export const putFile = (
   xhrFactory: () => XMLHttpRequest = () => new XMLHttpRequest(),
 ): Promise<void> =>
   new Promise((resolve, reject) => {
+    // The URL comes from the API: refuse anything that is not https (or local dev http).
+    if (!safeMediaUrl(target.url)) {
+      reject(new Error('upload target url is not allowed'))
+      return
+    }
     const xhr = xhrFactory()
     xhr.open(target.method, target.url)
     for (const [name, value] of Object.entries(target.headers ?? {})) {

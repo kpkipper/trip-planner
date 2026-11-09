@@ -75,7 +75,13 @@ export const feedText = (item: FeedItem): { parts: FeedPart[] } => {
     case 'moments_added': {
       const m = item.moments
       return {
-        parts: [actor, { text: m ? ` แปะ ${m.count} รูปใน ${m.day_title}` : ' แปะรูป' }],
+        parts: m
+          ? [
+              actor,
+              { text: ` แปะ ${m.count} รูปใน ` },
+              { text: m.day_title, href: tripHref(item.trip.slug) },
+            ]
+          : [actor, { text: ' แปะรูป' }],
       }
     }
     case 'trip_completed':
@@ -95,6 +101,7 @@ export const relativeThai = (iso: string, now: Date = new Date()): string => {
   if (diff < HOUR) return `${Math.floor(diff / MIN)} นาทีที่แล้ว`
   if (diff < DAY) return `${Math.floor(diff / HOUR)} ชม.ที่แล้ว`
   if (diff < 7 * DAY) return `${Math.floor(diff / DAY)} วันที่แล้ว`
-  const day = `${at.getUTCDate()} ${MONTHS[at.getUTCMonth()]}`
-  return at.getUTCFullYear() === now.getUTCFullYear() ? day : `${day} ${at.getUTCFullYear()}`
+  // `at` is an instant: show the viewer's local calendar date.
+  const day = `${at.getDate()} ${MONTHS[at.getMonth()]}`
+  return at.getFullYear() === now.getFullYear() ? day : `${day} ${at.getFullYear()}`
 }

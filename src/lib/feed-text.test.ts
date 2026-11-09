@@ -98,6 +98,15 @@ describe('feedText', () => {
       ),
     ).toBe('Ann แปะ 3 รูปใน วันที่ 2')
   })
+  it('moments_added links the day title to the trip', () => {
+    const { parts } = feedText(
+      base({
+        type: 'moments_added',
+        moments: { count: 3, day_id: 'd', day_title: 'วันที่ 2', thumbs: [] },
+      }),
+    )
+    expect(parts.find((p) => p.text === 'วันที่ 2')?.href).toBe('/plans/tokyo%201')
+  })
   it('moments_added without moments omits the dangling count', () => {
     expect(text(base({ type: 'moments_added' }))).toBe('Ann แปะรูป')
   })
@@ -119,8 +128,11 @@ describe('relativeThai', () => {
     expect(relativeThai(ago(-60_000), now)).toBe('เมื่อสักครู่')
   })
   it('older than 7 days gives a date', () => {
-    expect(relativeThai(ago(10 * 86_400_000), now)).toBe('30 ต.ค.')
-    expect(relativeThai('2025-03-01T00:00:00Z', now)).toBe('1 มี.ค. 2025')
+    // Built from local components so the expectation holds in any timezone.
+    const local = (y: number, m: number, d: number) => new Date(y, m, d, 0, 30).toISOString()
+    const localNow = new Date(2026, 10, 9, 12)
+    expect(relativeThai(local(2026, 9, 30), localNow)).toBe('30 ต.ค.')
+    expect(relativeThai(local(2025, 2, 1), localNow)).toBe('1 มี.ค. 2025')
   })
   it('invalid gives empty', () => {
     expect(relativeThai('nope', now)).toBe('')

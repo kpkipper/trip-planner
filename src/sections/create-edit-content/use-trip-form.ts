@@ -348,7 +348,10 @@ export function useTripForm(slugProp?: string) {
       const rejected = status !== undefined && status >= 400 && status < 500
       if (result.message) {
         // The user can fix this (remove the photos first); show what the server has now.
-        showToast(result.message, 'error')
+        showToast(
+          result.index > 0 ? `${result.message} (การแก้ไขอื่นบันทึกแล้ว)` : result.message,
+          'error',
+        )
         await loadTrip(slug)
         return finishSaving()
       }

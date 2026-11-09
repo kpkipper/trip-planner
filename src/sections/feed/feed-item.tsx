@@ -34,7 +34,11 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
         </p>
         <p className="text-xs text-gray-400 mt-0.5">{relativeThai(item.at, now)}</p>
         {thumbs.length > 0 && (
-          <div className="mt-2 flex gap-1.5">
+          <a
+            href={`/plans/${encodeURIComponent(item.trip.slug)}`}
+            className="mt-2 flex gap-1.5"
+            aria-label={`ดูรูปในทริป ${item.trip.destination}`}
+          >
             {thumbs.map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element -- static export, signed media URL
               <img
@@ -45,7 +49,7 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
                 className="h-16 w-16 rounded-md object-cover bg-gray-100"
               />
             ))}
-          </div>
+          </a>
         )}
         {cover && (
           <a href={`/plans/${encodeURIComponent(item.trip.slug)}`} className="block mt-2">
