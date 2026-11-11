@@ -8,6 +8,7 @@ import { Edit2, FileJson, FileText, Flag, LogOut, MoreVertical, Trash2 } from 'l
 
 import { useAuth } from '@/contexts/auth-context'
 import { tripActions } from '@/lib/trip-roles'
+import { cn } from '@/lib/ui-classes'
 import ReportDialog from '@/sections/safety/report-dialog'
 
 import { exportJSON, exportPDF } from './export-utils'
@@ -19,9 +20,17 @@ interface Props {
   trip: Trip
   onDelete: () => void
   onLeave: () => void
+  // `glass` for the trip hero (on the cover); `default` on white surfaces.
+  variant?: 'default' | 'glass'
 }
 
-export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props) {
+export default function TripActionMenu({
+  slug,
+  trip,
+  onDelete,
+  onLeave,
+  variant = 'default',
+}: Props) {
   const router = useRouter()
   const { user } = useAuth()
   const [reporting, setReporting] = useState(false)
@@ -53,21 +62,27 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
       <button
         ref={triggerRef}
         onClick={() => setMenuOpen((v) => !v)}
-        className="rounded-full bg-surface p-2 text-gray-600 ring-1 ring-inset ring-line transition-colors hover:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        aria-expanded={menuOpen}
+        className={cn(
+          'grid place-items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2',
+          variant === 'glass'
+            ? 'h-10 w-10 bg-white/20 text-white backdrop-blur-md hover:bg-white/30 focus-visible:ring-white'
+            : 'p-2 text-ink-2 bg-surface ring-1 ring-inset ring-line hover:bg-chip focus-visible:ring-accent',
+        )}
         aria-label="Actions"
       >
-        <MoreVertical size={16} />
+        <MoreVertical size={variant === 'glass' ? 18 : 16} />
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-surface rounded-tile shadow-lg ring-1 ring-line overflow-hidden z-20">
+        <div className="absolute right-0 top-full mt-2 w-48 bg-surface rounded-tile shadow-soft ring-1 ring-line overflow-hidden z-20">
           {actions.edit && (
             <button
               onClick={() => {
                 router.push(`/plans/${slug}/edit`)
                 close()
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
             >
               <Edit2 size={14} />
               Edit
@@ -75,13 +90,13 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
           )}
           {actions.export && (
             <>
-              {actions.edit && <div className="border-t border-gray-100" />}
+              {actions.edit && <div className="border-t border-line" />}
               <button
                 onClick={() => {
                   exportJSON(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
               >
                 <FileJson size={14} />
                 Export as JSON
@@ -91,7 +106,7 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
                   exportPDF(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
               >
                 <FileText size={14} />
                 Export as PDF
@@ -100,13 +115,13 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
           )}
           {canReport && (
             <>
-              {(actions.edit || actions.export) && <div className="border-t border-gray-100" />}
+              {(actions.edit || actions.export) && <div className="border-t border-line" />}
               <button
                 onClick={() => {
                   setReporting(true)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
               >
                 <Flag size={14} />
                 Report
@@ -115,13 +130,13 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
           )}
           {actions.leave && (
             <>
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-line" />
               <button
                 onClick={() => {
                   onLeave()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none transition-colors"
               >
                 <LogOut size={14} />
                 Leave trip
@@ -130,13 +145,13 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
           )}
           {actions.delete && (
             <>
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-line" />
               <button
                 onClick={() => {
                   onDelete()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none transition-colors"
               >
                 <Trash2 size={14} />
                 Delete

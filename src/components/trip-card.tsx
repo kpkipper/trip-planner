@@ -1,5 +1,6 @@
 import { MapPin } from 'lucide-react'
 
+import { coverGradient } from '@/lib/cover-gradient'
 import { safeHttpsUrl } from '@/lib/safe-url'
 import { cardClass, cn } from '@/lib/ui-classes'
 import StatusBadge from '@/sections/view-content/status-badge'
@@ -23,7 +24,7 @@ export default function TripCard({ trip, className }: { trip: TripCardData; clas
       href={`/plans/${encodeURIComponent(trip.slug ?? '')}`}
       className={cardClass(
         cn(
-          'group block overflow-hidden transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+          'group block overflow-hidden transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
           className,
         ),
         '',
@@ -40,9 +41,11 @@ export default function TripCard({ trip, className }: { trip: TripCardData; clas
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <span aria-hidden className="grid h-full w-full place-items-center text-muted">
-            <MapPin size={28} />
-          </span>
+          <span
+            aria-hidden
+            className="block h-full w-full"
+            style={{ backgroundImage: coverGradient(trip.slug ?? trip.title) }}
+          />
         )}
       </div>
       <div className="flex flex-col gap-2 p-4">

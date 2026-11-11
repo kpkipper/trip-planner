@@ -50,7 +50,7 @@ export function useUploads(dayId: string, planId?: string) {
   return { items, busy, store, key }
 }
 
-// Small marker for day tabs that have uploads in flight.
+// Small marker for day chips that have uploads in flight (inherits the chip's text colour).
 export function DayUploadingMark({ dayId }: { dayId: string }) {
   const store = useUploadStore()
   const busy = useSyncExternalStore(
@@ -59,5 +59,5 @@ export function DayUploadingMark({ dayId }: { dayId: string }) {
     () => false,
   )
   if (!busy) return null
-  return <div className="text-[10px] font-normal text-accent">กำลังอัปโหลด…</div>
+  return <div className="text-[10px] font-normal leading-normal opacity-80">กำลังอัปโหลด…</div>
 }

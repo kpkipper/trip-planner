@@ -34,23 +34,21 @@ export default function TripDayDetail({
   let placeCount = 0
 
   return (
-    <div className="mb-6 rounded-card bg-surface p-6 shadow-soft">
-      <div className="mb-4 flex items-center gap-4">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-tile bg-primary text-2xl font-bold text-white">
-          {dayIndex + 1}
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-500">
-            Day {dayIndex + 1} · {day.date}
-          </p>
-          <h2 className="text-2xl font-bold text-gray-900">{day.title}</h2>
-        </div>
+    <div>
+      <div className="mb-5 min-w-0">
+        <p className="text-sm font-medium leading-normal text-muted">
+          Day {dayIndex + 1} · {day.date}
+        </p>
+        <h2 className="break-words text-2xl font-semibold leading-snug tracking-tight text-ink">
+          {day.title}
+        </h2>
       </div>
 
       {moments && (
-        <div className="mb-4">
+        <div className="mb-6">
           <MomentsGallery
             key={day.id}
+            stories
             slug={moments.slug}
             dayId={day.id}
             moments={moments.dayMoments}
@@ -63,11 +61,11 @@ export default function TripDayDetail({
       )}
 
       {day.activities.length === 0 ? (
-        <div className="py-8 text-center text-sm text-gray-400">
+        <div className="rounded-tile bg-bg py-8 text-center text-sm leading-normal text-muted">
           No activities for this day yet.
         </div>
       ) : (
-        <ul className="relative before:absolute before:top-4 before:bottom-4 before:left-[86px] before:w-0.5 before:bg-line">
+        <ul className="ml-2 space-y-3 border-l-2 border-dashed border-line pl-7">
           {day.activities.map((act, idx) => (
             <ActivityItem
               key={act.id}
