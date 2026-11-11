@@ -67,3 +67,16 @@ export default function TripCard({ trip, className }: { trip: TripCardData; clas
     </a>
   )
 }
+
+/** Grid of trip cards used by /trips and the profile tabs (TripGridSkeleton matches it). */
+export function TripGrid({ trips }: { trips: TripCardData[] }) {
+  return (
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {trips.map((trip, i) => (
+        <li key={trip.slug ?? `${trip.title}-${i}`} className="min-w-0">
+          <TripCard trip={trip} />
+        </li>
+      ))}
+    </ul>
+  )
+}

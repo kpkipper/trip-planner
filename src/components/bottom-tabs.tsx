@@ -7,7 +7,7 @@ import { LogIn, Plus } from 'lucide-react'
 
 import { useAuth } from '@/contexts/auth-context'
 import { badgeLabel } from '@/lib/follow-requests'
-import { isActive, isProfilePath, type NavIcon, navItems } from '@/lib/nav'
+import { isActive, isProfilePath, navItems } from '@/lib/nav'
 import { isAuthPath, loginPath } from '@/lib/safe-next'
 import { cn } from '@/lib/ui-classes'
 
@@ -15,13 +15,6 @@ import AccountMenu from './account-menu'
 import Logo from './logo'
 import { NAV_ICONS } from './nav-icons'
 import { ButtonLink } from './ui/button'
-
-// Short labels so five tabs fit at 375px; the full label stays the accessible name.
-const SHORT_LABEL: Record<NavIcon, string> = {
-  feed: 'Feed',
-  trips: 'Trips',
-  requests: 'Requests',
-}
 
 // Sits above the safe area, below dialogs (z-40/50) and the story viewer (z-40).
 const barPosition =
@@ -44,6 +37,8 @@ export default function BottomTabs({ pending }: { pending: number }) {
   if (status !== 'authed' || !user) {
     // The login pages are the Log in screen already; the bar would only cover the form.
     if (isAuthPath(pathname)) return null
+    const [anonTrips] = navItems(false)
+    const TripsIcon = NAV_ICONS[anonTrips.icon]
     return (
       <nav
         aria-label="Main"
@@ -55,10 +50,21 @@ export default function BottomTabs({ pending }: { pending: number }) {
         >
           <Logo size={24} />
         </Link>
-        <ButtonLink href={loginPath(pathname)}>
-          <LogIn size={16} className="flex-shrink-0" />
-          Log in
-        </ButtonLink>
+        <div className="flex items-center gap-1">
+          <ButtonLink
+            href={anonTrips.href}
+            variant="ghost"
+            aria-current={isActive(pathname, anonTrips.href) ? 'page' : undefined}
+            className={cn(isActive(pathname, anonTrips.href) && 'bg-chip text-ink')}
+          >
+            <TripsIcon size={16} className="flex-shrink-0" />
+            {anonTrips.shortLabel}
+          </ButtonLink>
+          <ButtonLink href={loginPath(pathname)}>
+            <LogIn size={16} className="flex-shrink-0" />
+            Log in
+          </ButtonLink>
+        </div>
       </nav>
     )
   }
@@ -89,7 +95,8 @@ export default function BottomTabs({ pending }: { pending: number }) {
             </span>
           )}
         </span>
-        {SHORT_LABEL[item.icon]}
+        {/* Short label so five tabs fit at 375px; the full label stays the accessible name. */}
+        {item.shortLabel}
       </Link>
     )
   }

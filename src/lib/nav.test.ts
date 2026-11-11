@@ -3,16 +3,29 @@ import { describe, expect, it } from 'vitest'
 import { isActive, isProfilePath, navItems } from './nav'
 
 describe('navItems', () => {
-  it('is empty when not logged in', () => {
-    expect(navItems(false)).toEqual([])
+  it('gives anonymous visitors only the public Trips list', () => {
+    expect(navItems(false)).toEqual([
+      { href: '/trips', label: 'Trips', shortLabel: 'Trips', icon: 'trips' },
+    ])
   })
 
   it('gives Feed, My trips, Follow requests in that order when logged in', () => {
     expect(navItems(true)).toEqual([
-      { href: '/feed', label: 'Feed', icon: 'feed' },
-      { href: '/trips', label: 'My trips', icon: 'trips' },
-      { href: '/follow-requests', label: 'Follow requests', icon: 'requests' },
+      { href: '/feed', label: 'Feed', shortLabel: 'Feed', icon: 'feed' },
+      { href: '/trips', label: 'My trips', shortLabel: 'Trips', icon: 'trips' },
+      {
+        href: '/follow-requests',
+        label: 'Follow requests',
+        shortLabel: 'Requests',
+        icon: 'requests',
+      },
     ])
+  })
+
+  it('returns fresh objects each call', () => {
+    const a = navItems(false)
+    a[0].label = 'changed'
+    expect(navItems(false)[0].label).toBe('Trips')
   })
 })
 

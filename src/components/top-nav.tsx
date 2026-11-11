@@ -20,7 +20,8 @@ import { ButtonLink } from './ui/button'
 export default function TopNav({ pending }: { pending: number }) {
   const pathname = usePathname()
   const { status } = useAuth()
-  const items = navItems(status === 'authed')
+  // Nothing while the login state is unknown, so the anonymous list never flashes for members.
+  const items = status === 'loading' ? [] : navItems(status === 'authed')
   const badge = badgeLabel(pending)
 
   return (
@@ -51,7 +52,11 @@ export default function TopNav({ pending }: { pending: number }) {
                   )}
                 >
                   <Icon size={16} className="flex-shrink-0" />
-                  {item.label}
+                  {/* Short label below lg so the bar fits; the full label stays the accessible name. */}
+                  <span aria-hidden className="lg:hidden">
+                    {item.shortLabel}
+                  </span>
+                  <span className="sr-only lg:not-sr-only">{item.label}</span>
                   {item.icon === 'requests' && badge && (
                     <span
                       role="status"

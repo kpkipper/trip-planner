@@ -4,19 +4,26 @@ export type NavIcon = 'feed' | 'trips' | 'requests'
 
 export interface NavItem {
   href: string
+  // Full name: the accessible name everywhere, and the visible label where there is room.
   label: string
+  // Visible label where space is tight (mobile tab bar, top nav below lg).
+  shortLabel: string
   icon: NavIcon
 }
 
 const AUTHED_ITEMS: readonly NavItem[] = [
-  { href: '/feed', label: 'Feed', icon: 'feed' },
-  { href: '/trips', label: 'My trips', icon: 'trips' },
-  { href: '/follow-requests', label: 'Follow requests', icon: 'requests' },
+  { href: '/feed', label: 'Feed', shortLabel: 'Feed', icon: 'feed' },
+  { href: '/trips', label: 'My trips', shortLabel: 'Trips', icon: 'trips' },
+  { href: '/follow-requests', label: 'Follow requests', shortLabel: 'Requests', icon: 'requests' },
 ]
 
-// Anonymous visitors get no app sections, only Log in.
+// Anonymous visitors get the public trips list (and Log in, outside this list).
+const ANON_ITEMS: readonly NavItem[] = [
+  { href: '/trips', label: 'Trips', shortLabel: 'Trips', icon: 'trips' },
+]
+
 export const navItems = (authed: boolean): NavItem[] =>
-  authed ? AUTHED_ITEMS.map((item) => ({ ...item })) : []
+  (authed ? AUTHED_ITEMS : ANON_ITEMS).map((item) => ({ ...item }))
 
 // Sections that also own the pages below them.
 const NESTED = new Set(['/trips'])

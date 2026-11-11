@@ -48,7 +48,7 @@ export function FeedSkeleton({ count = 3 }: { count?: number }) {
   )
 }
 
-/** Trip card grid, matching the TripGrid columns on /trips. */
+/** Trip card grid, matching TripGrid (components/trip-card). */
 export function TripGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <Loading className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
