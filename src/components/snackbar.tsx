@@ -1,6 +1,5 @@
-import Alert from '@mui/material/Alert'
-import Button from '@mui/material/Button'
 import MuiSnackbar from '@mui/material/Snackbar'
+import { CircleAlert, CircleCheck, X } from 'lucide-react'
 
 export interface SnackbarAction {
   label: string
@@ -16,6 +15,7 @@ interface SnackbarProps {
 }
 
 const Snackbar = ({ open, message, severity = 'success', action, onClose }: SnackbarProps) => {
+  const Icon = severity === 'error' ? CircleAlert : CircleCheck
   return (
     <MuiSnackbar
       open={open}
@@ -28,28 +28,40 @@ const Snackbar = ({ open, message, severity = 'success', action, onClose }: Snac
       }}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
     >
-      <Alert
-        severity={severity}
-        onClose={onClose}
-        sx={{ fontFamily: 'inherit', borderRadius: '16px' }}
-        action={
-          action ? (
-            <Button
-              color="inherit"
-              size="small"
-              sx={{ fontFamily: 'inherit', textTransform: 'none' }}
-              onClick={() => {
-                onClose()
-                action.onClick()
-              }}
-            >
-              {action.label}
-            </Button>
-          ) : undefined
-        }
+      {/* Dark pill (rounded-card = a full pill at one line, still tidy when it wraps). role="alert"
+          as the MUI Alert it replaces, so it is announced. */}
+      <div
+        role="alert"
+        className="flex max-w-full items-center gap-2.5 rounded-card bg-primary py-2 pl-4 pr-2 text-sm leading-normal text-white shadow-soft"
       >
-        {message}
-      </Alert>
+        <Icon
+          aria-hidden
+          size={18}
+          className={severity === 'error' ? 'shrink-0 text-danger' : 'shrink-0 text-live'}
+        />
+        <span className="min-w-0 break-words py-1">{message}</span>
+        {action && (
+          <button
+            type="button"
+            onClick={() => {
+              onClose()
+              action.onClick()
+            }}
+            className="shrink-0 rounded-full px-3 py-1 font-semibold whitespace-nowrap text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            {action.label}
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label="Close"
+          title="Close"
+          onClick={onClose}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          <X size={16} />
+        </button>
+      </div>
     </MuiSnackbar>
   )
 }

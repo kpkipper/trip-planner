@@ -1,7 +1,7 @@
 'use client'
 
 import NotFound from '@/components/not-found'
-import PageLoading from '@/components/page-loading'
+import PageLoading, { TripPageSkeleton } from '@/components/page-loading'
 import { useShellParam } from '@/lib/use-shell-param'
 
 import CreateEditContent from './create-edit-content/create-edit-content'
@@ -14,7 +14,7 @@ import TripViewContent from './view-content/trip-view-content'
 
 export function TripViewShell({ slug }: { slug: string }) {
   const value = useShellParam(slug, '/plans')
-  if (value === undefined) return <PageLoading />
+  if (value === undefined) return <TripPageSkeleton />
   if (value === null) return <NotFound />
   return <TripViewContent slug={value} key={value} />
 }

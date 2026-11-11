@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import PageLoading from '@/components/page-loading'
+import { FeedSkeleton, SkeletonBlock } from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
 import { loginPath } from '@/lib/safe-next'
 import { buttonClass } from '@/lib/ui-classes'
@@ -23,7 +23,14 @@ export default function FeedContent() {
     if (status === 'anon') router.replace(loginPath('/feed'))
   }, [status, router])
 
-  if (status !== 'authed') return <PageLoading />
+  if (status !== 'authed') {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:py-10">
+        <SkeletonBlock className="mb-6 h-9 w-28" />
+        <FeedSkeleton />
+      </div>
+    )
+  }
 
   const firstLoad = !feed.loaded && feed.items.length === 0 && feed.error == null
   const empty = feed.loaded && !feed.loading && !feed.error && feed.items.length === 0
@@ -32,7 +39,7 @@ export default function FeedContent() {
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:py-10">
       <h1 className="mb-4 text-[28px] font-semibold leading-snug tracking-tight text-ink">Feed</h1>
       <NowRow travelers={feed.travelers} />
-      {firstLoad && <PageLoading />}
+      {firstLoad && <FeedSkeleton />}
       {empty && (
         <p className="py-10 text-center leading-normal text-muted">ยังไม่มีอะไรใน feed ลอง follow เพื่อนดูสิ</p>
       )}

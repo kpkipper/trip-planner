@@ -61,3 +61,11 @@ export const fieldClass =
 
 // Add next to fieldClass when the field has a validation error.
 export const fieldErrorClass = 'ring-2 ring-danger/60'
+
+// Form label above a field: 13px, medium, muted.
+export const labelClass = 'text-[13px] font-medium leading-normal text-muted'
+
+// A checkbox drawn as a switch (pair with role="switch"): chip track, primary when on,
+// white knob. Fixed size is fine here: there is no text inside.
+export const switchClass =
+  "relative h-6 w-10 shrink-0 cursor-pointer appearance-none rounded-full bg-chip ring-1 ring-inset ring-line transition-colors before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow-sm before:transition-transform before:content-[''] checked:bg-primary checked:ring-primary checked:before:translate-x-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"

@@ -8,7 +8,7 @@ import { MapPin, Radio } from 'lucide-react'
 
 import ConfirmDialog from '@/components/confirm-dialog'
 import NotFound from '@/components/not-found'
-import PageLoading from '@/components/page-loading'
+import { TripPageSkeleton } from '@/components/page-loading'
 import { Card } from '@/components/ui/card'
 import { coverGradient } from '@/lib/cover-gradient'
 import { groupMoments } from '@/lib/moments-by-day'
@@ -68,7 +68,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
     uploadStore.setOnBatchDone(reloadMoments)
   }, [uploadStore, reloadMoments])
 
-  if (loading || deleting) return <PageLoading />
+  if (loading || deleting) return <TripPageSkeleton />
   if (notFound || !trip) return <NotFound />
 
   const selectedDay = trip.days[selectedDayIndex]

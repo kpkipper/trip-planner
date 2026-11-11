@@ -20,7 +20,7 @@ export default function UserAvatar({ user, size = 32 }: Props) {
         width={size}
         height={size}
         referrerPolicy="no-referrer"
-        className="rounded-full object-cover flex-shrink-0 bg-gray-100"
+        className="rounded-full object-cover flex-shrink-0 bg-chip"
         style={{ width: size, height: size }}
       />
     )

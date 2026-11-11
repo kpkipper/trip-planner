@@ -1,7 +1,7 @@
 import { cache, Suspense } from 'react'
 
 import { getJourneyBySlug } from '@/api/journey'
-import PageLoading from '@/components/page-loading'
+import { TripPageSkeleton } from '@/components/page-loading'
 import { siteConfig } from '@/config/site'
 import { tripStaticParams } from '@/lib/public-slugs'
 import { SHELL_PARAM } from '@/lib/shell-param'
@@ -81,7 +81,7 @@ export default async function TripPage({ params }: { params: Promise<{ slug: str
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       )}
-      <Suspense fallback={<PageLoading />}>
+      <Suspense fallback={<TripPageSkeleton />}>
         <TripViewShell slug={slug} />
       </Suspense>
     </>

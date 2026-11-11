@@ -42,18 +42,18 @@ export default function ConfirmDialog({
         role="alertdialog"
         aria-modal="true"
         aria-label={title}
-        className="relative bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-sm p-6"
+        className="relative w-full max-w-sm rounded-card bg-surface p-6 shadow-soft"
       >
-        <div className="flex items-start gap-3 mb-4">
-          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
-            <AlertTriangle size={18} className="text-red-500" />
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger/10">
+            <AlertTriangle size={18} className="text-danger" />
           </div>
-          <div>
-            <h2 className="text-base font-semibold text-gray-800">{title}</h2>
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold leading-normal tracking-tight text-ink">{title}</h2>
+            <p className="mt-1 text-sm leading-normal text-muted">{description}</p>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onCancel}
             className={buttonClass('secondary', 'md')}

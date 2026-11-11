@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Plus } from 'lucide-react'
 
-import PageLoading from '@/components/page-loading'
+import { SkeletonBlock, TripGridSkeleton } from '@/components/page-loading'
 import TripCard from '@/components/trip-card'
 import { ButtonLink } from '@/components/ui/button'
 import { useAuth } from '@/contexts/auth-context'
@@ -45,11 +45,16 @@ export default function MyTripsContent() {
     if (status === 'anon') router.replace(loginPath('/trips'))
   }, [status, router])
 
-  if (status !== 'authed') return <PageLoading />
-
   const empty = myTrips.length === 0 && sharedTrips.length === 0
-  // The list refetches on every navigation; only show the spinner while nothing is there yet.
-  if (!loaded && empty) return <PageLoading />
+  // The list refetches on every navigation; only show the skeleton while nothing is there yet.
+  if (status !== 'authed' || (!loaded && empty)) {
+    return (
+      <div className="px-4 py-8">
+        <SkeletonBlock className="mb-6 h-10 w-40 md:h-14 md:w-56" />
+        <TripGridSkeleton />
+      </div>
+    )
+  }
 
   return (
     <div className="px-4 py-8">

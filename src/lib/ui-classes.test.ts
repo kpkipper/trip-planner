@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { buttonClass, cardClass, chipClass, cn, fieldClass } from './ui-classes'
+import {
+  buttonClass,
+  cardClass,
+  chipClass,
+  cn,
+  fieldClass,
+  labelClass,
+  switchClass,
+} from './ui-classes'
 
 const tokens = (s: string) => s.split(/\s+/).filter(Boolean)
 
@@ -116,5 +124,27 @@ describe('cn', () => {
 
   it('keeps colour and size utilities that do not conflict', () => {
     expect(cn('text-sm text-ink', 'text-accent')).toBe('text-sm text-accent')
+  })
+})
+
+describe('switchClass', () => {
+  it('is a chip track that turns primary when checked, with a white knob', () => {
+    const c = tokens(switchClass)
+    expect(c).toContain('appearance-none')
+    expect(c).toContain('rounded-full')
+    expect(c).toContain('bg-chip')
+    expect(c).toContain('checked:bg-primary')
+    expect(c).toContain('before:bg-white')
+    expect(c).toContain('checked:before:translate-x-4')
+    expect(c).toContain('focus-visible:ring-accent')
+  })
+})
+
+describe('labelClass', () => {
+  it('is 13px medium muted text', () => {
+    const c = tokens(labelClass)
+    expect(c).toContain('text-[13px]')
+    expect(c).toContain('font-medium')
+    expect(c).toContain('text-muted')
   })
 })
