@@ -101,11 +101,14 @@ export default function MyMomentsContent() {
       <PageTitle>รูปของฉัน</PageTitle>
 
       {failed && (
-        <EmptyCard>
-          <p className="mb-3">โหลดรูปไม่สำเร็จ</p>
-          <button onClick={load} className={buttonClass('primary', 'sm')}>
-            ลองใหม่
-          </button>
+        <EmptyCard
+          action={
+            <button onClick={load} className={buttonClass('primary', 'sm')}>
+              ลองใหม่
+            </button>
+          }
+        >
+          โหลดรูปไม่สำเร็จ
         </EmptyCard>
       )}
 
@@ -126,7 +129,10 @@ export default function MyMomentsContent() {
           {moments.map((m) => {
             const thumb = safeMediaUrl(m.thumb_url)
             return (
-              <li key={m.id} className="min-w-0 overflow-hidden rounded-tile bg-surface shadow-soft">
+              <li
+                key={m.id}
+                className="min-w-0 overflow-hidden rounded-tile bg-surface shadow-soft"
+              >
                 <div className="relative aspect-square bg-chip">
                   {thumb && (
                     // eslint-disable-next-line @next/next/no-img-element -- static export, signed remote URL

@@ -68,19 +68,22 @@ export default function BlocksContent() {
     <div className="mx-auto max-w-xl px-4 py-8">
       <PageTitle>คนที่ block</PageTitle>
       {failed && (
-        <EmptyCard>
-          <p className="mb-3">โหลดรายการไม่สำเร็จ</p>
-          <button
-            type="button"
-            onClick={() => {
-              setFailed(false)
-              setUsers(null)
-              setAttempt((n) => n + 1)
-            }}
-            className={buttonClass('primary', 'sm')}
-          >
-            ลองใหม่
-          </button>
+        <EmptyCard
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setFailed(false)
+                setUsers(null)
+                setAttempt((n) => n + 1)
+              }}
+              className={buttonClass('primary', 'sm')}
+            >
+              ลองใหม่
+            </button>
+          }
+        >
+          โหลดรายการไม่สำเร็จ
         </EmptyCard>
       )}
       {!failed && users?.length === 0 && <EmptyCard>ยังไม่ได้ block ใคร</EmptyCard>}

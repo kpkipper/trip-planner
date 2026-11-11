@@ -182,7 +182,12 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className={buttonClass('ghost', 'md')}>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className={buttonClass('ghost', 'md')}
+          >
             Cancel
           </button>
           <button

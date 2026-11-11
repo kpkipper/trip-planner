@@ -70,3 +70,14 @@ export const labelClass = 'text-[13px] font-medium leading-normal text-muted'
 // outline outside the track (the track's own ring is inset, so a ring would draw inside it).
 export const switchClass =
   "relative h-6 w-10 shrink-0 cursor-pointer appearance-none rounded-full bg-chip ring-1 ring-inset ring-line transition-colors before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow-sm before:transition-transform before:content-[''] checked:bg-primary checked:ring-primary checked:before:translate-x-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50"
+
+// A row in a dropdown menu (account menu, block menu, trip actions). The inset ring keeps the
+// focus indicator visible inside the menu's rounded, overflow-hidden panel.
+export function menuItemClass(tone: 'default' | 'danger' = 'default'): string {
+  return join(
+    'flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
+    tone === 'danger'
+      ? 'text-danger hover:bg-danger/5 focus-visible:bg-danger/5'
+      : 'text-ink-2 hover:bg-chip focus-visible:bg-chip',
+  )
+}

@@ -10,7 +10,7 @@ import { followUser, getProfile, unfollowUser } from '@/api/profile'
 import { unblockUser } from '@/api/safety'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
-import TripCard, { type TripCardData } from '@/components/trip-card'
+import { type TripCardData, TripGrid } from '@/components/trip-card'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { EmptyCard } from '@/components/ui/list'
 import UserAvatar from '@/components/user-avatar'
@@ -64,16 +64,8 @@ const cardData = (t: {
   status: t.status,
 })
 
-function TripGrid({ trips }: { trips: Parameters<typeof cardData>[0][] }) {
-  return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-      {trips.map((t) => (
-        <li key={t.slug} className="min-w-0">
-          <TripCard trip={cardData(t)} />
-        </li>
-      ))}
-    </ul>
-  )
+function ProfileTripGrid({ trips }: { trips: Parameters<typeof cardData>[0][] }) {
+  return <TripGrid trips={trips.map(cardData)} />
 }
 
 type TabKey = 'upcoming' | 'calendar' | 'past'
@@ -205,18 +197,23 @@ export default function ProfileContent({ username }: { username: string }) {
   }
   if (result.error || !result.profile) {
     return (
-      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="text-sm text-muted">Could not load this profile.</p>
-        <button
-          type="button"
-          onClick={() => {
-            setResult(null)
-            setAttempt((n) => n + 1)
-          }}
-          className={buttonClass('primary', 'md')}
+      <div className="mx-auto w-full max-w-xl px-4 py-10">
+        <EmptyCard
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setResult(null)
+                setAttempt((n) => n + 1)
+              }}
+              className={buttonClass('primary', 'md')}
+            >
+              Retry
+            </button>
+          }
         >
-          Retry
-        </button>
+          Could not load this profile.
+        </EmptyCard>
       </div>
     )
   }
@@ -423,7 +420,7 @@ export default function ProfileContent({ username }: { username: string }) {
               />
             )}
             <span className="min-w-0 flex-1">
-              <span className="flex items-start gap-2 text-sm font-semibold leading-normal text-live">
+              <span className="flex items-start gap-2 text-sm font-semibold leading-normal text-live-ink">
                 <span
                   aria-hidden
                   className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-live ring-4 ring-live/25"
@@ -465,7 +462,7 @@ export default function ProfileContent({ username }: { username: string }) {
             id={`profile-panel-${activeTab}`}
             aria-labelledby={`profile-tab-${activeTab}`}
           >
-            {activeTab === 'upcoming' && <TripGrid trips={upcoming} />}
+            {activeTab === 'upcoming' && <ProfileTripGrid trips={upcoming} />}
 
             {activeTab === 'calendar' && (
               <div className="space-y-6">
@@ -477,7 +474,7 @@ export default function ProfileContent({ username }: { username: string }) {
                         <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                           {MONTHS[m.month - 1]}
                         </h4>
-                        <TripGrid trips={m.items} />
+                        <ProfileTripGrid trips={m.items} />
                       </div>
                     ))}
                   </div>
@@ -485,7 +482,7 @@ export default function ProfileContent({ username }: { username: string }) {
                 {hidden.length > 0 && (
                   <div>
                     <h3 className="mb-3 text-sm font-semibold text-muted">Dates hidden</h3>
-                    <TripGrid trips={hidden} />
+                    <ProfileTripGrid trips={hidden} />
                   </div>
                 )}
               </div>
@@ -498,7 +495,7 @@ export default function ProfileContent({ username }: { username: string }) {
                   {stats.cities} {stats.cities === 1 ? 'city' : 'cities'} · {stats.trips}{' '}
                   {stats.trips === 1 ? 'trip' : 'trips'}
                 </p>
-                <TripGrid trips={past} />
+                <ProfileTripGrid trips={past} />
               </>
             )}
           </div>

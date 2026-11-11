@@ -179,43 +179,46 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
         {members.map((m) => {
           const isOwner = m.role === 'owner'
           return (
-            <li key={m.username} className="flex items-center gap-3 py-3">
+            // Wraps at narrow widths: the controls drop below the name instead of squeezing it.
+            <li key={m.username} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
               <UserAvatar user={m} size={32} />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-32 flex-1">
                 <p className="truncate text-sm font-medium leading-normal text-ink">
                   {m.display_name || m.username}
                 </p>
                 <p className="truncate text-xs leading-normal text-muted">@{m.username}</p>
               </div>
-              {m.status === 'invited' && (
-                <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium leading-normal text-accent">
-                  pending
-                </span>
-              )}
-              {controls.manageMembers && !isOwner ? (
-                <>
-                  <select
-                    aria-label={`Role of @${m.username}`}
-                    value={m.role}
-                    disabled={busy}
-                    onChange={(e) => handleRole(m, e.target.value as MemberRole)}
-                    className={selectClass}
-                  >
-                    <option value="editor">editor</option>
-                    <option value="traveler">traveler</option>
-                  </select>
-                  <button
-                    aria-label={`Remove @${m.username}`}
-                    disabled={busy}
-                    onClick={() => setRemoving(m)}
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-danger/5 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </>
-              ) : (
-                <span className="text-xs leading-normal text-muted">{m.role}</span>
-              )}
+              <div className="ml-auto flex shrink-0 items-center gap-2">
+                {m.status === 'invited' && (
+                  <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium leading-normal text-accent">
+                    pending
+                  </span>
+                )}
+                {controls.manageMembers && !isOwner ? (
+                  <>
+                    <select
+                      aria-label={`Role of @${m.username}`}
+                      value={m.role}
+                      disabled={busy}
+                      onChange={(e) => handleRole(m, e.target.value as MemberRole)}
+                      className={selectClass}
+                    >
+                      <option value="editor">editor</option>
+                      <option value="traveler">traveler</option>
+                    </select>
+                    <button
+                      aria-label={`Remove @${m.username}`}
+                      disabled={busy}
+                      onClick={() => setRemoving(m)}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-danger/5 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-xs leading-normal text-muted">{m.role}</span>
+                )}
+              </div>
             </li>
           )
         })}
@@ -294,10 +297,7 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
                 onFocus={(e) => e.currentTarget.select()}
                 className="min-w-0 flex-1 rounded bg-transparent text-xs leading-normal text-ink-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               />
-              <button
-                onClick={handleCopy}
-                className={buttonClass('secondary', 'sm')}
-              >
+              <button onClick={handleCopy} className={buttonClass('secondary', 'sm')}>
                 <Copy size={14} />
                 Copy
               </button>
@@ -307,7 +307,10 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
           {links.length > 0 && (
             <ul className="mt-3 divide-y divide-line">
               {links.map((l) => (
-                <li key={l.id} className="flex items-center gap-2 py-2 text-sm leading-normal text-ink-2">
+                <li
+                  key={l.id}
+                  className="flex items-center gap-2 py-2 text-sm leading-normal text-ink-2"
+                >
                   <span className="flex-1">
                     {l.role} link
                     <span className="ml-2 text-xs text-muted">{expiryLabel(l.expires_at)}</span>

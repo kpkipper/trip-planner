@@ -137,19 +137,22 @@ export default function FollowRequestsContent() {
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
       {failed ? (
-        <EmptyCard>
-          <p className="mb-3">Could not load follow requests</p>
-          <button
-            type="button"
-            onClick={() => {
-              setFailed(false)
-              setRequests(null)
-              setAttempt((n) => n + 1)
-            }}
-            className={buttonClass('primary', 'sm')}
-          >
-            Try again
-          </button>
+        <EmptyCard
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setFailed(false)
+                setRequests(null)
+                setAttempt((n) => n + 1)
+              }}
+              className={buttonClass('primary', 'sm')}
+            >
+              Try again
+            </button>
+          }
+        >
+          Could not load follow requests
         </EmptyCard>
       ) : (
         <>

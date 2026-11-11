@@ -7,6 +7,7 @@ import {
   cn,
   fieldClass,
   labelClass,
+  menuItemClass,
   switchClass,
 } from './ui-classes'
 
@@ -154,5 +155,35 @@ describe('labelClass', () => {
     expect(c).toContain('text-[13px]')
     expect(c).toContain('font-medium')
     expect(c).toContain('text-muted')
+  })
+})
+
+describe('menuItemClass', () => {
+  it('is a full-width row with a visible inset accent focus ring', () => {
+    const c = tokens(menuItemClass())
+    expect(c).toContain('w-full')
+    expect(c).toContain('focus-visible:ring-2')
+    expect(c).toContain('focus-visible:ring-inset')
+    expect(c).toContain('focus-visible:ring-accent')
+  })
+
+  it('default tone is ink-2 with a chip hover and focus fill', () => {
+    const c = tokens(menuItemClass())
+    expect(c).toContain('text-ink-2')
+    expect(c).toContain('hover:bg-chip')
+    expect(c).toContain('focus-visible:bg-chip')
+  })
+
+  it('danger tone uses danger text and a danger tint', () => {
+    const c = tokens(menuItemClass('danger'))
+    expect(c).toContain('text-danger')
+    expect(c).toContain('hover:bg-danger/5')
+    expect(c).toContain('focus-visible:bg-danger/5')
+    expect(c).not.toContain('text-ink-2')
+    expect(c).toContain('focus-visible:ring-accent')
+  })
+
+  it('keeps Thai-safe line height', () => {
+    expect(tokens(menuItemClass())).toContain('leading-normal')
   })
 })

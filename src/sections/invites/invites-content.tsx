@@ -39,11 +39,14 @@ export default function InvitesContent() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <PageTitle>Invites</PageTitle>
-        <EmptyCard>
-          <p className="mb-3">Could not load your invites.</p>
-          <button onClick={() => void refresh()} className={buttonClass('primary', 'sm')}>
-            Retry
-          </button>
+        <EmptyCard
+          action={
+            <button onClick={() => void refresh()} className={buttonClass('primary', 'sm')}>
+              Retry
+            </button>
+          }
+        >
+          Could not load your invites.
         </EmptyCard>
       </div>
     )
@@ -89,7 +92,9 @@ export default function InvitesContent() {
           {invites.map((inv) => (
             <li key={inv.id} className={cn(listRowClass, 'flex-wrap justify-between py-4')}>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold leading-normal text-ink">{inv.journey_title}</p>
+                <p className="truncate font-semibold leading-normal text-ink">
+                  {inv.journey_title}
+                </p>
                 <p className="text-sm leading-normal text-muted">
                   {inv.invited_by ? `@${inv.invited_by} invited you as ` : 'Invited as '}
                   <span className="font-medium text-ink-2">{inv.role}</span>

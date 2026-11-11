@@ -61,7 +61,7 @@ export default function ActivityItem({
           )}
         >
           {today && !highlight && (
-            <span className="mr-2 inline-flex items-center gap-1 rounded-full bg-live/10 px-2 py-0.5 align-middle text-[11px] font-semibold uppercase leading-normal text-live">
+            <span className="mr-2 inline-flex items-center gap-1 rounded-full bg-live/10 px-2 py-0.5 align-middle text-[11px] font-semibold uppercase leading-normal text-live-ink">
               <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-live" />
               Today
             </span>

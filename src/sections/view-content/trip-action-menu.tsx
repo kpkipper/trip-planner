@@ -8,7 +8,7 @@ import { Edit2, FileJson, FileText, Flag, LogOut, MoreVertical, Trash2 } from 'l
 
 import { useAuth } from '@/contexts/auth-context'
 import { tripActions } from '@/lib/trip-roles'
-import { cn } from '@/lib/ui-classes'
+import { cn, menuItemClass } from '@/lib/ui-classes'
 import ReportDialog from '@/sections/safety/report-dialog'
 
 import { exportJSON, exportPDF } from './export-utils'
@@ -82,7 +82,7 @@ export default function TripActionMenu({
                 router.push(`/plans/${slug}/edit`)
                 close()
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+              className={menuItemClass()}
             >
               <Edit2 size={14} />
               Edit
@@ -96,7 +96,7 @@ export default function TripActionMenu({
                   exportJSON(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+                className={menuItemClass()}
               >
                 <FileJson size={14} />
                 Export as JSON
@@ -106,7 +106,7 @@ export default function TripActionMenu({
                   exportPDF(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+                className={menuItemClass()}
               >
                 <FileText size={14} />
                 Export as PDF
@@ -121,7 +121,7 @@ export default function TripActionMenu({
                   setReporting(true)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+                className={menuItemClass()}
               >
                 <Flag size={14} />
                 Report
@@ -136,7 +136,7 @@ export default function TripActionMenu({
                   onLeave()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+                className={menuItemClass('danger')}
               >
                 <LogOut size={14} />
                 Leave trip
@@ -151,7 +151,7 @@ export default function TripActionMenu({
                   onDelete()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
+                className={menuItemClass('danger')}
               >
                 <Trash2 size={14} />
                 Delete

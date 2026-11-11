@@ -5,7 +5,7 @@
   --color-surface: #ffffff;
   --color-ink: #171717;
   --color-ink-2: #2b313b;
-  --color-muted: #6b7280;
+  --color-muted: #646b78;
   --color-line: rgb(17 17 17 / 0.08);
   --color-chip: #efefec;
   --color-primary: #131922;
@@ -13,6 +13,7 @@
   --color-accent: #0066cc;
   --color-accent-soft: #e8f2ff;
   --color-live: #16a34a;
+  --color-live-ink: #15803d;
   --color-danger: #dc2626;
 
   --radius-card: 24px;

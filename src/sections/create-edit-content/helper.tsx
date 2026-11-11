@@ -21,7 +21,7 @@ export const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
 
 // Suggestion dropdowns: a white tile floating over the form.
 const listboxClass =
-  'absolute z-50 mt-2 overflow-y-auto rounded-tile bg-surface p-1 text-sm shadow-soft ring-1 ring-line'
+  'absolute z-20 mt-2 overflow-y-auto rounded-tile bg-surface p-1 text-sm shadow-soft ring-1 ring-line'
 const optionClass = 'cursor-pointer rounded-tile px-3 py-2 leading-normal text-ink-2 hover:bg-chip hover:text-ink'
 
 export function Autocomplete({

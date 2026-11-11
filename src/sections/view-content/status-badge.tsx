@@ -9,7 +9,7 @@ type Variant = 'default' | 'glass'
 const TONES = {
   planning: 'bg-chip text-ink-2',
   upcoming: 'bg-chip text-ink-2',
-  ongoing: 'bg-live/10 text-live',
+  ongoing: 'bg-live/10 text-live-ink',
   completed: 'bg-chip text-ink-2',
 } as const
 

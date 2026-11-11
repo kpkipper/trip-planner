@@ -10,7 +10,7 @@ import { Ban, ImageIcon, Inbox, LogIn, LogOut, UserRound } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
 import { loginPath } from '@/lib/safe-next'
-import { buttonClass, cn } from '@/lib/ui-classes'
+import { buttonClass, cn, menuItemClass } from '@/lib/ui-classes'
 
 import UserAvatar from './user-avatar'
 
@@ -24,8 +24,7 @@ interface Props {
   active?: boolean
 }
 
-const itemClass =
-  'flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors'
+const itemClass = menuItemClass()
 
 export default function AccountMenu({ variant = 'nav', active = false }: Props) {
   const pathname = usePathname()
@@ -191,7 +190,7 @@ export default function AccountMenu({ variant = 'nav', active = false }: Props) 
               close()
               logout()
             }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-normal text-danger transition-colors hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none"
+            className={menuItemClass('danger')}
           >
             <LogOut size={14} />
             Log out

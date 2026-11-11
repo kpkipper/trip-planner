@@ -74,7 +74,7 @@ export default function TripInfoForm({
             <label className={label}>
               Destination
               {!country && (
-                <span className="font-normal text-muted/80"> (select country first)</span>
+                <span className="font-normal text-muted"> (select country first)</span>
               )}
             </label>
             <Autocomplete

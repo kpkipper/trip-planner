@@ -186,7 +186,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
               <>
                 {trip.live && (
                   <Card padding="p-5">
-                    <p className="flex items-center gap-2 text-sm font-semibold leading-normal text-live">
+                    <p className="flex items-center gap-2 text-sm font-semibold leading-normal text-live-ink">
                       <Radio size={14} />
                       {liveLabel(trip.live)}
                     </p>
@@ -194,7 +194,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
                       <ul className="mt-2 space-y-1 text-sm leading-normal text-ink-2">
                         {todayPlans.map((p) => (
                           <li key={p.id} className="flex gap-3">
-                            <span className="w-12 shrink-0 tabular-nums font-semibold text-live">
+                            <span className="w-12 shrink-0 tabular-nums font-semibold text-live-ink">
                               {p.time}
                             </span>
                             <span className="min-w-0 break-words font-medium">{p.description}</span>

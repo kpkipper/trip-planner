@@ -8,6 +8,7 @@ import { blockUser, unblockUser } from '@/api/safety'
 import ConfirmDialog from '@/components/confirm-dialog'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
+import { menuItemClass } from '@/lib/ui-classes'
 
 import ReportDialog from './report-dialog'
 
@@ -18,8 +19,7 @@ interface Props {
   onChanged: () => void
 }
 
-const itemClass =
-  'flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-normal text-ink-2 transition-colors hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent'
+const itemClass = menuItemClass()
 
 export default function BlockMenu({ username, isBlocked, onChanged }: Props) {
   const { showToast } = useToast()
