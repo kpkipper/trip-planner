@@ -39,7 +39,7 @@ export default function MomentUploader({ slug, dayId, planId }: Props) {
         className="inline-flex items-center gap-1.5 rounded-lg border border-[#0163a4] px-3 py-1.5 text-sm font-medium text-[#0163a4] hover:bg-[#0163a4]/5 disabled:opacity-50"
       >
         <Camera size={14} />
-        {busy ? 'กำลังอัปโหลด…' : 'แปะรูป/วิดีโอ'}
+        {busy ? 'กำลังอัปโหลด…' : 'อัปโหลดรูป'}
       </button>
       <input
         ref={inputRef}
@@ -48,7 +48,7 @@ export default function MomentUploader({ slug, dayId, planId }: Props) {
         accept={ACCEPT}
         onChange={onPick}
         className="hidden"
-        aria-label={`เลือกรูปหรือวิดีโอ (ไม่เกิน ${MAX_FILES} ไฟล์)`}
+        aria-label={`เลือกรูป (ไม่เกิน ${MAX_FILES} ไฟล์)`}
       />
 
       {items.length > 0 && (

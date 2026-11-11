@@ -7,9 +7,9 @@ const GENERIC = 'อัปโหลดไม่สำเร็จ'
 const BY_MESSAGE: Record<string, string> = {
   'file too large': 'ไฟล์ใหญ่เกินไป',
   'unsupported file format': 'ไฟล์ชนิดนี้ใช้ไม่ได้',
-  'video is longer than 60 seconds': 'วิดีโอยาวเกิน 60 วินาที',
+  'video is longer than 60 seconds': 'คลิปยาวเกิน 60 วินาที',
   'trip has too many moments': 'ทริปนี้มีรูปครบ 500 แล้ว',
-  'video processing is unavailable': 'ตอนนี้ยังอัปวิดีโอไม่ได้',
+  'video processing is unavailable': 'ตอนนี้ยังอัปโหลดคลิปไม่ได้',
   'image dimensions too large': 'รูปใหญ่เกินไป',
   'upload not found': 'อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง',
 }

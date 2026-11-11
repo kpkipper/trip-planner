@@ -64,7 +64,7 @@ export default function MomentsGallery({
                 <button
                   type="button"
                   onClick={() => setOpen(i)}
-                  aria-label={m.kind === 'video' ? 'เปิดวิดีโอ' : 'เปิดรูป'}
+                  aria-label="เปิดดู story"
                   className="relative block aspect-square w-full overflow-hidden rounded-lg bg-gray-100"
                 >
                   {thumb && (

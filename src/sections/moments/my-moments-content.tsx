@@ -111,7 +111,7 @@ export default function MyMomentsContent() {
 
       {!failed && moments?.length === 0 && (
         <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
-          ยังไม่มีรูปที่คุณแปะ
+          ยังไม่มีรูปที่คุณอัปโหลด
         </div>
       )}
 

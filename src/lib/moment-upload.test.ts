@@ -196,7 +196,7 @@ describe('uploadAll', () => {
     const files = Array.from({ length: 4 }, (_, i) => file('image/jpeg', 10, `f${i}`))
     const items = await uploadAll(files, ctx, deps, () => {})
     expect(items.map((i) => i.state)).toEqual(['done', 'error', 'done', 'done'])
-    expect(items[1].error).toBe('วิดีโอยาวเกิน 60 วินาที')
+    expect(items[1].error).toBe('คลิปยาวเกิน 60 วินาที')
   })
 
   it('marks invalid files as errors without calling the API', async () => {

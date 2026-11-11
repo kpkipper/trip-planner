@@ -96,7 +96,7 @@ describe('feedText', () => {
           moments: { count: 3, day_id: 'd', day_title: 'วันที่ 2', thumbs: [] },
         }),
       ),
-    ).toBe('Ann แปะ 3 รูปใน วันที่ 2')
+    ).toBe('Ann อัปโหลด 3 รูปใน วันที่ 2')
   })
   it('moments_added links the day title to the trip', () => {
     const { parts } = feedText(
@@ -108,7 +108,7 @@ describe('feedText', () => {
     expect(parts.find((p) => p.text === 'วันที่ 2')?.href).toBe('/plans/tokyo%201')
   })
   it('moments_added without moments omits the dangling count', () => {
-    expect(text(base({ type: 'moments_added' }))).toBe('Ann แปะรูป')
+    expect(text(base({ type: 'moments_added' }))).toBe('Ann อัปโหลดรูป')
   })
   it('trip_completed', () => {
     expect(text(base({ type: 'trip_completed' }))).toBe('Ann เที่ยว Tokyo จบแล้ว ✅')

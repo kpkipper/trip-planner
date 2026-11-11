@@ -78,10 +78,10 @@ export const feedText = (item: FeedItem): { parts: FeedPart[] } => {
         parts: m
           ? [
               actor,
-              { text: ` แปะ ${m.count} รูปใน ` },
+              { text: ` อัปโหลด ${m.count} รูปใน ` },
               { text: m.day_title, href: tripHref(item.trip.slug) },
             ]
-          : [actor, { text: ' แปะรูป' }],
+          : [actor, { text: ' อัปโหลดรูป' }],
       }
     }
     case 'trip_completed':
