@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -10,86 +10,155 @@ import { Ban, ImageIcon, Inbox, LogIn, LogOut, UserRound } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass, cn } from '@/lib/ui-classes'
 
 import UserAvatar from './user-avatar'
 
 interface Props {
-  collapsed: boolean
+  /**
+   * `nav`: avatar button in the desktop top nav, menu opens below.
+   * `tab`: the "Me" tab of the mobile tab bar, menu opens above the bar.
+   */
+  variant?: 'nav' | 'tab'
+  /** Mobile tab is highlighted while on the viewer's own profile. */
+  active?: boolean
 }
 
 const itemClass =
-  'flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors'
+  'flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors'
 
-export default function AccountMenu({ collapsed }: Props) {
+export default function AccountMenu({ variant = 'nav', active = false }: Props) {
   const pathname = usePathname()
   const { status, user, logout } = useAuth()
   const { invites } = useInvites()
   const inviteCount = invites.length
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const panelId = useId()
+  const [openedAt, setOpenedAt] = useState(pathname)
+
+  // Close after navigating (e.g. browser back while the menu is open).
+  if (openedAt !== pathname) {
+    setOpenedAt(pathname)
+    setMenuOpen(false)
+  }
 
   useEffect(() => {
     if (!menuOpen) return
-    const handler = (e: MouseEvent) => {
+    // Keyboard users land on the first item.
+    panelRef.current?.querySelector<HTMLElement>('a[href], button')?.focus()
+    const onMouseDown = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      setMenuOpen(false)
+      triggerRef.current?.focus()
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [menuOpen])
 
-  if (status === 'loading') return <div className="h-[37px]" />
+  if (status === 'loading') {
+    return variant === 'tab' ? (
+      <span aria-hidden className="block h-6 w-6 rounded-full bg-chip" />
+    ) : (
+      <span aria-hidden className="block h-9 w-9 rounded-full bg-chip" />
+    )
+  }
 
   if (status === 'anon' || !user) {
     return (
-      <Link
-        href={loginPath(pathname)}
-        className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium ${
-          collapsed ? 'justify-center px-2' : ''
-        }`}
-        aria-label="Log in"
-      >
-        <LogIn size={18} className="flex-shrink-0" />
-        {!collapsed && 'Log in'}
+      <Link href={loginPath(pathname)} className={buttonClass('secondary', 'md')}>
+        <LogIn size={16} className="flex-shrink-0" />
+        Log in
       </Link>
     )
   }
 
   const close = () => setMenuOpen(false)
 
+  // Tabbing out of the menu closes it, so it never stays open behind the focus. A null
+  // relatedTarget (a click on nothing focusable, or Safari not focusing clicked links) is left to
+  // the outside-click handler, so a click on a menu item is never lost.
+  const onBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    const next = e.relatedTarget
+    if (menuOpen && next && !e.currentTarget.contains(next)) close()
+  }
+
+  const label = inviteCount > 0 ? `Account menu, ${inviteCount} pending invites` : 'Account menu'
+
+  const dot = inviteCount > 0 && (
+    <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-danger ring-2 ring-surface" />
+  )
+
   return (
-    <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setMenuOpen((v) => !v)}
-        className={`flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 hover:bg-gray-100 transition-colors ${
-          collapsed ? 'justify-center' : ''
-        }`}
-        aria-label={
-          inviteCount > 0 ? `Account menu, ${inviteCount} pending invites` : 'Account menu'
-        }
-        aria-expanded={menuOpen}
-      >
-        <span className="relative flex-shrink-0">
-          <UserAvatar user={user} size={28} />
-          {inviteCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+    <div className="relative" ref={menuRef} onBlur={onBlur}>
+      {variant === 'tab' ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className={cn(
+            'flex min-w-14 flex-col items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-medium leading-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+            active || menuOpen ? 'text-ink' : 'text-muted',
           )}
-        </span>
-        {!collapsed && (
-          <span className="flex-1 min-w-0 text-left">
-            <span className="block text-sm font-medium text-gray-700 truncate">
-              {user.display_name || user.username}
-            </span>
-            <span className="block text-xs text-gray-400 truncate">@{user.username}</span>
+          aria-label={`Me, ${label.charAt(0).toLowerCase()}${label.slice(1)}`}
+          aria-expanded={menuOpen}
+          aria-controls={menuOpen ? panelId : undefined}
+        >
+          <span
+            className={cn(
+              'relative rounded-full ring-2',
+              active || menuOpen ? 'ring-ink' : 'ring-transparent',
+            )}
+          >
+            <UserAvatar user={user} size={24} />
+            {dot}
           </span>
-        )}
-      </button>
+          Me
+        </button>
+      ) : (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className="flex items-center rounded-full p-0.5 transition-colors hover:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label={label}
+          aria-expanded={menuOpen}
+          aria-controls={menuOpen ? panelId : undefined}
+        >
+          <span className="relative">
+            <UserAvatar user={user} size={36} />
+            {dot}
+          </span>
+        </button>
+      )}
 
       {menuOpen && (
         <div
-          className={`absolute bottom-full mb-1 w-48 bg-surface rounded-tile shadow-lg ring-1 ring-line overflow-hidden z-30 ${
-            collapsed ? 'left-0' : 'left-0 right-0 w-auto'
-          }`}
+          ref={panelRef}
+          id={panelId}
+          className={cn(
+            'absolute right-0 z-40 w-60 overflow-hidden rounded-tile bg-surface shadow-soft ring-1 ring-line',
+            variant === 'tab' ? 'bottom-full mb-4' : 'top-full mt-2',
+          )}
         >
+          <div className="border-b border-line px-4 py-3">
+            <span className="block truncate text-sm font-semibold leading-normal text-ink">
+              {user.display_name || user.username}
+            </span>
+            <span className="block truncate text-xs leading-normal text-muted">
+              @{user.username}
+            </span>
+          </div>
           <Link
             href={`/u/${encodeURIComponent(user.username)}`}
             onClick={close}
@@ -110,18 +179,19 @@ export default function AccountMenu({ collapsed }: Props) {
             <Inbox size={14} />
             Invites
             {inviteCount > 0 && (
-              <span className="ml-auto rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">
+              <span className="ml-auto rounded-full bg-danger px-1.5 text-xs font-semibold leading-normal text-white">
                 {inviteCount}
               </span>
             )}
           </Link>
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-line" />
           <button
+            type="button"
             onClick={() => {
               close()
               logout()
             }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-normal text-danger transition-colors hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none"
           >
             <LogOut size={14} />
             Log out
