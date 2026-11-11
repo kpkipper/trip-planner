@@ -49,7 +49,7 @@ export default function JoinContent({ token }: { token: string }) {
     <div className="max-w-md mx-auto px-4 py-16 text-center">
       <h1 className="text-xl font-semibold text-gray-800 mb-2">Could not join the trip</h1>
       <p className="text-gray-600 mb-6">{error}</p>
-      <Link href="/" className="text-[#0163a4] hover:underline text-sm">
+      <Link href="/" className="text-accent hover:underline text-sm">
         Back to home
       </Link>
     </div>

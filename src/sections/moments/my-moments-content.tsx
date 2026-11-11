@@ -17,6 +17,7 @@ import { shouldRefreshOnError } from '@/lib/moment-refresh'
 import { formatDuration } from '@/lib/moments-by-day'
 import { loginPath } from '@/lib/safe-next'
 import { safeMediaUrl } from '@/lib/safe-url'
+import { buttonClass } from '@/lib/ui-classes'
 
 import type { MomentView } from '@/api/moments/type'
 
@@ -98,11 +99,11 @@ export default function MyMomentsContent() {
       <h1 className="mb-6 text-2xl font-bold text-gray-800">รูปของฉัน</h1>
 
       {failed && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           <p className="mb-3">โหลดรูปไม่สำเร็จ</p>
           <button
             onClick={load}
-            className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387]"
+            className={buttonClass('primary', 'sm')}
           >
             ลองใหม่
           </button>
@@ -110,7 +111,7 @@ export default function MyMomentsContent() {
       )}
 
       {!failed && moments?.length === 0 && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           ยังไม่มีรูปที่คุณอัปโหลด
         </div>
       )}
@@ -120,7 +121,7 @@ export default function MyMomentsContent() {
           {moments.map((m) => {
             const thumb = safeMediaUrl(m.thumb_url)
             return (
-              <li key={m.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <li key={m.id} className="overflow-hidden rounded-tile bg-surface shadow-soft">
                 <div className="relative aspect-square bg-gray-100">
                   {thumb && (
                     // eslint-disable-next-line @next/next/no-img-element -- static export, signed remote URL
@@ -153,7 +154,7 @@ export default function MyMomentsContent() {
                   {m.journey ? (
                     <Link
                       href={`/plans/${encodeURIComponent(m.journey.slug)}`}
-                      className="block truncate font-medium text-[#0163a4] hover:underline"
+                      className="block truncate font-medium text-accent hover:underline"
                     >
                       {m.journey.title}
                     </Link>

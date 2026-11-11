@@ -10,6 +10,7 @@ import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import DayCard from './day-card'
 import TripInfoForm from './trip-info-form'
@@ -126,7 +127,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
       )}
 
       {days.length === 0 && (!startDate || !endDate) && (
-        <div className="bg-[#edf3f7] border border-[#0163a4]/20 rounded-xl p-4 mb-6 text-sm text-[#0163a4]">
+        <div className="bg-accent-soft rounded-tile p-4 mb-6 text-sm text-ink-2">
           Set start and end dates above to generate your day-by-day plan.
         </div>
       )}
@@ -134,14 +135,14 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
       <div className="flex items-center justify-end gap-3">
         <button
           onClick={handleCancel}
-          className="px-6 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
+          className={buttonClass('secondary', 'md')}
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-[#0163a4] text-white rounded-lg hover:bg-[#0470b9] transition-colors text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`${buttonClass('primary', 'md')} w-full sm:w-auto`}
         >
           <Save size={16} />
           {saving ? 'Saving...' : 'Save Plan'}

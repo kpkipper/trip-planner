@@ -4,6 +4,7 @@ import React, { useRef } from 'react'
 
 import { AlertTriangle } from 'lucide-react'
 
+import { buttonClass } from '@/lib/ui-classes'
 import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { RefObject } from 'react'
@@ -55,13 +56,13 @@ export default function ConfirmDialog({
         <div className="flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 text-sm transition-colors"
+            className={buttonClass('secondary', 'md')}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+            className={buttonClass('danger', 'md')}
           >
             {confirmLabel}
           </button>

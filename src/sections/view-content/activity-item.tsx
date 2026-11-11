@@ -28,7 +28,7 @@ export default function ActivityItem({
     <li className="relative flex gap-4 py-3">
       <span
         className={`w-14 shrink-0 text-right font-mono tabular-nums transition-all ${
-          highlight ? 'text-base font-bold text-[#0163a4]' : 'pt-0.5 text-sm text-gray-500'
+          highlight ? 'text-base font-bold text-accent' : 'pt-0.5 text-sm text-gray-500'
         }`}
       >
         {act.time}
@@ -36,13 +36,13 @@ export default function ActivityItem({
 
       <span className="relative z-10 flex w-7 shrink-0 justify-center pt-0.5">
         {highlight ? (
-          <span className="h-7 w-7 rounded-full border-4 border-[#0163a4] bg-white ring-4 ring-[#0163a4]/15" />
+          <span className="h-7 w-7 rounded-full border-4 border-primary bg-surface ring-4 ring-primary/10" />
         ) : placeNumber ? (
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0163a4] text-xs font-semibold text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
             {placeNumber}
           </span>
         ) : (
-          <span className="mt-1 h-3.5 w-3.5 rounded-full border-2 border-[#0163a4] bg-white" />
+          <span className="mt-1 h-3.5 w-3.5 rounded-full border-2 border-primary bg-surface" />
         )}
       </span>
 
@@ -62,7 +62,7 @@ export default function ActivityItem({
             href={mapHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-2 inline-flex items-center gap-0.5 text-sm font-normal text-[#0470b9] underline underline-offset-2 hover:text-[#0163a4]"
+            className="ml-2 inline-flex items-center gap-0.5 text-sm font-normal text-accent underline underline-offset-2 hover:text-accent/80"
           >
             Map
             <ArrowUpRight size={14} />

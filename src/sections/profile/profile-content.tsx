@@ -18,6 +18,7 @@ import { followButton } from '@/lib/follow-button'
 import { groupCalendar } from '@/lib/profile-calendar'
 import { loginPath } from '@/lib/safe-next'
 import { liveLabel } from '@/lib/trip-status'
+import { buttonClass } from '@/lib/ui-classes'
 import BlockMenu from '@/sections/safety/block-menu'
 
 import EditProfileDialog from './edit-profile-dialog'
@@ -57,7 +58,7 @@ function TripLink({
   return (
     <a
       href={`/plans/${encodeURIComponent(slug)}`}
-      className="block rounded-xl border border-gray-200 bg-white p-3 hover:border-[#16aef2]"
+      className="block rounded-tile bg-surface p-3 shadow-soft transition-shadow hover:ring-2 hover:ring-accent/40"
     >
       <span className="block text-sm font-semibold text-gray-800">{title}</span>
       <span className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
@@ -156,7 +157,7 @@ export default function ProfileContent({ username }: { username: string }) {
             setResult(null)
             setAttempt((n) => n + 1)
           }}
-          className="rounded-lg bg-[#0163a4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0470b9]"
+          className={buttonClass('primary', 'md')}
         >
           Retry
         </button>
@@ -266,7 +267,7 @@ export default function ProfileContent({ username }: { username: string }) {
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className={buttonClass('secondary', 'md')}
           >
             Edit profile
           </button>
@@ -277,11 +278,7 @@ export default function ProfileContent({ username }: { username: string }) {
             disabled={busy}
             title={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
             aria-label={followState.action === 'cancel' ? 'Requested, cancel follow request' : undefined}
-            className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
-              followState.action !== 'follow'
-                ? 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                : 'bg-[#0163a4] text-white hover:bg-[#0470b9]'
-            }`}
+            className={buttonClass(followState.action !== 'follow' ? 'secondary' : 'primary')}
           >
             {followState.label}
           </button>
@@ -296,13 +293,13 @@ export default function ProfileContent({ username }: { username: string }) {
       </header>
 
       {profile.is_blocked && !own && (
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+        <div className="mt-8 rounded-card bg-surface p-8 text-center shadow-soft">
           <p className="mb-3 text-sm text-gray-600">คุณ block คนนี้อยู่</p>
           <button
             type="button"
             onClick={() => void unblock()}
             disabled={busy}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className={buttonClass('secondary', 'md')}
           >
             Unblock
           </button>
@@ -339,7 +336,7 @@ export default function ProfileContent({ username }: { username: string }) {
           <div className="space-y-5">
             {years.map((y) => (
               <div key={y.year}>
-                <h3 className="mb-2 text-sm font-bold text-[#0163a4]">{y.year}</h3>
+                <h3 className="mb-2 text-sm font-bold text-ink">{y.year}</h3>
                 {y.months.map((m) => (
                   <div key={m.month} className="mb-3">
                     <h4 className="mb-1 text-xs font-semibold uppercase text-gray-500">

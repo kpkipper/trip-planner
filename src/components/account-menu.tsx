@@ -86,7 +86,7 @@ export default function AccountMenu({ collapsed }: Props) {
 
       {menuOpen && (
         <div
-          className={`absolute bottom-full mb-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-30 ${
+          className={`absolute bottom-full mb-1 w-48 bg-surface rounded-tile shadow-lg ring-1 ring-line overflow-hidden z-30 ${
             collapsed ? 'left-0' : 'left-0 right-0 w-auto'
           }`}
         >

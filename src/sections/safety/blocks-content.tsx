@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import type { PublicProfileType } from '@/api/journey/type'
 
@@ -68,7 +69,7 @@ export default function BlocksContent() {
     <div className="mx-auto max-w-xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">คนที่ block</h1>
       {failed && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           <p className="mb-3">โหลดรายการไม่สำเร็จ</p>
           <button
             type="button"
@@ -77,14 +78,14 @@ export default function BlocksContent() {
               setUsers(null)
               setAttempt((n) => n + 1)
             }}
-            className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387]"
+            className={buttonClass('primary', 'sm')}
           >
             ลองใหม่
           </button>
         </div>
       )}
       {!failed && users?.length === 0 && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           ยังไม่ได้ block ใคร
         </div>
       )}
@@ -93,7 +94,7 @@ export default function BlocksContent() {
           {users.map((u) => (
             <li
               key={u.username}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3"
+              className="flex items-center gap-3 rounded-tile bg-surface p-3 shadow-soft"
             >
               <UserAvatar user={u} size={40} />
               <Link
@@ -109,7 +110,7 @@ export default function BlocksContent() {
                 type="button"
                 onClick={() => void unblock(u.username)}
                 disabled={busy !== null}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className={buttonClass('secondary', 'sm')}
               >
                 Unblock
               </button>

@@ -17,6 +17,7 @@ import {
   type SettingsForm,
   VISIBILITY_OPTIONS,
 } from '@/lib/trip-settings'
+import { buttonClass } from '@/lib/ui-classes'
 
 import type { TripSettings } from '@/types/trip'
 
@@ -31,7 +32,7 @@ interface Props {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#16aef2]'
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent'
 
 function Toggle({
   label,
@@ -110,7 +111,7 @@ export default function TripSettingsPanel({
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <section className="mt-8 rounded-card bg-surface p-4 shadow-soft">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -225,7 +226,7 @@ export default function TripSettingsPanel({
             type="button"
             onClick={save}
             disabled={saving || !!coverProblem}
-            className="rounded-lg bg-[#0163a4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0470b9] disabled:opacity-50"
+            className={buttonClass('primary', 'md')}
           >
             {saving ? 'Saving…' : 'Save settings'}
           </button>

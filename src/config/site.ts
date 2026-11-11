@@ -11,7 +11,7 @@ export const siteConfig = {
   // Firebase hosting site: "jourlyplan". Swap for a custom domain when ready.
   url: 'https://jourlyplan.web.app',
   locale: 'en_US',
-  themeColor: '#0163a4',
+  themeColor: '#f5f5f3',
   keywords: [
     'trip planner',
     'travel itinerary',

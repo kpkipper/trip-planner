@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import FeedItem from './feed-item'
 import NowRow from './now-row'
@@ -50,7 +51,7 @@ export default function FeedContent() {
             type="button"
             onClick={feed.loadMore}
             disabled={feed.loading}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className={buttonClass('secondary', 'md')}
           >
             {feed.loading ? 'กำลังโหลด…' : 'โหลดเพิ่ม'}
           </button>
@@ -61,7 +62,7 @@ export default function FeedContent() {
           <button
             type="button"
             onClick={feed.loadMore}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className={buttonClass('secondary', 'md')}
           >
             ลองอีกครั้ง
           </button>

@@ -54,7 +54,7 @@ export default function ActivityRow({
       onDrop={onDrop}
       onDragEnd={onDragEnd}
       className={`rounded-xl border border-gray-200 bg-gray-50 p-2.5 space-y-2 transition-colors ${
-        isOver ? 'ring-1 ring-indigo-200 bg-indigo-50' : ''
+        isOver ? 'ring-1 ring-accent/40 bg-accent-soft' : ''
       }`}
     >
       <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export default function ActivityRow({
           value={act.category ?? ''}
           onChange={(e) => onUpdate('category', e.target.value)}
           aria-label="Category"
-          className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+          className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
         >
           {CATEGORY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -102,7 +102,7 @@ export default function ActivityRow({
         onChange={(e) => onUpdate('description', e.target.value)}
         placeholder="What are you doing?"
         aria-invalid={!!descriptionError}
-        className={`w-full border ${descriptionError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition`}
+        className={`w-full border ${descriptionError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition`}
       />
       {descriptionError && <p className="text-xs text-red-500">{descriptionError}</p>}
       <div className="flex items-center gap-1.5">
@@ -113,7 +113,7 @@ export default function ActivityRow({
           onChange={(e) => onUpdate('mapUrl', e.target.value)}
           placeholder="Maps URL (optional)"
           aria-invalid={!!mapUrlError}
-          className={`flex-1 border ${mapUrlError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition`}
+          className={`flex-1 border ${mapUrlError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition`}
         />
       </div>
       {mapUrlError && <p className="text-xs text-red-500">{mapUrlError}</p>}

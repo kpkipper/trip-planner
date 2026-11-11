@@ -46,8 +46,8 @@ export function buildPdfHtml(trip: Trip): string {
     h1 { font-size: 1.8rem; }
     .meta { color: #555; margin-bottom: 24px; }
     .day { margin-bottom: 24px; border-top: 1px solid #ddd; padding-top: 16px; }
-    h3 { font-size: 1.1rem; margin-bottom: 4px; color: #0163a4; }
-    .date { font-weight: 600; color: #0470b9; margin-bottom: 8px; }
+    h3 { font-size: 1.1rem; margin-bottom: 4px; color: #171717; }
+    .date { font-weight: 600; color: #0a84ff; margin-bottom: 8px; }
     ul { padding-left: 18px; }
     li { margin-bottom: 6px; }
     .empty { color: #999; font-style: italic; }

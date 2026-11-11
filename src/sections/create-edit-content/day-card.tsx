@@ -47,7 +47,7 @@ export default function DayCard({
         className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={onToggle}
       >
-        <span className="text-xs font-semibold text-[#0163a4] bg-[#edf3f7] rounded-md px-2 py-0.5 flex-shrink-0">
+        <span className="text-xs font-semibold leading-normal text-ink-2 bg-chip rounded-full px-2.5 py-0.5 flex-shrink-0">
           Day {dayIdx + 1}
         </span>
         <input
@@ -97,7 +97,7 @@ export default function DayCard({
 
           <button
             onClick={onAddActivity}
-            className="flex items-center gap-1.5 text-sm text-[#0163a4] hover:text-[#0470b9] font-medium mt-3 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium mt-3 transition-colors"
           >
             <Plus size={15} />
             Add Activity

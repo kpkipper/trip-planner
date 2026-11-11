@@ -4,7 +4,7 @@ import type { JourneyStatusType } from '@/api/journey/type'
 
 const TONES = {
   planning: 'bg-gray-100 text-gray-600',
-  upcoming: 'bg-blue-50 text-[#0163a4]',
+  upcoming: 'bg-accent-soft text-accent',
   ongoing: 'bg-green-50 text-green-700',
   completed: 'bg-gray-100 text-gray-500',
 } as const

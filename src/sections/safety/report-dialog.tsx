@@ -6,6 +6,7 @@ import { createReport } from '@/api/safety'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { MAX_NOTE, REPORT_REASONS, reportErrorMessage, validateReport } from '@/lib/report-form'
+import { buttonClass } from '@/lib/ui-classes'
 import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { ReportReason, ReportTargetType } from '@/api/safety/type'
@@ -62,7 +63,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
         role="dialog"
         aria-modal="true"
         aria-label="รายงาน"
-        className="relative w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
+        className="relative w-full max-w-sm rounded-card bg-surface p-6 shadow-xl"
       >
         <h2 className="mb-3 text-base font-semibold text-gray-800">รายงาน</h2>
         <fieldset className="space-y-1.5">
@@ -94,7 +95,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             setError(null)
           }}
           rows={3}
-          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#16aef2]"
+          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent"
         />
         <p className="text-right text-xs text-gray-400">
           {[...note].length}/{MAX_NOTE}
@@ -109,7 +110,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+            className={buttonClass('secondary', 'md')}
           >
             ยกเลิก
           </button>
@@ -117,7 +118,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             type="button"
             onClick={() => void submit()}
             disabled={busy}
-            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+            className={buttonClass('danger', 'md')}
           >
             ส่งรายงาน
           </button>

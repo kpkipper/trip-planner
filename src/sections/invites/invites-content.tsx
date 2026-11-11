@@ -13,6 +13,7 @@ import { useInvites } from '@/contexts/invites-context'
 import { useToast } from '@/contexts/toast-context'
 import { memberErrorMessage } from '@/lib/member-errors'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 export default function InvitesContent() {
   const router = useRouter()
@@ -36,11 +37,11 @@ export default function InvitesContent() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Invites</h1>
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           <p className="mb-3">Could not load your invites.</p>
           <button
             onClick={() => void refresh()}
-            className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387]"
+            className={buttonClass('primary', 'sm')}
           >
             Retry
           </button>
@@ -74,7 +75,7 @@ export default function InvitesContent() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Invites</h1>
       {invites.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
           <Inbox size={28} className="mx-auto mb-2 text-gray-300" />
           <p>No pending invites.</p>
         </div>
@@ -83,7 +84,7 @@ export default function InvitesContent() {
           {invites.map((inv) => (
             <li
               key={inv.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-surface p-4 shadow-soft"
             >
               <div className="min-w-0">
                 <p className="font-semibold text-gray-800 truncate">{inv.journey_title}</p>
@@ -96,14 +97,14 @@ export default function InvitesContent() {
                 <button
                   disabled={busyId !== null}
                   onClick={() => respond(inv.id, inv.journey_slug, false)}
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                  className={buttonClass('secondary', 'sm')}
                 >
                   Decline
                 </button>
                 <button
                   disabled={busyId !== null}
                   onClick={() => respond(inv.id, inv.journey_slug, true)}
-                  className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387] disabled:opacity-50"
+                  className={buttonClass('primary', 'sm')}
                 >
                   Accept
                 </button>

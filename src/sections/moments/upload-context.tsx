@@ -59,5 +59,5 @@ export function DayUploadingMark({ dayId }: { dayId: string }) {
     () => false,
   )
   if (!busy) return null
-  return <div className="text-[10px] font-normal text-[#0163a4]">กำลังอัปโหลด…</div>
+  return <div className="text-[10px] font-normal text-accent">กำลังอัปโหลด…</div>
 }

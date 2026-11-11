@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import { Camera } from 'lucide-react'
 
 import { MAX_FILES } from '@/lib/moment-upload'
+import { buttonClass } from '@/lib/ui-classes'
 
 import { useUploads } from './upload-context'
 
@@ -36,7 +37,7 @@ export default function MomentUploader({ slug, dayId, planId }: Props) {
         type="button"
         disabled={busy}
         onClick={() => inputRef.current?.click()}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#0163a4] px-3 py-1.5 text-sm font-medium text-[#0163a4] hover:bg-[#0163a4]/5 disabled:opacity-50"
+        className={buttonClass('secondary', 'sm')}
       >
         <Camera size={14} />
         {busy ? 'กำลังอัปโหลด…' : 'อัปโหลดรูป'}
@@ -68,7 +69,7 @@ export default function MomentUploader({ slug, dayId, planId }: Props) {
               {(it.state === 'uploading' || it.state === 'queued') && (
                 <div className="mt-0.5 h-1 overflow-hidden rounded bg-gray-100">
                   <div
-                    className="h-full bg-[#0163a4] transition-all"
+                    className="h-full bg-accent transition-all"
                     style={{ width: `${Math.round(it.progress * 100)}%` }}
                   />
                 </div>

@@ -53,14 +53,14 @@ export default function TripActionMenu({ slug, trip, onDelete, onLeave }: Props)
       <button
         ref={triggerRef}
         onClick={() => setMenuOpen((v) => !v)}
-        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-600 transition-colors"
+        className="rounded-full bg-surface p-2 text-gray-600 ring-1 ring-inset ring-line transition-colors hover:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         aria-label="Actions"
       >
         <MoreVertical size={16} />
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-surface rounded-tile shadow-lg ring-1 ring-line overflow-hidden z-20">
           {actions.edit && (
             <button
               onClick={() => {

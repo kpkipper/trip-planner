@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Outfit } from 'next/font/google'
+import { Anuphan } from 'next/font/google'
 
 import ClientLayout from '@/components/client-layout'
 import { siteConfig } from '@/config/site'
@@ -11,20 +11,10 @@ import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
-
-const outfit = Outfit({
-  variable: '--font-outfit',
-  subsets: ['latin'],
-  weight: ['500', '700', '800'],
+const anuphan = Anuphan({
+  variable: '--font-anuphan',
+  subsets: ['thai', 'latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -103,7 +93,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable}`}>
+    <html lang="en" className={anuphan.variable}>
       <body className="antialiased" suppressHydrationWarning>
         <script
           type="application/ld+json"

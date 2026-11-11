@@ -65,12 +65,12 @@ export default function BlockMenu({ username, isBlocked, onChanged }: Props) {
         onClick={() => setOpen((v) => !v)}
         aria-label="เมนู"
         aria-expanded={open}
-        className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-50"
+        className="rounded-full bg-surface p-2 text-gray-600 ring-1 ring-inset ring-line transition-colors hover:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <MoreHorizontal size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-tile bg-surface shadow-lg ring-1 ring-line">
           {isBlocked ? (
             <button type="button" className={itemClass} onClick={() => void run('unblock')}>
               <Ban size={14} />

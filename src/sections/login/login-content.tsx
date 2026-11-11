@@ -12,6 +12,7 @@ import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
 import { storeLoginNext } from '@/lib/login-next'
 import { safeNext } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import { emailStartErrorMessage, loginErrorMessage } from './errors'
 import GoogleButton from './google-button'
@@ -64,14 +65,14 @@ export default function LoginContent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-10">
-      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+      <div className="w-full max-w-sm bg-surface rounded-card shadow-soft p-8">
         <div className="flex justify-center mb-6">
           <Logo size={36} />
         </div>
 
         {sentTo ? (
           <div className="text-center">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#edf3f7] text-[#0163a4] flex items-center justify-center mb-4">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-accent-soft text-accent flex items-center justify-center mb-4">
               <Mail size={26} />
             </div>
             <h1 className="text-xl font-bold text-gray-800 mb-2">Check your email</h1>
@@ -85,7 +86,7 @@ export default function LoginContent() {
                 setSentTo(null)
                 setError(null)
               }}
-              className="mt-6 text-sm font-medium text-[#0163a4] hover:underline"
+              className="mt-6 text-sm font-medium text-accent hover:underline"
             >
               Use a different email
             </button>
@@ -120,12 +121,12 @@ export default function LoginContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4]"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
               />
               <button
                 type="submit"
                 disabled={sending}
-                className="flex items-center justify-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium disabled:opacity-60"
+                className={`${buttonClass('primary', 'lg')} w-full`}
               >
                 <Mail size={16} />
                 {sending ? 'Sending…' : 'Email me a login link'}

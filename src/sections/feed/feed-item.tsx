@@ -15,7 +15,7 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
   const cover = item.type === 'moments_added' ? null : safeHttpsUrl(item.trip.cover_url)
 
   return (
-    <li className="flex gap-3 rounded-xl border border-gray-200 bg-white p-3">
+    <li className="flex gap-3 rounded-tile bg-surface p-3 shadow-soft">
       <UserAvatar user={item.actor} size={40} />
       <div className="min-w-0 flex-1">
         <p className="text-sm text-gray-800">

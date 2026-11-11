@@ -31,11 +31,13 @@ const Snackbar = ({ open, message, severity = 'success', action, onClose }: Snac
       <Alert
         severity={severity}
         onClose={onClose}
+        sx={{ fontFamily: 'inherit', borderRadius: '16px' }}
         action={
           action ? (
             <Button
               color="inherit"
               size="small"
+              sx={{ fontFamily: 'inherit', textTransform: 'none' }}
               onClick={() => {
                 onClose()
                 action.onClick()

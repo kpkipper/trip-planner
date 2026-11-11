@@ -11,6 +11,7 @@ import { verifyEmailLogin } from '@/api/auth'
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
 import { consumeLoginNext } from '@/lib/login-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import { verifyErrorMessage } from './errors'
 import { consumeVerifyToken } from './verify-token'
@@ -42,14 +43,14 @@ export default function VerifyContent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#0163a4] to-[#38bdf8] flex items-center justify-center mb-6 shadow-xl shadow-[#0163a4]/20">
+      <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center mb-6 shadow-soft">
         <LinkIcon size={34} className="text-white" strokeWidth={1.5} />
       </div>
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Can&apos;t log you in</h1>
       <p className="text-gray-400 text-sm max-w-xs leading-relaxed mb-6">{error}</p>
       <Link
         href="/login"
-        className="rounded-lg px-4 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium"
+        className={buttonClass('primary', 'md')}
       >
         Back to login
       </Link>

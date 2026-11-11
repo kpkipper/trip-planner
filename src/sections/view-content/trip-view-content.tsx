@@ -121,7 +121,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
         </div>
 
         {trip.redacted ? (
-          <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+          <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
             <p>Details will be visible after the trip ends.</p>
           </div>
         ) : (
@@ -149,7 +149,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
 
             {/* Date range */}
             {trip.startDate && trip.endDate && (
-              <p className="font-semibold text-[#0470b9] text-sm mb-6">
+              <p className="font-semibold text-accent text-sm mb-6">
                 {new Date(trip.startDate + 'T12:00:00').toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -171,7 +171,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
                 {tripActions(trip.role, trip.redacted ?? false).edit && (
                   <button
                     onClick={() => router.push(`/plans/${slug}/edit`)}
-                    className="mt-3 text-[#0163a4] hover:underline text-sm"
+                    className="mt-3 text-accent hover:underline text-sm"
                   >
                     Edit plan to add days
                   </button>
@@ -187,6 +187,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
                     variant="scrollable"
                     scrollButtons="auto"
                     allowScrollButtonsMobile
+                    sx={{ '& .MuiTabs-indicator': { backgroundColor: 'var(--color-ink)' } }}
                   >
                     {trip.days.map((day, idx) => (
                       <Tab
@@ -199,9 +200,10 @@ export default function TripViewContent({ slug }: { slug: string }) {
                           </div>
                         }
                         sx={{
+                          fontFamily: 'inherit',
                           textTransform: 'none',
                           transition: 'all 0.3s ease',
-                          '&.Mui-selected': { color: '#4f46e5', fontWeight: 'bold' },
+                          '&.Mui-selected': { color: 'var(--color-ink)', fontWeight: 'bold' },
                         }}
                       />
                     ))}

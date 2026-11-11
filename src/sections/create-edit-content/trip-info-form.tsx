@@ -39,7 +39,7 @@ export default function TripInfoForm({
 }: TripInfoFormProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-4">
-      <h2 className="text-base font-semibold text-[#0163a4] mb-4">Trip Info</h2>
+      <h2 className="text-base font-semibold tracking-tight text-ink mb-4">Trip Info</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Trip Title</label>
@@ -48,7 +48,7 @@ export default function TripInfoForm({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="e.g. Tokyo Adventure 2025"
-            className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
+            className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
               errors.title ? 'border-red-400' : 'border-gray-300'
             }`}
           />
@@ -95,7 +95,7 @@ export default function TripInfoForm({
               type="date"
               value={startDate}
               onChange={(e) => onStartDateChange(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
+              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
                 errors.startDate ? 'border-red-400' : 'border-gray-300'
               }`}
             />
@@ -108,7 +108,7 @@ export default function TripInfoForm({
               value={endDate}
               onChange={(e) => onEndDateChange(e.target.value)}
               min={startDate}
-              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition ${
+              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
                 errors.endDate ? 'border-red-400' : 'border-gray-300'
               }`}
             />
@@ -122,7 +122,7 @@ export default function TripInfoForm({
             <select
               value={visibility}
               onChange={(e) => onVisibilityChange(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
             >
               {VISIBILITY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>

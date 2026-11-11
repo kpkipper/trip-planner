@@ -20,6 +20,7 @@ import { copyText } from '@/lib/clipboard'
 import { errorSummary } from '@/lib/error-summary'
 import { memberControls } from '@/lib/member-controls'
 import { memberErrorMessage } from '@/lib/member-errors'
+import { buttonClass } from '@/lib/ui-classes'
 
 import type { InviteLink, MemberRole, MemberView } from '@/api/members/type'
 
@@ -33,7 +34,7 @@ interface Props {
 }
 
 const selectClass =
-  'rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#16aef2]'
+  'rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent'
 
 const expiryLabel = (iso: string) => {
   const d = new Date(iso)
@@ -162,7 +163,7 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
     })
 
   return (
-    <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="mt-8 rounded-card bg-surface p-5 shadow-soft">
       <ConfirmDialog
         open={removing !== null}
         title="Remove this member?"
@@ -229,7 +230,7 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
             aria-label="Username to invite"
             autoCapitalize="none"
             autoCorrect="off"
-            className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16aef2]"
+            className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           />
           {controls.inviteRoles.length > 1 ? (
             <select
@@ -247,7 +248,7 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
           <button
             type="submit"
             disabled={busy || !username.trim()}
-            className="flex items-center gap-1.5 rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387] disabled:opacity-50"
+            className={buttonClass('primary', 'sm')}
           >
             <UserPlus size={14} />
             Invite
@@ -278,7 +279,7 @@ export default function MembersPanel({ slug, role, editorsCanInvite, onChanged }
             <button
               onClick={handleCreateLink}
               disabled={busy}
-              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className={buttonClass('secondary', 'sm')}
             >
               Create link
             </button>

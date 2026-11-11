@@ -22,7 +22,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-bg">
       {/* Desktop sidebar */}
       <div className="hidden md:flex flex-col flex-shrink-0 h-full">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />

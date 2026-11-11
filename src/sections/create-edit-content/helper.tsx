@@ -57,7 +57,7 @@ export function Autocomplete({
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
+        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
           hasError ? 'border-red-400' : 'border-gray-300'
         }`}
       />
@@ -71,7 +71,7 @@ export function Autocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-2 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+              className="px-3 py-2 cursor-pointer hover:bg-chip text-gray-700"
             >
               {opt}
             </li>
@@ -115,7 +115,7 @@ export function TimeAutocomplete({
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
         placeholder="09:00"
-        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#0163a4]/30 focus:border-[#0163a4] transition"
+        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
       />
       {open && filtered.length > 0 && (
         <ul className="absolute z-50 mt-1 left-0 w-24 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
@@ -127,7 +127,7 @@ export function TimeAutocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-1.5 cursor-pointer hover:bg-[#edf3f7] text-gray-700"
+              className="px-3 py-1.5 cursor-pointer hover:bg-chip text-gray-700"
             >
               {opt}
             </li>

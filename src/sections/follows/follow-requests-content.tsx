@@ -25,11 +25,12 @@ import {
   removeEntry,
 } from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 import type { FollowEntry } from '@/api/follows/type'
 import type { PublicProfileType } from '@/api/journey/type'
 
-const card = 'rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm'
+const card = 'rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft'
 
 function UserLink({ user }: { user: PublicProfileType }) {
   return (
@@ -154,7 +155,7 @@ export default function FollowRequestsContent() {
     }
   }
 
-  const rowClass = 'flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3'
+  const rowClass = 'flex items-center gap-3 rounded-tile bg-surface p-3 shadow-soft'
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
@@ -168,7 +169,7 @@ export default function FollowRequestsContent() {
               setRequests(null)
               setAttempt((n) => n + 1)
             }}
-            className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#015387]"
+            className={buttonClass('primary', 'sm')}
           >
             Try again
           </button>
@@ -188,7 +189,7 @@ export default function FollowRequestsContent() {
                       type="button"
                       onClick={() => void respond(r.user.username, true)}
                       disabled={busy !== null}
-                      className="rounded-lg bg-[#0163a4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#0470b9] disabled:opacity-50"
+                      className={buttonClass('primary', 'sm')}
                     >
                       Accept
                     </button>
@@ -196,7 +197,7 @@ export default function FollowRequestsContent() {
                       type="button"
                       onClick={() => void respond(r.user.username, false)}
                       disabled={busy !== null}
-                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                      className={buttonClass('secondary', 'sm')}
                     >
                       Decline
                     </button>
@@ -219,7 +220,7 @@ export default function FollowRequestsContent() {
                       type="button"
                       onClick={() => setRemoving(f.user.username)}
                       disabled={busy !== null}
-                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                      className={buttonClass('secondary', 'sm')}
                     >
                       Remove
                     </button>

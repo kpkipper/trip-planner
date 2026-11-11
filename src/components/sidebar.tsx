@@ -122,7 +122,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div
                 className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
                   pathname === href
-                    ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                    ? 'bg-chip text-ink font-medium'
                     : 'hover:bg-gray-50 text-gray-600'
                 } ${collapsed ? 'justify-center' : ''}`}
               >
@@ -164,7 +164,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {status === 'loading' ? (
           <div
             aria-disabled
-            className={`flex items-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white opacity-50 text-sm font-medium cursor-not-allowed ${
+            className={`flex items-center gap-2 w-full rounded-full px-3 py-2.5 bg-primary text-white opacity-50 text-sm font-medium cursor-not-allowed ${
               collapsed ? 'justify-center px-2' : ''
             }`}
           >
@@ -174,7 +174,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         ) : (
           <Link
             href={status === 'authed' ? '/plans/create' : loginPath('/plans/create')}
-            className={`flex items-center gap-2 w-full rounded-lg px-3 py-2.5 bg-[#0163a4] text-white hover:bg-[#0470b9] transition-colors text-sm font-medium ${
+            className={`flex items-center gap-2 w-full rounded-full px-3 py-2.5 bg-primary text-white hover:bg-primary-hover transition-colors text-sm font-medium ${
               collapsed ? 'justify-center px-2' : ''
             }`}
             aria-label="Create Plan"
@@ -192,7 +192,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             title="Feed"
             className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
               pathname === '/feed' || pathname === '/feed/'
-                ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                ? 'bg-chip text-ink font-medium'
                 : 'hover:bg-gray-50 text-gray-600'
             } ${collapsed ? 'justify-center' : ''}`}
           >
@@ -204,7 +204,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             title="Follow requests"
             className={`relative mt-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
               pathname === '/follow-requests' || pathname === '/follow-requests/'
-                ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                ? 'bg-chip text-ink font-medium'
                 : 'hover:bg-gray-50 text-gray-600'
             } ${collapsed ? 'justify-center' : ''}`}
           >
@@ -214,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <span
                 role="status"
                 aria-label={`${shownPending} pending`}
-                className={`rounded-full bg-[#0163a4] px-1.5 text-xs font-semibold text-white ${
+                className={`rounded-full bg-accent px-1.5 text-xs font-semibold text-white ${
                   collapsed ? 'absolute -right-0.5 -top-0.5 text-[10px]' : ''
                 }`}
               >
@@ -235,8 +235,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div
               className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
                 pathname === `/plans/${encodeURIComponent(latestTrip.slug ?? '')}`
-                  ? 'bg-[#edf3f7] border-[#0163a4]/30 text-[#0163a4]'
-                  : 'bg-gray-50 border-gray-200 hover:bg-[#edf3f7] text-gray-700'
+                  ? 'bg-chip border-transparent text-ink'
+                  : 'bg-bg border-transparent hover:bg-chip text-gray-700'
               }`}
             >
               <div className="font-medium truncate">{latestTrip.title}</div>
@@ -278,7 +278,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   collapsed ? 'justify-center' : ''
                 }`}
               >
-                <FolderOpen size={15} className="text-[#0163a4] flex-shrink-0" />
+                <FolderOpen size={15} className="text-accent flex-shrink-0" />
                 {!collapsed && (
                   <>
                     <span className="flex-1 text-left font-medium">{country}</span>
@@ -296,7 +296,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                         <div
                           className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors ${
                             pathname === href
-                              ? 'bg-[#edf3f7] text-[#0163a4] font-medium'
+                              ? 'bg-chip text-ink font-medium'
                               : 'hover:bg-gray-50 text-gray-600'
                           } ${collapsed ? 'justify-center' : ''}`}
                         >

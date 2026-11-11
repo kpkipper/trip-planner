@@ -29,7 +29,7 @@ export default function UserAvatar({ user, size = 32 }: Props) {
   return (
     <span
       aria-hidden
-      className="rounded-full flex-shrink-0 bg-gradient-to-br from-[#16aef2] to-[#0163a4] text-white font-semibold flex items-center justify-center"
+      className="rounded-full flex-shrink-0 bg-gradient-to-br from-orange-500 to-pink-500 text-white font-semibold flex items-center justify-center"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.45) }}
     >
       {initial}
