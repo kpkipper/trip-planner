@@ -10,7 +10,7 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
   const tripHref = `/plans/${encodeURIComponent(item.trip.slug)}`
 
   return (
-    <li className="overflow-hidden rounded-card bg-surface shadow-soft">
+    <li className="overflow-hidden rounded-card bg-surface shadow-soft transition-transform duration-200 hover:-translate-y-0.5">
       <a
         href={tripHref}
         aria-label={

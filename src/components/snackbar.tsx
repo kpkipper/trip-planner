@@ -27,6 +27,9 @@ const Snackbar = ({ open, message, severity = 'success', action, onClose }: Snac
         onClose()
       }}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      // From md the floating top nav sits at the top; drop the toast below it so it does not
+      // cover the account menu (the nav is 12px + ~52px tall).
+      sx={{ '@media (min-width: 768px)': { top: 80 } }}
     >
       {/* Dark pill (rounded-card = a full pill at one line, still tidy when it wraps). role="alert"
           as the MUI Alert it replaces, so it is announced. */}

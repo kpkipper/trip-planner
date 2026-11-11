@@ -65,7 +65,7 @@ export default function TripDayDetail({
           No activities for this day yet.
         </div>
       ) : (
-        <ul className="ml-2 space-y-3 border-l-2 border-dashed border-line pl-7">
+        <ul className="ml-2 space-y-3 border-l-2 border-dashed border-muted/35 pl-7">
           {day.activities.map((act, idx) => (
             <ActivityItem
               key={act.id}

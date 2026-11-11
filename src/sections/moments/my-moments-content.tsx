@@ -10,6 +10,7 @@ import { Trash2 } from 'lucide-react'
 import { deleteMoment, listMyMoments } from '@/api/moments'
 import ConfirmDialog from '@/components/confirm-dialog'
 import PageLoading from '@/components/page-loading'
+import { ButtonLink } from '@/components/ui/button'
 import { EmptyCard, PageTitle } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
@@ -109,7 +110,15 @@ export default function MyMomentsContent() {
       )}
 
       {!failed && moments?.length === 0 && (
-        <EmptyCard>ยังไม่มีรูปที่คุณอัปโหลด</EmptyCard>
+        <EmptyCard
+          action={
+            <ButtonLink href="/trips" variant="secondary" size="sm">
+              My trips
+            </ButtonLink>
+          }
+        >
+          ยังไม่มีรูปที่คุณอัปโหลด
+        </EmptyCard>
       )}
 
       {!failed && moments && moments.length > 0 && (

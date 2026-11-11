@@ -23,11 +23,20 @@ export function ListCard({ className, children, ...props }: ComponentProps<'ul'>
 
 export const listRowClass = 'flex items-center gap-3 px-4 py-3 sm:px-5'
 
-/** Empty or error state in the same card shape as a list. */
-export function EmptyCard({ className, children }: { className?: string; children: ReactNode }) {
+/** Empty or error state in the same card shape as a list: a short line and, optionally, one action. */
+export function EmptyCard({
+  className,
+  children,
+  action,
+}: {
+  className?: string
+  children: ReactNode
+  action?: ReactNode
+}) {
   return (
     <Card padding="p-8" className={cn('text-center text-sm leading-normal text-muted', className)}>
       {children}
+      {action && <div className="mt-4 flex justify-center">{action}</div>}
     </Card>
   )
 }

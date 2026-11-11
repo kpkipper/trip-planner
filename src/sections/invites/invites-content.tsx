@@ -8,6 +8,7 @@ import { Inbox } from 'lucide-react'
 
 import { acceptInvite, declineInvite } from '@/api/members'
 import PageLoading from '@/components/page-loading'
+import { ButtonLink } from '@/components/ui/button'
 import { EmptyCard, ListCard, listRowClass, PageTitle } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
@@ -73,7 +74,13 @@ export default function InvitesContent() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <PageTitle>Invites</PageTitle>
       {invites.length === 0 ? (
-        <EmptyCard>
+        <EmptyCard
+          action={
+            <ButtonLink href="/trips" variant="secondary" size="sm">
+              My trips
+            </ButtonLink>
+          }
+        >
           <Inbox size={28} className="mx-auto mb-2 text-muted/60" />
           <p>No pending invites.</p>
         </EmptyCard>

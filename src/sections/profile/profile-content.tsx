@@ -11,7 +11,8 @@ import { unblockUser } from '@/api/safety'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
 import TripCard, { type TripCardData } from '@/components/trip-card'
-import { Button } from '@/components/ui/button'
+import { Button, ButtonLink } from '@/components/ui/button'
+import { EmptyCard } from '@/components/ui/list'
 import UserAvatar from '@/components/user-avatar'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
@@ -439,6 +440,21 @@ export default function ProfileContent({ username }: { username: string }) {
             </span>
           </a>
         </section>
+      )}
+
+      {!profile.is_blocked && !activeTab && (
+        <EmptyCard
+          className="mt-8"
+          action={
+            own ? (
+              <ButtonLink href="/plans/create" variant="secondary" size="sm">
+                Create Plan
+              </ButtonLink>
+            ) : undefined
+          }
+        >
+          No trips to show yet.
+        </EmptyCard>
       )}
 
       {activeTab && (

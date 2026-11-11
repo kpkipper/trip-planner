@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { FeedSkeleton, SkeletonBlock } from '@/components/page-loading'
+import { ButtonLink } from '@/components/ui/button'
+import { EmptyCard } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { loginPath } from '@/lib/safe-next'
 import { buttonClass } from '@/lib/ui-classes'
@@ -41,7 +43,15 @@ export default function FeedContent() {
       <NowRow travelers={feed.travelers} />
       {firstLoad && <FeedSkeleton />}
       {empty && (
-        <p className="py-10 text-center leading-normal text-muted">ยังไม่มีอะไรใน feed ลอง follow เพื่อนดูสิ</p>
+        <EmptyCard
+          action={
+            <ButtonLink href="/plans/create" variant="secondary" size="sm">
+              Create Plan
+            </ButtonLink>
+          }
+        >
+          ยังไม่มีอะไรใน feed ลอง follow เพื่อนดูสิ
+        </EmptyCard>
       )}
       <ul className="flex flex-col gap-4 md:gap-5">
         {feed.items.map((item) => (
