@@ -66,7 +66,7 @@ export default function TripActionMenu({
         className={cn(
           'grid place-items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2',
           variant === 'glass'
-            ? 'h-10 w-10 bg-white/20 text-white backdrop-blur-md hover:bg-white/30 focus-visible:ring-white'
+            ? 'h-10 w-10 bg-black/30 text-white backdrop-blur-md hover:bg-black/45 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
             : 'p-2 text-ink-2 bg-surface ring-1 ring-inset ring-line hover:bg-chip focus-visible:ring-accent',
         )}
         aria-label="Actions"
@@ -82,7 +82,7 @@ export default function TripActionMenu({
                 router.push(`/plans/${slug}/edit`)
                 close()
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
+              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
             >
               <Edit2 size={14} />
               Edit
@@ -96,7 +96,7 @@ export default function TripActionMenu({
                   exportJSON(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
               >
                 <FileJson size={14} />
                 Export as JSON
@@ -106,7 +106,7 @@ export default function TripActionMenu({
                   exportPDF(trip)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
               >
                 <FileText size={14} />
                 Export as PDF
@@ -121,7 +121,7 @@ export default function TripActionMenu({
                   setReporting(true)
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-ink-2 hover:bg-chip focus-visible:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
               >
                 <Flag size={14} />
                 Report
@@ -136,7 +136,7 @@ export default function TripActionMenu({
                   onLeave()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
               >
                 <LogOut size={14} />
                 Leave trip
@@ -151,7 +151,7 @@ export default function TripActionMenu({
                   onDelete()
                   close()
                 }}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm leading-normal text-danger hover:bg-danger/5 focus-visible:bg-danger/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent transition-colors"
               >
                 <Trash2 size={14} />
                 Delete

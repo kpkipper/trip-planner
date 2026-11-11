@@ -80,6 +80,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
     !trip.redacted && trip.startDate && trip.endDate
       ? `${shortDate(trip.startDate)} – ${shortDate(trip.endDate)}`
       : ''
+  const ownerName = trip.owner ? trip.owner.displayName || trip.owner.username : ''
   const planCount = trip.days.reduce((n, d) => n + d.activities.length, 0)
   const stats = trip.redacted
     ? []
@@ -129,16 +130,22 @@ export default function TripViewContent({ slug }: { slug: string }) {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             )}
+            {/* Scrims: bottom for the title block, top for the action menu, so both read on
+                bright covers and the lighter gradient palettes. */}
             <div
               aria-hidden
-              className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent"
+              className="absolute inset-0 bg-linear-to-t from-black/65 via-black/35 to-transparent"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-x-0 top-0 h-2/5 bg-linear-to-b from-black/35 to-transparent"
             />
             <div className="relative px-5 pt-16 pb-6 text-white md:px-8 md:pb-7">
               <StatusBadge status={trip.status} variant="glass" />
-              <h1 className="mt-3 break-words text-[28px] font-semibold leading-tight tracking-tight md:text-[44px]">
+              <h1 className="mt-3 break-words text-[28px] font-semibold leading-snug tracking-tight md:text-[44px]">
                 {trip.title}
               </h1>
-              {(place || dates) && (
+              {(place || dates || ownerName) && (
                 <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-sm leading-normal text-white/85 md:text-base">
                   {place && (
                     <span className="flex min-w-0 items-center gap-1.5">
@@ -148,11 +155,15 @@ export default function TripViewContent({ slug }: { slug: string }) {
                   )}
                   {place && dates && <span aria-hidden>·</span>}
                   {dates && <span>{dates}</span>}
+                  {ownerName && (place || dates) && <span aria-hidden>·</span>}
+                  {ownerName && <span className="min-w-0 break-words">by {ownerName}</span>}
                 </p>
               )}
             </div>
           </div>
-          <div className="absolute top-4 right-4 z-10 md:top-5 md:right-5">
+          {/* No z-index here: a stacking context would trap the menu's ReportDialog (z-50)
+              below the nav bars (z-30). The wrapper still paints above the hero (DOM order). */}
+          <div className="absolute top-4 right-4 md:top-5 md:right-5">
             <TripActionMenu
               slug={slug}
               trip={trip}
