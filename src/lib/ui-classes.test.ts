@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buttonClass, cardClass, chipClass, fieldClass } from './ui-classes'
+import { buttonClass, cardClass, chipClass, cn, fieldClass } from './ui-classes'
 
 const tokens = (s: string) => s.split(/\s+/).filter(Boolean)
 
@@ -96,5 +96,25 @@ describe('cardClass', () => {
 
   it('appends extra classes', () => {
     expect(tokens(cardClass('mt-4'))).toContain('mt-4')
+  })
+})
+
+describe('cn', () => {
+  it('drops falsy parts and joins', () => {
+    expect(cn('a', false, undefined, null, '', 'b')).toBe('a b')
+  })
+
+  it('lets later classes override conflicting earlier ones', () => {
+    expect(cn('bg-surface p-6', 'bg-chip')).toBe('p-6 bg-chip')
+    expect(cn('px-4 py-2', 'px-6')).toBe('py-2 px-6')
+  })
+
+  it('knows the custom radius and shadow tokens', () => {
+    expect(cn('rounded-card', 'rounded-tile')).toBe('rounded-tile')
+    expect(cn('shadow-soft', 'shadow-xl')).toBe('shadow-xl')
+  })
+
+  it('keeps colour and size utilities that do not conflict', () => {
+    expect(cn('text-sm text-ink', 'text-accent')).toBe('text-sm text-accent')
   })
 })

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { buttonClass, type ButtonSize, type ButtonVariant } from '@/lib/ui-classes'
+import { buttonClass, type ButtonSize, type ButtonVariant, cn } from '@/lib/ui-classes'
 
 import type { ComponentProps } from 'react'
 
@@ -19,7 +19,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`${buttonClass(variant, size)} ${className}`.trim()}
+      className={cn(buttonClass(variant, size), className)}
       {...props}
     />
   )
@@ -31,5 +31,5 @@ export function ButtonLink({
   className = '',
   ...props
 }: StyleProps & ComponentProps<typeof Link>) {
-  return <Link className={`${buttonClass(variant, size)} ${className}`.trim()} {...props} />
+  return <Link className={cn(buttonClass(variant, size), className)} {...props} />
 }

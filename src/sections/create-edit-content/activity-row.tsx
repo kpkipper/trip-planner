@@ -53,8 +53,8 @@ export default function ActivityRow({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
-      className={`rounded-xl border border-gray-200 bg-gray-50 p-2.5 space-y-2 transition-colors ${
-        isOver ? 'ring-1 ring-accent/40 bg-accent-soft' : ''
+      className={`rounded-xl border border-gray-200 p-2.5 space-y-2 transition-colors ${
+        isOver ? 'ring-1 ring-accent/40 bg-accent-soft' : 'bg-gray-50'
       }`}
     >
       <div className="flex items-center gap-2">

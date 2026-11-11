@@ -4,10 +4,25 @@
 // Thai text: every pill uses `leading-normal` (1.5) and no fixed height so
 // tone marks and upper vowels never clip.
 
+import { extendTailwindMerge } from 'tailwind-merge'
+
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-const join = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ')
+type ClassPart = string | false | null | undefined
+
+const join = (...parts: ClassPart[]) => parts.filter(Boolean).join(' ')
+
+// Teach tailwind-merge our custom radius and shadow tokens so e.g.
+// rounded-card vs rounded-tile resolve as a conflict.
+const twMerge = extendTailwindMerge({
+  extend: { theme: { radius: ['card', 'tile'], shadow: ['soft'] } },
+})
+
+/** Join class parts, dropping falsy ones; later classes win on conflicts. */
+export function cn(...parts: ClassPart[]): string {
+  return twMerge(join(...parts))
+}
 
 const buttonBase =
   'inline-flex items-center justify-center gap-2 rounded-full font-medium leading-normal whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
@@ -37,7 +52,7 @@ export function chipClass(active = false): string {
 }
 
 export function cardClass(className = '', padding = 'p-6'): string {
-  return join('bg-surface rounded-card shadow-soft', padding, className)
+  return cn('bg-surface rounded-card shadow-soft', padding, className)
 }
 
 // Filled input/select/textarea. Width is left to the caller (most add w-full).

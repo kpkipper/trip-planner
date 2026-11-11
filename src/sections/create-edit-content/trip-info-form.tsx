@@ -38,7 +38,7 @@ export default function TripInfoForm({
   onEndDateChange,
 }: TripInfoFormProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-4">
+    <div className="bg-surface rounded-card shadow-soft p-6 mb-4">
       <h2 className="text-base font-semibold tracking-tight text-ink mb-4">Trip Info</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>

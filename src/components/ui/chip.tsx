@@ -1,4 +1,4 @@
-import { chipClass } from '@/lib/ui-classes'
+import { chipClass, cn } from '@/lib/ui-classes'
 
 import type { ComponentProps } from 'react'
 
@@ -7,5 +7,5 @@ interface Props extends ComponentProps<'span'> {
 }
 
 export function Chip({ active = false, className = '', ...props }: Props) {
-  return <span className={`${chipClass(active)} ${className}`.trim()} {...props} />
+  return <span className={cn(chipClass(active), className)} {...props} />
 }

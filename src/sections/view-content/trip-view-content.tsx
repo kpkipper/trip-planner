@@ -166,7 +166,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
 
             {/* Empty state */}
             {trip.days.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
+              <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
                 <p>No days planned yet.</p>
                 {tripActions(trip.role, trip.redacted ?? false).edit && (
                   <button

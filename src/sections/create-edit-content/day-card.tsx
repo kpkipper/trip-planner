@@ -42,7 +42,7 @@ export default function DayCard({
   onDragEnd,
 }: DayCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-surface rounded-card shadow-soft overflow-hidden">
       <div
         className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={onToggle}

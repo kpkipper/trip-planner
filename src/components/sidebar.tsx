@@ -214,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <span
                 role="status"
                 aria-label={`${shownPending} pending`}
-                className={`rounded-full bg-accent px-1.5 text-xs font-semibold text-white ${
+                className={`rounded-full bg-primary px-1.5 text-xs font-semibold text-white ${
                   collapsed ? 'absolute -right-0.5 -top-0.5 text-[10px]' : ''
                 }`}
               >

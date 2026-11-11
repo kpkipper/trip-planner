@@ -174,7 +174,7 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+            className={buttonClass('ghost')}
           >
             Cancel
           </button>
