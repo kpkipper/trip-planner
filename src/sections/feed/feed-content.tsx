@@ -29,24 +29,25 @@ export default function FeedContent() {
   const empty = feed.loaded && !feed.loading && !feed.error && feed.items.length === 0
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-6">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:py-10">
+      <h1 className="mb-4 text-[28px] font-semibold leading-snug tracking-tight text-ink">Feed</h1>
       <NowRow travelers={feed.travelers} />
       {firstLoad && <PageLoading />}
       {empty && (
-        <p className="text-center text-gray-500 py-10">ยังไม่มีอะไรใน feed ลอง follow เพื่อนดูสิ</p>
+        <p className="py-10 text-center leading-normal text-muted">ยังไม่มีอะไรใน feed ลอง follow เพื่อนดูสิ</p>
       )}
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-4 md:gap-5">
         {feed.items.map((item) => (
           <FeedItem key={item.id} item={item} now={now} />
         ))}
       </ul>
       {feed.error != null && (
-        <p role="alert" className="text-center text-sm text-red-600 mt-4">
+        <p role="alert" className="mt-4 text-center text-sm text-danger">
           โหลด feed ไม่สำเร็จ
         </p>
       )}
       {(feed.hasMore || feed.error != null) && feed.items.length > 0 && (
-        <div className="flex justify-center mt-4">
+        <div className="mt-6 flex justify-center">
           <button
             type="button"
             onClick={feed.loadMore}
@@ -58,7 +59,7 @@ export default function FeedContent() {
         </div>
       )}
       {feed.error != null && feed.items.length === 0 && (
-        <div className="flex justify-center mt-4">
+        <div className="mt-6 flex justify-center">
           <button
             type="button"
             onClick={feed.loadMore}

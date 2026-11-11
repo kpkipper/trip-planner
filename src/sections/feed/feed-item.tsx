@@ -1,67 +1,83 @@
 import UserAvatar from '@/components/user-avatar'
+import { feedCover } from '@/lib/feed-cover'
 import { feedText, relativeThai } from '@/lib/feed-text'
-import { safeHttpsUrl, safeMediaUrl } from '@/lib/safe-url'
 
 import type { FeedItem as FeedItemType } from '@/api/feed/type'
 
-const MAX_THUMBS = 4
-
 export default function FeedItem({ item, now }: { item: FeedItemType; now: Date }) {
   const { parts } = feedText(item)
-  const thumbs = (item.moments?.thumbs ?? [])
-    .map(safeMediaUrl)
-    .filter((u): u is string => !!u)
-    .slice(0, MAX_THUMBS)
-  const cover = item.type === 'moments_added' ? null : safeHttpsUrl(item.trip.cover_url)
+  const cover = feedCover(item)
+  const tripHref = `/plans/${encodeURIComponent(item.trip.slug)}`
 
   return (
-    <li className="flex gap-3 rounded-tile bg-surface p-3 shadow-soft">
-      <UserAvatar user={item.actor} size={40} />
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-gray-800">
-          {parts.map((p, i) => {
-            const cls = p.strong ? 'font-semibold' : undefined
-            return p.href ? (
-              <a key={i} href={p.href} className={`${cls ?? ''} hover:underline`}>
-                {p.text}
-              </a>
-            ) : (
-              <span key={i} className={cls}>
-                {p.text}
-              </span>
-            )
-          })}
-        </p>
-        <p className="text-xs text-gray-400 mt-0.5">{relativeThai(item.at, now)}</p>
-        {thumbs.length > 0 && (
-          <a
-            href={`/plans/${encodeURIComponent(item.trip.slug)}`}
-            className="mt-2 flex gap-1.5"
-            aria-label={`ดูรูปในทริป ${item.trip.destination}`}
-          >
-            {thumbs.map((src, i) => (
+    <li className="overflow-hidden rounded-card bg-surface shadow-soft">
+      <a
+        href={tripHref}
+        aria-label={
+          cover.kind === 'photo'
+            ? `ดูรูปในทริป ${item.trip.destination}`
+            : item.trip.title || item.trip.destination
+        }
+        className="relative block h-[150px] bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent sm:h-[220px]"
+      >
+        {cover.kind === 'gradient' ? (
+          <span
+            aria-hidden
+            className="block h-full w-full"
+            style={{ backgroundImage: cover.background }}
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- static export, signed/remote media
+          <img
+            src={cover.src}
+            alt=""
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        )}
+        {cover.kind === 'photo' && cover.extras.length > 0 && (
+          <span className="absolute bottom-3 right-3 flex gap-1.5">
+            {cover.extras.map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element -- static export, signed media URL
               <img
                 key={i}
                 src={src}
                 alt=""
                 referrerPolicy="no-referrer"
-                className="h-16 w-16 rounded-md object-cover bg-gray-100"
+                loading="lazy"
+                className="h-10 w-10 rounded-lg object-cover bg-chip ring-2 ring-white"
               />
             ))}
-          </a>
+          </span>
         )}
-        {cover && (
-          <a href={`/plans/${encodeURIComponent(item.trip.slug)}`} className="block mt-2">
-            {/* eslint-disable-next-line @next/next/no-img-element -- static export, remote cover */}
-            <img
-              src={cover}
-              alt=""
-              referrerPolicy="no-referrer"
-              className="h-32 w-full rounded-lg object-cover bg-gray-100"
-            />
-          </a>
-        )}
+      </a>
+      <div className="flex items-start gap-3 px-4 pb-4 pt-3">
+        {/* Positioned (no z-index) so it paints over the cover without a stacking context. */}
+        <span className="relative -mt-8 shrink-0 rounded-full ring-[3px] ring-surface">
+          <UserAvatar user={item.actor} size={40} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-[15px] leading-normal text-ink-2">
+            {parts.map((p, i) => {
+              const cls = p.strong ? 'font-semibold text-ink' : undefined
+              return p.href ? (
+                <a
+                  key={i}
+                  href={p.href}
+                  className={`${cls ?? ''} rounded hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent`}
+                >
+                  {p.text}
+                </a>
+              ) : (
+                <span key={i} className={cls}>
+                  {p.text}
+                </span>
+              )
+            })}
+          </p>
+          <p className="mt-0.5 text-xs leading-normal text-muted">{relativeThai(item.at, now)}</p>
+        </div>
       </div>
     </li>
   )

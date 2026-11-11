@@ -4,27 +4,32 @@ import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { MapPin, Radio } from 'lucide-react'
+import { Pencil, Share2 } from 'lucide-react'
 
 import { followUser, getProfile, unfollowUser } from '@/api/profile'
 import { unblockUser } from '@/api/safety'
 import NotFound from '@/components/not-found'
 import PageLoading from '@/components/page-loading'
+import TripCard, { type TripCardData } from '@/components/trip-card'
+import { Button } from '@/components/ui/button'
 import UserAvatar from '@/components/user-avatar'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
+import { copyText } from '@/lib/clipboard'
+import { coverGradient } from '@/lib/cover-gradient'
 import { errorSummary } from '@/lib/error-summary'
 import { followButton } from '@/lib/follow-button'
 import { groupCalendar } from '@/lib/profile-calendar'
 import { loginPath } from '@/lib/safe-next'
+import { safeHttpsUrl } from '@/lib/safe-url'
 import { liveLabel } from '@/lib/trip-status'
-import { buttonClass } from '@/lib/ui-classes'
+import { buttonClass, cn } from '@/lib/ui-classes'
 import BlockMenu from '@/sections/safety/block-menu'
 
 import EditProfileDialog from './edit-profile-dialog'
 
-import type { JourneyView } from '@/api/journey/type'
-import type { CalendarItemType, ProfileView } from '@/api/profile/type'
+import type { JourneyStatusType } from '@/api/journey/type'
+import type { ProfileView } from '@/api/profile/type'
 
 const MONTHS = [
   'January',
@@ -41,65 +46,103 @@ const MONTHS = [
   'December',
 ]
 
-const place = (destination: string, country = '') =>
-  !country || destination.includes(country) ? destination : `${destination}, ${country}`
-
-function TripLink({
-  slug,
-  title,
-  destination,
-  country,
-}: {
+// TripCard joins destination and country; drop the country when the destination already has it.
+const cardData = (t: {
   slug: string
   title: string
   destination: string
   country?: string
-}) {
-  return (
-    <a
-      href={`/plans/${encodeURIComponent(slug)}`}
-      className="block rounded-tile bg-surface p-3 shadow-soft transition-shadow hover:ring-2 hover:ring-accent/40"
-    >
-      <span className="block text-sm font-semibold text-gray-800">{title}</span>
-      <span className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-        <MapPin size={12} />
-        {place(destination, country)}
-      </span>
-    </a>
-  )
-}
+  cover_url?: string
+  status?: JourneyStatusType
+}): TripCardData => ({
+  slug: t.slug,
+  title: t.title,
+  destination: t.destination,
+  country: !t.country || t.destination.includes(t.country) ? undefined : t.country,
+  coverUrl: t.cover_url,
+  status: t.status,
+})
 
-function TripList({ trips }: { trips: JourneyView[] }) {
+function TripGrid({ trips }: { trips: Parameters<typeof cardData>[0][] }) {
   return (
-    <ul className="space-y-2">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
       {trips.map((t) => (
-        <li key={t.slug}>
-          <TripLink slug={t.slug} title={t.title} destination={t.destination} country={t.country} />
+        <li key={t.slug} className="min-w-0">
+          <TripCard trip={cardData(t)} />
         </li>
       ))}
     </ul>
   )
 }
 
-function CalendarEntry({ item }: { item: CalendarItemType }) {
+type TabKey = 'upcoming' | 'calendar' | 'past'
+
+const TAB_LABELS: Record<TabKey, string> = {
+  upcoming: 'Upcoming',
+  calendar: 'Calendar',
+  past: 'Past',
+}
+
+// Underline tabs (WAI-ARIA tabs pattern: arrow keys move between tabs).
+function ProfileTabs({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: TabKey[]
+  active: TabKey
+  onChange: (tab: TabKey) => void
+}) {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+    if (!step) return
+    e.preventDefault()
+    const next = tabs[(tabs.indexOf(active) + step + tabs.length) % tabs.length]
+    onChange(next)
+    document.getElementById(`profile-tab-${next}`)?.focus()
+  }
   return (
-    <li>
-      <TripLink
-        slug={item.slug}
-        title={item.title}
-        destination={item.destination}
-        country={item.country}
-      />
-    </li>
+    <div
+      role="tablist"
+      aria-label="Trips"
+      onKeyDown={onKeyDown}
+      className="mb-5 flex gap-6 overflow-x-auto border-b border-line"
+    >
+      {tabs.map((t) => {
+        const selected = t === active
+        return (
+          <button
+            key={t}
+            id={`profile-tab-${t}`}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            aria-controls={`profile-panel-${t}`}
+            tabIndex={selected ? 0 : -1}
+            onClick={() => onChange(t)}
+            className={cn(
+              '-mb-px whitespace-nowrap rounded-t-md border-b-2 pb-2.5 pt-1 text-sm font-medium leading-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              selected ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink',
+            )}
+          >
+            {TAB_LABELS[t]}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="mt-8">
-    <h2 className="mb-3 text-base font-semibold text-gray-800">{title}</h2>
-    {children}
-  </section>
-)
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-tile bg-surface px-3 py-3 text-center shadow-soft">
+      <span className="block text-xl font-semibold leading-normal tracking-tight text-ink">
+        {value}
+      </span>
+      <span className="block truncate text-xs leading-normal text-muted">{label}</span>
+    </div>
+  )
+}
 
 export default function ProfileContent({ username }: { username: string }) {
   const router = useRouter()
@@ -117,6 +160,8 @@ export default function ProfileContent({ username }: { username: string }) {
   const [editing, setEditing] = useState(false)
   // The new username right after the owner renamed themselves (until navigation completes).
   const [renamedTo, setRenamedTo] = useState<string | null>(null)
+  // null = the first tab that has trips.
+  const [tab, setTab] = useState<TabKey | null>(null)
 
   // Re-load once auth is known: the token changes what the viewer is allowed to see.
   const authKey = status === 'loading' ? 'loading' : (me?.id ?? 'anon')
@@ -150,7 +195,7 @@ export default function ProfileContent({ username }: { username: string }) {
   if (result.error || !result.profile) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="text-sm text-gray-600">Could not load this profile.</p>
+        <p className="text-sm text-muted">Could not load this profile.</p>
         <button
           type="button"
           onClick={() => {
@@ -215,13 +260,27 @@ export default function ProfileContent({ username }: { username: string }) {
     }
   }
 
+  const share = async () => {
+    const url = `${window.location.origin}/u/${encodeURIComponent(profile.user.username)}`
+    if (await copyText(url)) showToast('Link copied')
+    else showToast('Could not copy the link', 'error')
+  }
+
   const { years, hidden } = groupCalendar(profile.calendar)
   const upcoming = profile.upcoming ?? []
   const past = profile.past ?? []
   const { stats } = profile
+  const tabs: TabKey[] = profile.is_blocked
+    ? []
+    : [
+        ...(upcoming.length > 0 ? (['upcoming'] as const) : []),
+        ...(years.length > 0 || hidden.length > 0 ? (['calendar'] as const) : []),
+        ...(past.length > 0 || stats.trips > 0 ? (['past'] as const) : []),
+      ]
+  const activeTab = tab && tabs.includes(tab) ? tab : tabs[0]
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto w-full max-w-4xl px-4 pb-10 md:pt-6">
       {editing && me && (
         <EditProfileDialog
           user={me}
@@ -248,53 +307,71 @@ export default function ProfileContent({ username }: { username: string }) {
         />
       )}
 
-      <header className="flex items-start gap-4">
-        <UserAvatar user={profile.user} size={72} />
-        <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-gray-800">
+      <header>
+        <div
+          aria-hidden
+          className="-mx-4 h-[150px] md:mx-0 md:h-[220px] md:rounded-card"
+          style={{ backgroundImage: coverGradient(profile.user.username) }}
+        />
+        <div className="md:px-6">
+          {/* Positioned (no z-index) so it paints over the banner without a stacking context. */}
+          <span className="relative -mt-[42px] flex w-fit rounded-full ring-4 ring-bg">
+            <UserAvatar user={profile.user} size={84} />
+          </span>
+          <h1 className="mt-2 break-words text-[22px] font-semibold leading-snug tracking-tight text-ink">
             {profile.user.display_name || profile.user.username}
           </h1>
-          <p className="text-sm text-gray-500">@{profile.user.username}</p>
+          <p className="break-words text-sm leading-normal text-muted">@{profile.user.username}</p>
           {profile.user.bio && (
-            <p className="mt-2 whitespace-pre-line text-sm text-gray-700">{profile.user.bio}</p>
+            <p className="mt-2 whitespace-pre-line break-words text-sm leading-normal text-ink-2">
+              {profile.user.bio}
+            </p>
           )}
-          <p className="mt-2 text-sm text-gray-600">
-            <strong>{profile.followers}</strong> followers · <strong>{profile.following}</strong>{' '}
-            following
-          </p>
+
+          <div className="mt-4 flex items-center gap-2">
+            {own ? (
+              <Button variant="secondary" onClick={() => setEditing(true)}>
+                <Pencil size={16} aria-hidden className="flex-shrink-0" />
+                Edit profile
+              </Button>
+            ) : profile.is_blocked ? null : (
+              <Button
+                variant={followState.action !== 'follow' ? 'secondary' : 'primary'}
+                onClick={toggleFollow}
+                disabled={busy}
+                title={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
+                aria-label={
+                  followState.action === 'cancel' ? 'Requested, cancel follow request' : undefined
+                }
+                className="flex-1 sm:flex-none sm:px-8"
+              >
+                {followState.label}
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => void share()}>
+              <Share2 size={16} aria-hidden className="flex-shrink-0" />
+              Share
+            </Button>
+            {!own && me && (
+              <BlockMenu
+                username={profile.user.username}
+                isBlocked={!!profile.is_blocked}
+                onChanged={reloadProfile}
+              />
+            )}
+          </div>
+
+          <div className="mt-5 grid grid-cols-3 gap-2 sm:max-w-md">
+            <Stat value={stats.trips} label={stats.trips === 1 ? 'trip' : 'trips'} />
+            <Stat value={profile.followers} label="followers" />
+            <Stat value={profile.following} label="following" />
+          </div>
         </div>
-        {own ? (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className={buttonClass('secondary', 'md')}
-          >
-            Edit profile
-          </button>
-        ) : profile.is_blocked ? null : (
-          <button
-            type="button"
-            onClick={toggleFollow}
-            disabled={busy}
-            title={followState.action === 'cancel' ? 'Cancel follow request' : undefined}
-            aria-label={followState.action === 'cancel' ? 'Requested, cancel follow request' : undefined}
-            className={buttonClass(followState.action !== 'follow' ? 'secondary' : 'primary')}
-          >
-            {followState.label}
-          </button>
-        )}
-        {!own && me && (
-          <BlockMenu
-            username={profile.user.username}
-            isBlocked={!!profile.is_blocked}
-            onChanged={reloadProfile}
-          />
-        )}
       </header>
 
       {profile.is_blocked && !own && (
         <div className="mt-8 rounded-card bg-surface p-8 text-center shadow-soft">
-          <p className="mb-3 text-sm text-gray-600">คุณ block คนนี้อยู่</p>
+          <p className="mb-3 text-sm text-muted">คุณ block คนนี้อยู่</p>
           <button
             type="button"
             onClick={() => void unblock()}
@@ -307,73 +384,84 @@ export default function ProfileContent({ username }: { username: string }) {
       )}
 
       {!profile.is_blocked && profile.now?.live && (
-        <Section title="Now">
+        <section className="mt-8">
+          <h2 className="mb-3 text-base font-semibold tracking-tight text-ink">Now</h2>
           <a
             href={`/plans/${encodeURIComponent(profile.now.slug)}`}
-            className="block rounded-2xl border border-green-200 bg-green-50 p-4"
+            className="flex items-center gap-4 overflow-hidden rounded-card bg-surface p-3 shadow-soft transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <span className="flex items-center gap-2 text-sm font-semibold text-green-700">
-              <Radio size={14} />
-              {liveLabel({
-                city: profile.now.live.city,
-                dayNumber: profile.now.live.day_number,
-                totalDays: profile.now.live.total_days,
-              })}
+            <span
+              aria-hidden
+              className="block h-16 w-16 flex-shrink-0 rounded-tile bg-chip bg-cover bg-center"
+              style={{
+                backgroundImage: safeHttpsUrl(profile.now.cover_url)
+                  ? `url("${safeHttpsUrl(profile.now.cover_url)}")`
+                  : coverGradient(profile.now.slug),
+              }}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2 text-sm font-semibold leading-normal text-live">
+                <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-live ring-4 ring-live/25" />
+                {liveLabel({
+                  city: profile.now.live.city,
+                  dayNumber: profile.now.live.day_number,
+                  totalDays: profile.now.live.total_days,
+                })}
+              </span>
+              <span className="mt-0.5 block truncate text-sm leading-normal text-ink-2">
+                {profile.now.title}
+              </span>
             </span>
-            <span className="mt-1 block text-sm text-gray-700">{profile.now.title}</span>
           </a>
-        </Section>
+        </section>
       )}
 
-      {!profile.is_blocked && upcoming.length > 0 && (
-        <Section title="Upcoming">
-          <TripList trips={upcoming} />
-        </Section>
-      )}
+      {activeTab && (
+        <section className="mt-8">
+          <ProfileTabs tabs={tabs} active={activeTab} onChange={setTab} />
+          <div
+            role="tabpanel"
+            id={`profile-panel-${activeTab}`}
+            aria-labelledby={`profile-tab-${activeTab}`}
+          >
+            {activeTab === 'upcoming' && <TripGrid trips={upcoming} />}
 
-      {!profile.is_blocked && (years.length > 0 || hidden.length > 0) && (
-        <Section title="Calendar">
-          <div className="space-y-5">
-            {years.map((y) => (
-              <div key={y.year}>
-                <h3 className="mb-2 text-sm font-bold text-ink">{y.year}</h3>
-                {y.months.map((m) => (
-                  <div key={m.month} className="mb-3">
-                    <h4 className="mb-1 text-xs font-semibold uppercase text-gray-500">
-                      {MONTHS[m.month - 1]}
-                    </h4>
-                    <ul className="space-y-2">
-                      {m.items.map((item) => (
-                        <CalendarEntry key={item.slug} item={item} />
-                      ))}
-                    </ul>
+            {activeTab === 'calendar' && (
+              <div className="space-y-6">
+                {years.map((y) => (
+                  <div key={y.year}>
+                    <h3 className="mb-3 text-sm font-semibold text-ink">{y.year}</h3>
+                    {y.months.map((m) => (
+                      <div key={m.month} className="mb-5">
+                        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                          {MONTHS[m.month - 1]}
+                        </h4>
+                        <TripGrid trips={m.items} />
+                      </div>
+                    ))}
                   </div>
                 ))}
-              </div>
-            ))}
-            {hidden.length > 0 && (
-              <div>
-                <h3 className="mb-2 text-sm font-bold text-gray-500">Dates hidden</h3>
-                <ul className="space-y-2">
-                  {hidden.map((item) => (
-                    <CalendarEntry key={item.slug} item={item} />
-                  ))}
-                </ul>
+                {hidden.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 text-sm font-semibold text-muted">Dates hidden</h3>
+                    <TripGrid trips={hidden} />
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        </Section>
-      )}
 
-      {!profile.is_blocked && (past.length > 0 || stats.trips > 0) && (
-        <Section title="Past">
-          <p className="mb-3 text-sm text-gray-600">
-            {stats.countries} {stats.countries === 1 ? 'country' : 'countries'} · {stats.cities}{' '}
-            {stats.cities === 1 ? 'city' : 'cities'} · {stats.trips}{' '}
-            {stats.trips === 1 ? 'trip' : 'trips'}
-          </p>
-          <TripList trips={past} />
-        </Section>
+            {activeTab === 'past' && (
+              <>
+                <p className="mb-4 text-sm leading-normal text-muted">
+                  {stats.countries} {stats.countries === 1 ? 'country' : 'countries'} ·{' '}
+                  {stats.cities} {stats.cities === 1 ? 'city' : 'cities'} · {stats.trips}{' '}
+                  {stats.trips === 1 ? 'trip' : 'trips'}
+                </p>
+                <TripGrid trips={past} />
+              </>
+            )}
+          </div>
+        </section>
       )}
     </div>
   )
