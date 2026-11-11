@@ -66,12 +66,10 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
   if (loadFailed) return <NotFound />
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {slugProp ? 'Edit Plan' : 'Create New Plan'}
-        </h1>
-      </div>
+    <div className="mx-auto max-w-xl px-4 py-8">
+      <h1 className="mb-6 text-[28px] font-semibold leading-snug tracking-tight text-ink">
+        {slugProp ? 'Edit Plan' : 'Create New Plan'}
+      </h1>
 
       <TripInfoForm
         title={title}
@@ -91,8 +89,8 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
       />
 
       {days.length > 0 && (
-        <div className="space-y-3 mb-6">
-          <h2 className="text-base font-semibold text-gray-700">
+        <div className="mb-6 space-y-3">
+          <h2 className="text-lg font-semibold leading-normal tracking-tight text-ink">
             Daily Plan ({days.length} {days.length === 1 ? 'day' : 'days'})
           </h2>
           {days.map((day, idx) => (
@@ -121,28 +119,28 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
       )}
 
       {days.length === 0 && startDate && endDate && startDate > endDate && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-800">
+        <div className="mb-6 rounded-tile bg-danger/5 p-4 text-sm leading-normal text-danger">
           End date must be after start date.
         </div>
       )}
 
       {days.length === 0 && (!startDate || !endDate) && (
-        <div className="bg-accent-soft rounded-tile p-4 mb-6 text-sm text-ink-2">
+        <div className="mb-6 rounded-tile bg-accent-soft p-4 text-sm leading-normal text-ink-2">
           Set start and end dates above to generate your day-by-day plan.
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-3">
-        <button
-          onClick={handleCancel}
-          className={buttonClass('secondary', 'md')}
-        >
+      {/* Sticky action bar. <main> is the scroll root and sticky insets count from its content
+          box, so its tab-bar padding already lifts the bar above the mobile tab bar: a small
+          inset is enough. No z-index, so nothing here stacks over dialogs. */}
+      <div className="sticky bottom-3 flex items-center justify-end gap-2 rounded-card bg-surface p-2 shadow-soft ring-1 ring-line md:bottom-4">
+        <button onClick={handleCancel} className={buttonClass('ghost', 'lg')}>
           Cancel
         </button>
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`${buttonClass('primary', 'md')} w-full sm:w-auto`}
+          className={`${buttonClass('primary', 'lg')} flex-1 sm:flex-none`}
         >
           <Save size={16} />
           {saving ? 'Saving...' : 'Save Plan'}

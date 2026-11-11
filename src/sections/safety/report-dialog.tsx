@@ -6,7 +6,7 @@ import { createReport } from '@/api/safety'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { MAX_NOTE, REPORT_REASONS, reportErrorMessage, validateReport } from '@/lib/report-form'
-import { buttonClass } from '@/lib/ui-classes'
+import { buttonClass, cn, fieldClass } from '@/lib/ui-classes'
 import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { ReportReason, ReportTargetType } from '@/api/safety/type'
@@ -63,16 +63,20 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
         role="dialog"
         aria-modal="true"
         aria-label="รายงาน"
-        className="relative w-full max-w-sm rounded-card bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-sm rounded-card bg-surface p-6 shadow-soft"
       >
-        <h2 className="mb-3 text-base font-semibold text-gray-800">รายงาน</h2>
-        <fieldset className="space-y-1.5">
+        <h2 className="mb-3 text-lg font-semibold leading-normal tracking-tight text-ink">รายงาน</h2>
+        <fieldset className="-mx-2 space-y-0.5">
           <legend className="sr-only">เหตุผล</legend>
           {REPORT_REASONS.map((r) => (
-            <label key={r.value} className="flex items-center gap-2 text-sm text-gray-700">
+            <label
+              key={r.value}
+              className="flex cursor-pointer items-center gap-3 rounded-tile px-2 py-2 text-sm leading-normal text-ink-2 hover:bg-chip has-[:checked]:bg-chip has-[:checked]:text-ink has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+            >
               <input
                 type="radio"
                 name="report-reason"
+                className="h-4 w-4 shrink-0 accent-primary focus:outline-none"
                 value={r.value}
                 checked={reason === r.value}
                 onChange={() => {
@@ -84,7 +88,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             </label>
           ))}
         </fieldset>
-        <label className="mt-3 block text-sm text-gray-600" htmlFor="report-note">
+        <label className="mt-4 block text-[13px] font-medium leading-normal text-muted" htmlFor="report-note">
           รายละเอียดเพิ่มเติม (ไม่บังคับ)
         </label>
         <textarea
@@ -95,22 +99,22 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             setError(null)
           }}
           rows={3}
-          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent"
+          className={cn(fieldClass, 'mt-1.5 w-full resize-none')}
         />
-        <p className="text-right text-xs text-gray-400">
+        <p className="mt-1 text-right text-xs leading-normal text-muted">
           {[...note].length}/{MAX_NOTE}
         </p>
         {error && (
-          <p role="alert" className="mt-1 text-sm text-red-600">
+          <p role="alert" className="mt-1 text-sm leading-normal text-danger">
             {error}
           </p>
         )}
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className={buttonClass('secondary', 'md')}
+            className={buttonClass('ghost', 'md')}
           >
             ยกเลิก
           </button>
@@ -118,7 +122,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             type="button"
             onClick={() => void submit()}
             disabled={busy}
-            className={buttonClass('danger', 'md')}
+            className={buttonClass('primary', 'md')}
           >
             ส่งรายงาน
           </button>

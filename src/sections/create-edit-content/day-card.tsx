@@ -1,5 +1,7 @@
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
 
+import { buttonClass, cn } from '@/lib/ui-classes'
+
 import ActivityRow from './activity-row'
 import { activityErrorKey } from './sync'
 
@@ -42,9 +44,14 @@ export default function DayCard({
   onDragEnd,
 }: DayCardProps) {
   return (
-    <div className="bg-surface rounded-card shadow-soft overflow-hidden">
+    // No overflow-hidden: it would clip the time suggestions of the last activity. The header
+    // rounds its own corners for the hover fill instead.
+    <div className="rounded-card bg-surface shadow-soft">
       <div
-        className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+        className={cn(
+          'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-bg sm:px-5',
+          isExpanded ? 'rounded-t-card' : 'rounded-card',
+        )}
         onClick={onToggle}
       >
         <span className="text-xs font-semibold leading-normal text-ink-2 bg-chip rounded-full px-2.5 py-0.5 flex-shrink-0">
@@ -55,21 +62,21 @@ export default function DayCard({
           value={day.title}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => onUpdateTitle(e.target.value)}
-          className="flex-1 text-sm font-medium text-gray-800 bg-transparent outline-none border-b border-transparent focus:border-gray-300 transition-colors"
+          className="min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium leading-normal text-ink outline-none transition-colors placeholder:text-muted focus:bg-chip focus:ring-2 focus:ring-accent"
           placeholder="Day title..."
         />
-        <span className="text-xs text-gray-400 flex-shrink-0">{day.date}</span>
+        <span className="flex-shrink-0 text-xs leading-normal text-muted">{day.date}</span>
         {isExpanded ? (
-          <ChevronUp size={16} className="text-gray-400 flex-shrink-0" />
+          <ChevronUp size={16} className="flex-shrink-0 text-muted" />
         ) : (
-          <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />
+          <ChevronDown size={16} className="flex-shrink-0 text-muted" />
         )}
       </div>
 
       {isExpanded && (
-        <div className="border-t border-gray-100 px-5 py-4">
+        <div className="border-t border-line px-4 py-4 sm:px-5">
           {day.activities.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-2 mb-3">
+            <p className="mb-3 py-2 text-center text-sm leading-normal text-muted">
               No activities yet. Add one below.
             </p>
           )}
@@ -97,7 +104,7 @@ export default function DayCard({
 
           <button
             onClick={onAddActivity}
-            className="flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium mt-3 transition-colors"
+            className={cn(buttonClass('secondary', 'sm'), 'mt-3')}
           >
             <Plus size={15} />
             Add Activity

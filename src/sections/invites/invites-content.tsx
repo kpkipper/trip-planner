@@ -8,12 +8,13 @@ import { Inbox } from 'lucide-react'
 
 import { acceptInvite, declineInvite } from '@/api/members'
 import PageLoading from '@/components/page-loading'
+import { EmptyCard, ListCard, listRowClass, PageTitle } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
 import { useToast } from '@/contexts/toast-context'
 import { memberErrorMessage } from '@/lib/member-errors'
 import { loginPath } from '@/lib/safe-next'
-import { buttonClass } from '@/lib/ui-classes'
+import { buttonClass, cn } from '@/lib/ui-classes'
 
 export default function InvitesContent() {
   const router = useRouter()
@@ -35,17 +36,14 @@ export default function InvitesContent() {
 
   if (failed) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Invites</h1>
-        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        <PageTitle>Invites</PageTitle>
+        <EmptyCard>
           <p className="mb-3">Could not load your invites.</p>
-          <button
-            onClick={() => void refresh()}
-            className={buttonClass('primary', 'sm')}
-          >
+          <button onClick={() => void refresh()} className={buttonClass('primary', 'sm')}>
             Retry
           </button>
-        </div>
+        </EmptyCard>
       </div>
     )
   }
@@ -72,46 +70,43 @@ export default function InvitesContent() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Invites</h1>
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <PageTitle>Invites</PageTitle>
       {invites.length === 0 ? (
-        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
-          <Inbox size={28} className="mx-auto mb-2 text-gray-300" />
+        <EmptyCard>
+          <Inbox size={28} className="mx-auto mb-2 text-muted/60" />
           <p>No pending invites.</p>
-        </div>
+        </EmptyCard>
       ) : (
-        <ul className="space-y-3">
+        <ListCard>
           {invites.map((inv) => (
-            <li
-              key={inv.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-surface p-4 shadow-soft"
-            >
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-800 truncate">{inv.journey_title}</p>
-                <p className="text-sm text-gray-500">
+            <li key={inv.id} className={cn(listRowClass, 'flex-wrap justify-between py-4')}>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold leading-normal text-ink">{inv.journey_title}</p>
+                <p className="text-sm leading-normal text-muted">
                   {inv.invited_by ? `@${inv.invited_by} invited you as ` : 'Invited as '}
-                  <span className="font-medium">{inv.role}</span>
+                  <span className="font-medium text-ink-2">{inv.role}</span>
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
                   disabled={busyId !== null}
                   onClick={() => respond(inv.id, inv.journey_slug, false)}
-                  className={buttonClass('secondary', 'sm')}
+                  className={cn(buttonClass('ghost', 'sm'), 'text-muted')}
                 >
                   Decline
                 </button>
                 <button
                   disabled={busyId !== null}
                   onClick={() => respond(inv.id, inv.journey_slug, true)}
-                  className={buttonClass('primary', 'sm')}
+                  className={buttonClass('secondary', 'sm')}
                 >
                   Accept
                 </button>
               </div>
             </li>
           ))}
-        </ul>
+        </ListCard>
       )}
     </div>
   )

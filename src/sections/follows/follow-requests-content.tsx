@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import {
@@ -14,7 +13,7 @@ import {
 } from '@/api/follows'
 import ConfirmDialog from '@/components/confirm-dialog'
 import PageLoading from '@/components/page-loading'
-import UserAvatar from '@/components/user-avatar'
+import { EmptyCard, ListCard, listRowClass, PageTitle, UserLink } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
@@ -25,29 +24,9 @@ import {
   removeEntry,
 } from '@/lib/follow-requests'
 import { loginPath } from '@/lib/safe-next'
-import { buttonClass } from '@/lib/ui-classes'
+import { buttonClass, cn } from '@/lib/ui-classes'
 
 import type { FollowEntry } from '@/api/follows/type'
-import type { PublicProfileType } from '@/api/journey/type'
-
-const card = 'rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft'
-
-function UserLink({ user }: { user: PublicProfileType }) {
-  return (
-    <>
-      <UserAvatar user={user} size={40} />
-      <Link
-        href={`/u/${encodeURIComponent(user.username)}`}
-        className="min-w-0 flex-1 hover:underline"
-      >
-        <span className="block truncate text-sm font-medium text-gray-800">
-          {user.display_name || user.username}
-        </span>
-        <span className="block truncate text-xs text-gray-500">@{user.username}</span>
-      </Link>
-    </>
-  )
-}
 
 export default function FollowRequestsContent() {
   const router = useRouter()
@@ -155,12 +134,10 @@ export default function FollowRequestsContent() {
     }
   }
 
-  const rowClass = 'flex items-center gap-3 rounded-tile bg-surface p-3 shadow-soft'
-
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
       {failed ? (
-        <div className={card}>
+        <EmptyCard>
           <p className="mb-3">Could not load follow requests</p>
           <button
             type="button"
@@ -173,23 +150,23 @@ export default function FollowRequestsContent() {
           >
             Try again
           </button>
-        </div>
+        </EmptyCard>
       ) : (
         <>
           <section className="mb-10">
-            <h1 className="mb-4 text-2xl font-bold text-gray-800">Follow requests</h1>
+            <PageTitle>Follow requests</PageTitle>
             {requests?.length === 0 ? (
-              <div className={card}>No pending requests</div>
+              <EmptyCard>No pending requests</EmptyCard>
             ) : (
-              <ul className="space-y-2">
+              <ListCard>
                 {requests?.map((r) => (
-                  <li key={r.user.username} className={rowClass}>
+                  <li key={r.user.username} className={listRowClass}>
                     <UserLink user={r.user} />
                     <button
                       type="button"
                       onClick={() => void respond(r.user.username, true)}
                       disabled={busy !== null}
-                      className={buttonClass('primary', 'sm')}
+                      className={buttonClass('secondary', 'sm')}
                     >
                       Accept
                     </button>
@@ -197,36 +174,39 @@ export default function FollowRequestsContent() {
                       type="button"
                       onClick={() => void respond(r.user.username, false)}
                       disabled={busy !== null}
-                      className={buttonClass('secondary', 'sm')}
+                      className={cn(buttonClass('ghost', 'sm'), 'text-muted')}
                     >
                       Decline
                     </button>
                   </li>
                 ))}
-              </ul>
+              </ListCard>
             )}
           </section>
 
           <section>
-            <h2 className="mb-4 text-xl font-bold text-gray-800">Followers</h2>
+            <PageTitle as="h2">Followers</PageTitle>
             {followers?.length === 0 ? (
-              <div className={card}>No followers yet</div>
+              <EmptyCard>No followers yet</EmptyCard>
             ) : (
-              <ul className="space-y-2">
+              <ListCard>
                 {followers?.map((f) => (
-                  <li key={f.user.username} className={rowClass}>
+                  <li key={f.user.username} className={listRowClass}>
                     <UserLink user={f.user} />
                     <button
                       type="button"
                       onClick={() => setRemoving(f.user.username)}
                       disabled={busy !== null}
-                      className={buttonClass('secondary', 'sm')}
+                      className={cn(
+                        buttonClass('ghost', 'sm'),
+                        'text-danger hover:bg-danger/5 hover:text-danger',
+                      )}
                     >
                       Remove
                     </button>
                   </li>
                 ))}
-              </ul>
+              </ListCard>
             )}
           </section>
         </>

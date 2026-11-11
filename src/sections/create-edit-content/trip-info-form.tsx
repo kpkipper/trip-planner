@@ -1,4 +1,5 @@
 import { VISIBILITY_OPTIONS } from '@/lib/trip-settings'
+import { cn, fieldClass, fieldErrorClass, labelClass } from '@/lib/ui-classes'
 
 import { Autocomplete } from './helper'
 import { COUNTRY_NAMES } from './helper'
@@ -21,6 +22,10 @@ interface TripInfoFormProps {
   onEndDateChange: (v: string) => void
 }
 
+const label = cn(labelClass, 'mb-1.5 block')
+const errorText = 'mt-1 text-xs leading-normal text-danger'
+const field = (hasError: boolean) => cn(fieldClass, 'w-full', hasError && fieldErrorClass)
+
 export default function TripInfoForm({
   title,
   country,
@@ -38,26 +43,24 @@ export default function TripInfoForm({
   onEndDateChange,
 }: TripInfoFormProps) {
   return (
-    <div className="bg-surface rounded-card shadow-soft p-6 mb-4">
-      <h2 className="text-base font-semibold tracking-tight text-ink mb-4">Trip Info</h2>
+    <div className="mb-6 rounded-card bg-surface p-6 shadow-soft">
+      <h2 className="mb-5 text-lg font-semibold leading-normal tracking-tight text-ink">Trip Info</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Trip Title</label>
+          <label className={label}>Trip Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="e.g. Tokyo Adventure 2025"
-            className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
-              errors.title ? 'border-red-400' : 'border-gray-300'
-            }`}
+            className={field(!!errors.title)}
           />
-          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+          {errors.title && <p className={errorText}>{errors.title}</p>}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+            <label className={label}>Country</label>
             <Autocomplete
               value={country}
               onChange={onCountryChange}
@@ -65,13 +68,13 @@ export default function TripInfoForm({
               placeholder="e.g. Japan"
               hasError={!!errors.country}
             />
-            {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
+            {errors.country && <p className={errorText}>{errors.country}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={label}>
               Destination
               {!country && (
-                <span className="text-gray-400 font-normal"> (select country first)</span>
+                <span className="font-normal text-muted/80"> (select country first)</span>
               )}
             </label>
             <Autocomplete
@@ -83,46 +86,42 @@ export default function TripInfoForm({
               hasError={!!errors.destination}
             />
             {errors.destination && (
-              <p className="text-red-500 text-xs mt-1">{errors.destination}</p>
+              <p className={errorText}>{errors.destination}</p>
             )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <label className={label}>Start Date</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => onStartDateChange(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
-                errors.startDate ? 'border-red-400' : 'border-gray-300'
-              }`}
+              className={field(!!errors.startDate)}
             />
-            {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
+            {errors.startDate && <p className={errorText}>{errors.startDate}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <label className={label}>End Date</label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => onEndDateChange(e.target.value)}
               min={startDate}
-              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition ${
-                errors.endDate ? 'border-red-400' : 'border-gray-300'
-              }`}
+              className={field(!!errors.endDate)}
             />
-            {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
+            {errors.endDate && <p className={errorText}>{errors.endDate}</p>}
           </div>
         </div>
 
         {visibility !== undefined && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+            <label className={label}>Visibility</label>
             <select
               value={visibility}
               onChange={(e) => onVisibilityChange(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
+              className={field(false)}
             >
               {VISIBILITY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>

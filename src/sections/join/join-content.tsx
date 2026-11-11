@@ -5,13 +5,17 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+import { LinkIcon } from 'lucide-react'
+
 import { joinByLink } from '@/api/members'
 import PageLoading from '@/components/page-loading'
+import { StatusCard } from '@/components/ui/status-card'
 import { useAuth } from '@/contexts/auth-context'
 import { useInvites } from '@/contexts/invites-context'
 import { useToast } from '@/contexts/toast-context'
 import { joinErrorMessage } from '@/lib/member-errors'
 import { loginPath } from '@/lib/safe-next'
+import { buttonClass } from '@/lib/ui-classes'
 
 export default function JoinContent({ token }: { token: string }) {
   const router = useRouter()
@@ -46,12 +50,11 @@ export default function JoinContent({ token }: { token: string }) {
   if (!error) return <PageLoading />
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16 text-center">
-      <h1 className="text-xl font-semibold text-gray-800 mb-2">Could not join the trip</h1>
-      <p className="text-gray-600 mb-6">{error}</p>
-      <Link href="/" className="text-accent hover:underline text-sm">
+    <StatusCard icon={<LinkIcon size={26} strokeWidth={1.75} />} title="Could not join the trip">
+      <p className="mt-2 mb-6 text-sm leading-relaxed text-muted">{error}</p>
+      <Link href="/" className={buttonClass('secondary', 'md')}>
         Back to home
       </Link>
-    </div>
+    </StatusCard>
   )
 }

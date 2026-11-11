@@ -1,5 +1,7 @@
 import { ArrowDown, ArrowUp, GripVertical, MapPin, Trash2 } from 'lucide-react'
 
+import { cn, fieldClass, fieldErrorClass } from '@/lib/ui-classes'
+
 import { TimeAutocomplete } from './helper'
 
 import type { Activity } from '@/types/trip'
@@ -14,6 +16,12 @@ const CATEGORY_OPTIONS = [
   { value: 'transport', label: 'Transport' },
   { value: 'other', label: 'Other' },
 ]
+
+const iconButton = (extra: string) =>
+  cn(
+    'grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-chip hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30',
+    extra,
+  )
 
 interface ActivityRowProps {
   act: Activity
@@ -53,12 +61,13 @@ export default function ActivityRow({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
-      className={`rounded-xl border border-gray-200 p-2.5 space-y-2 transition-colors ${
-        isOver ? 'ring-1 ring-accent/40 bg-accent-soft' : 'bg-gray-50'
-      }`}
+      className={cn(
+        'space-y-2 rounded-tile p-3 ring-1 ring-inset transition-colors',
+        isOver ? 'bg-accent-soft ring-accent/40' : 'bg-surface ring-line',
+      )}
     >
       <div className="flex items-center gap-2">
-        <span className="hidden sm:inline-flex cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none flex-shrink-0">
+        <span className="hidden flex-shrink-0 cursor-grab touch-none text-muted/50 hover:text-muted active:cursor-grabbing sm:inline-flex">
           <GripVertical size={16} />
         </span>
         <TimeAutocomplete value={act.time} onChange={(v) => onUpdate('time', v)} />
@@ -66,7 +75,7 @@ export default function ActivityRow({
           value={act.category ?? ''}
           onChange={(e) => onUpdate('category', e.target.value)}
           aria-label="Category"
-          className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
+          className={cn(fieldClass, 'min-w-0 px-3 py-2')}
         >
           {CATEGORY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -78,20 +87,23 @@ export default function ActivityRow({
         <button
           onClick={() => onMove('up')}
           disabled={aIdx === 0}
-          className="sm:hidden p-1 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
+          aria-label="Move up"
+          className={iconButton('sm:hidden')}
         >
           <ArrowUp size={14} />
         </button>
         <button
           onClick={() => onMove('down')}
           disabled={aIdx === totalActivities - 1}
-          className="sm:hidden p-1 rounded-md hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
+          aria-label="Move down"
+          className={iconButton('sm:hidden')}
         >
           <ArrowDown size={14} />
         </button>
         <button
           onClick={onRemove}
-          className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+          aria-label="Remove activity"
+          className={iconButton('hover:bg-danger/5 hover:text-danger')}
         >
           <Trash2 size={15} />
         </button>
@@ -102,21 +114,21 @@ export default function ActivityRow({
         onChange={(e) => onUpdate('description', e.target.value)}
         placeholder="What are you doing?"
         aria-invalid={!!descriptionError}
-        className={`w-full border ${descriptionError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition`}
+        className={cn(fieldClass, 'w-full px-3 py-2', descriptionError && fieldErrorClass)}
       />
-      {descriptionError && <p className="text-xs text-red-500">{descriptionError}</p>}
+      {descriptionError && <p className="text-xs leading-normal text-danger">{descriptionError}</p>}
       <div className="flex items-center gap-1.5">
-        <MapPin size={13} className="text-gray-400 flex-shrink-0" />
+        <MapPin size={14} className="flex-shrink-0 text-muted" />
         <input
           type="text"
           value={act.mapUrl ?? ''}
           onChange={(e) => onUpdate('mapUrl', e.target.value)}
           placeholder="Maps URL (optional)"
           aria-invalid={!!mapUrlError}
-          className={`flex-1 border ${mapUrlError ? 'border-red-400' : 'border-gray-300'} rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition`}
+          className={cn(fieldClass, 'min-w-0 flex-1 px-3 py-2', mapUrlError && fieldErrorClass)}
         />
       </div>
-      {mapUrlError && <p className="text-xs text-red-500">{mapUrlError}</p>}
+      {mapUrlError && <p className="text-xs leading-normal text-danger">{mapUrlError}</p>}
     </div>
   )
 }

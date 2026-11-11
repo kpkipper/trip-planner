@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { listBlocks, unblockUser } from '@/api/safety'
 import PageLoading from '@/components/page-loading'
-import UserAvatar from '@/components/user-avatar'
+import { EmptyCard, ListCard, listRowClass, PageTitle, UserLink } from '@/components/ui/list'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
@@ -67,9 +66,9 @@ export default function BlocksContent() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">คนที่ block</h1>
+      <PageTitle>คนที่ block</PageTitle>
       {failed && (
-        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
+        <EmptyCard>
           <p className="mb-3">โหลดรายการไม่สำเร็จ</p>
           <button
             type="button"
@@ -82,30 +81,14 @@ export default function BlocksContent() {
           >
             ลองใหม่
           </button>
-        </div>
+        </EmptyCard>
       )}
-      {!failed && users?.length === 0 && (
-        <div className="rounded-card bg-surface p-8 text-center text-gray-500 shadow-soft">
-          ยังไม่ได้ block ใคร
-        </div>
-      )}
+      {!failed && users?.length === 0 && <EmptyCard>ยังไม่ได้ block ใคร</EmptyCard>}
       {!failed && users && users.length > 0 && (
-        <ul className="space-y-2">
+        <ListCard>
           {users.map((u) => (
-            <li
-              key={u.username}
-              className="flex items-center gap-3 rounded-tile bg-surface p-3 shadow-soft"
-            >
-              <UserAvatar user={u} size={40} />
-              <Link
-                href={`/u/${encodeURIComponent(u.username)}`}
-                className="min-w-0 flex-1 hover:underline"
-              >
-                <span className="block truncate text-sm font-medium text-gray-800">
-                  {u.display_name || u.username}
-                </span>
-                <span className="block truncate text-xs text-gray-500">@{u.username}</span>
-              </Link>
+            <li key={u.username} className={listRowClass}>
+              <UserLink user={u} />
               <button
                 type="button"
                 onClick={() => void unblock(u.username)}
@@ -116,7 +99,7 @@ export default function BlocksContent() {
               </button>
             </li>
           ))}
-        </ul>
+        </ListCard>
       )}
     </div>
   )

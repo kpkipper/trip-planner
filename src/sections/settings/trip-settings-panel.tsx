@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { Settings } from 'lucide-react'
+import { ChevronDown, Settings } from 'lucide-react'
 
 import { patchJourney } from '@/api/itinerary'
 import { useToast } from '@/contexts/toast-context'
@@ -17,7 +17,14 @@ import {
   type SettingsForm,
   VISIBILITY_OPTIONS,
 } from '@/lib/trip-settings'
-import { buttonClass } from '@/lib/ui-classes'
+import {
+  buttonClass,
+  cn,
+  fieldClass,
+  fieldErrorClass,
+  labelClass,
+  switchClass,
+} from '@/lib/ui-classes'
 
 import type { TripSettings } from '@/types/trip'
 
@@ -31,8 +38,7 @@ interface Props {
   onChanged: () => void
 }
 
-const inputClass =
-  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent'
+const inputClass = cn(fieldClass, 'w-full')
 
 function Toggle({
   label,
@@ -46,18 +52,18 @@ function Toggle({
   onChange: (v: boolean) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3">
+    <label className="flex cursor-pointer items-start justify-between gap-4 py-3">
+      <span className="min-w-0">
+        <span className="block text-sm font-medium leading-normal text-ink">{label}</span>
+        <span className="block text-xs leading-normal text-muted">{hint}</span>
+      </span>
       <input
         type="checkbox"
         role="switch"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-4 w-4"
+        className={cn(switchClass, 'mt-0.5')}
       />
-      <span>
-        <span className="block text-sm font-medium text-gray-700">{label}</span>
-        <span className="block text-xs text-gray-500">{hint}</span>
-      </span>
     </label>
   )
 }
@@ -111,38 +117,48 @@ export default function TripSettingsPanel({
   }
 
   return (
-    <section className="mt-8 rounded-card bg-surface p-4 shadow-soft">
+    <section className="mt-8 rounded-card bg-surface p-3 shadow-soft">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 text-left text-base font-semibold text-gray-800"
+        className="flex w-full items-center gap-2 rounded-tile px-3 py-2.5 text-left text-base font-semibold leading-normal tracking-tight text-ink transition-colors hover:bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <Settings size={16} />
         Settings
+        <ChevronDown
+          size={16}
+          aria-hidden
+          className={cn('ml-auto text-muted transition-transform', open && 'rotate-180')}
+        />
       </button>
 
       {open && (
-        <div className="mt-4 space-y-5">
+        <div className="space-y-5 px-3 pt-3 pb-3">
           {access.visibility && (
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-gray-700">
-                Who can see this trip
-              </legend>
+              <legend className={cn(labelClass, 'mb-2')}>Who can see this trip</legend>
               <div className="space-y-2">
                 {VISIBILITY_OPTIONS.map((o) => (
-                  <label key={o.value} className="flex cursor-pointer items-start gap-2">
+                  <label
+                    key={o.value}
+                    className="flex cursor-pointer items-start gap-3 rounded-tile px-4 py-3 ring-1 ring-inset ring-line transition-colors hover:bg-chip has-[:checked]:bg-chip has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+                  >
                     <input
                       type="radio"
                       name="visibility"
                       value={o.value}
                       checked={form.visibility === o.value}
                       onChange={() => set('visibility', o.value)}
-                      className="mt-1"
+                      className="mt-1 h-4 w-4 shrink-0 accent-primary focus:outline-none"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-gray-800">{o.label}</span>
-                      <span className="block text-xs text-gray-500">{o.description}</span>
+                      <span className="block text-sm font-medium leading-normal text-ink">
+                        {o.label}
+                      </span>
+                      <span className="block text-xs leading-normal text-muted">
+                        {o.description}
+                      </span>
                     </span>
                   </label>
                 ))}
@@ -150,46 +166,49 @@ export default function TripSettingsPanel({
             </fieldset>
           )}
 
-          {access.hideLiveStatus && (
-            <Toggle
-              label="Hide live status"
-              hint="Followers will not see where you are while the trip is ongoing."
-              checked={form.hideLiveStatus}
-              onChange={(v) => set('hideLiveStatus', v)}
-            />
-          )}
+          {/* Switches as one hairline-divided group. */}
+          <div className="divide-y divide-line empty:hidden">
+            {access.hideLiveStatus && (
+              <Toggle
+                label="Hide live status"
+                hint="Followers will not see where you are while the trip is ongoing."
+                checked={form.hideLiveStatus}
+                onChange={(v) => set('hideLiveStatus', v)}
+              />
+            )}
 
-          {access.editorsCanInvite && (
-            <Toggle
-              label="Editors can invite"
-              hint="Let editors invite people and create invite links."
-              checked={form.editorsCanInvite}
-              onChange={(v) => set('editorsCanInvite', v)}
-            />
-          )}
+            {access.editorsCanInvite && (
+              <Toggle
+                label="Editors can invite"
+                hint="Let editors invite people and create invite links."
+                checked={form.editorsCanInvite}
+                onChange={(v) => set('editorsCanInvite', v)}
+              />
+            )}
 
-          {access.membersCanPost && (
-            <Toggle
-              label="ให้สมาชิกอัปโหลดรูปได้"
-              hint="ถ้าปิด จะมีแค่เจ้าของทริปที่อัปโหลดรูปได้"
-              checked={form.membersCanPost}
-              onChange={(v) => set('membersCanPost', v)}
-            />
-          )}
+            {access.membersCanPost && (
+              <Toggle
+                label="ให้สมาชิกอัปโหลดรูปได้"
+                hint="ถ้าปิด จะมีแค่เจ้าของทริปที่อัปโหลดรูปได้"
+                checked={form.membersCanPost}
+                onChange={(v) => set('membersCanPost', v)}
+              />
+            )}
 
-          {access.draft && (
-            <Toggle
-              label="Draft"
-              hint="A draft trip shows as Planning, even after its dates start."
-              checked={form.draft}
-              onChange={(v) => set('draft', v)}
-            />
-          )}
+            {access.draft && (
+              <Toggle
+                label="Draft"
+                hint="A draft trip shows as Planning, even after its dates start."
+                checked={form.draft}
+                onChange={(v) => set('draft', v)}
+              />
+            )}
+          </div>
 
           {access.timezone && (
             <label className="block">
-              <span className="block text-sm font-medium text-gray-700">Timezone</span>
-              <span className="mb-1 block text-xs text-gray-500">
+              <span className={cn(labelClass, 'block')}>Timezone</span>
+              <span className="mb-1.5 block text-xs leading-normal text-muted">
                 Used to decide which day of the trip it is.
               </span>
               <select
@@ -208,16 +227,16 @@ export default function TripSettingsPanel({
 
           {access.cover && (
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-gray-700">Cover image URL</span>
+              <span className={cn(labelClass, 'mb-1.5 block')}>Cover image URL</span>
               <input
                 type="url"
                 value={form.coverUrl}
                 onChange={(e) => set('coverUrl', e.target.value)}
                 placeholder="https://…"
-                className={`${inputClass} ${coverProblem ? 'border-red-400' : ''}`}
+                className={cn(inputClass, coverProblem && fieldErrorClass)}
               />
               {coverProblem && (
-                <span className="mt-1 block text-xs text-red-500">{coverProblem}</span>
+                <span className="mt-1 block text-xs leading-normal text-danger">{coverProblem}</span>
               )}
             </label>
           )}

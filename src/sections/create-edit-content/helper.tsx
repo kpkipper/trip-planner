@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Country } from 'country-state-city'
 
+import { cn, fieldClass, fieldErrorClass } from '@/lib/ui-classes'
+
 export { generateDays, uid } from './days'
 
 export const ALL_COUNTRIES = Country.getAllCountries()
@@ -16,6 +18,11 @@ export const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
   const m = i % 2 === 0 ? '00' : '30'
   return `${h}:${m}`
 })
+
+// Suggestion dropdowns: a white tile floating over the form.
+const listboxClass =
+  'absolute z-50 mt-2 overflow-y-auto rounded-tile bg-surface p-1 text-sm shadow-soft ring-1 ring-line'
+const optionClass = 'cursor-pointer rounded-lg px-3 py-2 leading-normal text-ink-2 hover:bg-chip hover:text-ink'
 
 export function Autocomplete({
   value,
@@ -57,12 +64,10 @@ export function Autocomplete({
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
-          hasError ? 'border-red-400' : 'border-gray-300'
-        }`}
+        className={cn(fieldClass, 'w-full', hasError && fieldErrorClass)}
       />
       {open && !disabled && filtered.length > 0 && (
-        <ul className="absolute z-50 mt-1 left-0 right-0 max-h-52 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+        <ul className={cn(listboxClass, 'left-0 right-0 max-h-52')}>
           {filtered.map((opt) => (
             <li
               key={opt}
@@ -71,7 +76,7 @@ export function Autocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-2 cursor-pointer hover:bg-chip text-gray-700"
+              className={optionClass}
             >
               {opt}
             </li>
@@ -108,17 +113,17 @@ export function TimeAutocomplete({
   }, [open])
 
   return (
-    <div ref={containerRef} className="relative w-20">
+    <div ref={containerRef} className="relative w-24">
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
         placeholder="09:00"
-        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
+        className={cn(fieldClass, 'w-full px-3 py-2 tabular-nums')}
       />
       {open && filtered.length > 0 && (
-        <ul className="absolute z-50 mt-1 left-0 w-24 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg text-sm">
+        <ul className={cn(listboxClass, 'left-0 w-28 max-h-48')}>
           {filtered.map((opt) => (
             <li
               key={opt}
@@ -127,7 +132,7 @@ export function TimeAutocomplete({
                 onChange(opt)
                 setOpen(false)
               }}
-              className="px-3 py-1.5 cursor-pointer hover:bg-chip text-gray-700"
+              className={cn(optionClass, 'py-1.5 tabular-nums')}
             >
               {opt}
             </li>

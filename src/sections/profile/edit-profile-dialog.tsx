@@ -13,7 +13,14 @@ import {
   type ProfileForm,
   validateProfile,
 } from '@/lib/profile-form'
-import { buttonClass } from '@/lib/ui-classes'
+import {
+  buttonClass,
+  cn,
+  fieldClass,
+  fieldErrorClass,
+  labelClass,
+  switchClass,
+} from '@/lib/ui-classes'
 
 import type { User } from '@/api/me/type'
 
@@ -23,9 +30,6 @@ interface Props {
   // acceptedPending: approval was turned off, so the server accepted every pending request.
   onSaved: (user: User, info: { acceptedPending: boolean }) => void
 }
-
-const inputClass =
-  'w-full rounded-lg border px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent'
 
 export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
   const { setUser } = useAuth()
@@ -82,7 +86,7 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
   }
 
   const field = (key: keyof ProfileForm) =>
-    `${inputClass} ${errors[key] ? 'border-red-400' : 'border-gray-200'}`
+    cn(fieldClass, 'w-full', errors[key] && fieldErrorClass)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -91,12 +95,12 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
         onSubmit={submit}
         role="dialog"
         aria-label="Edit profile"
-        className="relative w-full max-w-md space-y-4 rounded-card bg-surface p-6 shadow-xl"
+        className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-card bg-surface p-6 shadow-soft"
       >
-        <h2 className="text-base font-semibold text-gray-800">Edit profile</h2>
+        <h2 className="text-lg font-semibold leading-normal tracking-tight text-ink">Edit profile</h2>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Username</span>
+          <span className={cn(labelClass, 'mb-1.5 block')}>Username</span>
           <input
             value={form.username}
             onChange={(e) => set('username', e.target.value)}
@@ -105,36 +109,36 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
             autoComplete="off"
           />
           {errors.username && (
-            <span className="mt-1 block text-xs text-red-500">{errors.username}</span>
+            <span className="mt-1 block text-xs leading-normal text-danger">{errors.username}</span>
           )}
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Display name</span>
+          <span className={cn(labelClass, 'mb-1.5 block')}>Display name</span>
           <input
             value={form.displayName}
             onChange={(e) => set('displayName', e.target.value)}
             className={field('displayName')}
           />
           {errors.displayName && (
-            <span className="mt-1 block text-xs text-red-500">{errors.displayName}</span>
+            <span className="mt-1 block text-xs leading-normal text-danger">{errors.displayName}</span>
           )}
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Bio</span>
+          <span className={cn(labelClass, 'mb-1.5 block')}>Bio</span>
           <textarea
             value={form.bio}
             onChange={(e) => set('bio', e.target.value)}
             rows={3}
             className={field('bio')}
           />
-          <span className="mt-1 block text-xs text-gray-400">{[...form.bio].length}/160</span>
-          {errors.bio && <span className="block text-xs text-red-500">{errors.bio}</span>}
+          <span className="mt-1 block text-xs leading-normal text-muted">{[...form.bio].length}/160</span>
+          {errors.bio && <span className="block text-xs leading-normal text-danger">{errors.bio}</span>}
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Avatar URL</span>
+          <span className={cn(labelClass, 'mb-1.5 block')}>Avatar URL</span>
           <input
             type="url"
             value={form.avatarUrl}
@@ -143,39 +147,37 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
             className={field('avatarUrl')}
           />
           {errors.avatarUrl && (
-            <span className="mt-1 block text-xs text-red-500">{errors.avatarUrl}</span>
+            <span className="mt-1 block text-xs leading-normal text-danger">{errors.avatarUrl}</span>
           )}
         </label>
 
         <div>
-          <label className="flex items-start gap-3">
+          <label className="flex cursor-pointer items-start justify-between gap-4 rounded-tile bg-bg px-4 py-3">
+            <span>
+              <span className="block text-sm font-medium leading-normal text-ink">
+                Approve followers
+              </span>
+              <span className="block text-xs leading-normal text-muted">
+                People must ask before following you.
+              </span>
+            </span>
             <input
               type="checkbox"
               role="switch"
               checked={approve}
               onChange={(e) => setApprove(e.target.checked)}
-              className="mt-1 h-4 w-4"
+              className={cn(switchClass, 'mt-0.5')}
             />
-            <span>
-              <span className="block text-sm font-medium text-gray-700">Approve followers</span>
-              <span className="block text-xs text-gray-400">
-                People must ask before following you.
-              </span>
-            </span>
           </label>
           {wasApproving && !approve && (
-            <p role="status" className="mt-2 text-xs text-amber-600">
+            <p role="status" className="mt-2 text-xs leading-normal text-danger">
               Pending requests will all be accepted.
             </p>
           )}
         </div>
 
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className={buttonClass('ghost')}
-          >
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className={buttonClass('ghost', 'md')}>
             Cancel
           </button>
           <button

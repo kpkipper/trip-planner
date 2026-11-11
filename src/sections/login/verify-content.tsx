@@ -9,6 +9,7 @@ import { LinkIcon } from 'lucide-react'
 
 import { verifyEmailLogin } from '@/api/auth'
 import PageLoading from '@/components/page-loading'
+import { StatusCard } from '@/components/ui/status-card'
 import { useAuth } from '@/contexts/auth-context'
 import { consumeLoginNext } from '@/lib/login-next'
 import { buttonClass } from '@/lib/ui-classes'
@@ -42,18 +43,11 @@ export default function VerifyContent() {
   if (!error) return <PageLoading />
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-      <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center mb-6 shadow-soft">
-        <LinkIcon size={34} className="text-white" strokeWidth={1.5} />
-      </div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">Can&apos;t log you in</h1>
-      <p className="text-gray-400 text-sm max-w-xs leading-relaxed mb-6">{error}</p>
-      <Link
-        href="/login"
-        className={buttonClass('primary', 'md')}
-      >
+    <StatusCard icon={<LinkIcon size={26} strokeWidth={1.75} />} title="Can't log you in">
+      <p className="mt-2 mb-6 text-sm leading-relaxed text-muted">{error}</p>
+      <Link href="/login" className={buttonClass('primary', 'md')}>
         Back to login
       </Link>
-    </div>
+    </StatusCard>
   )
 }
