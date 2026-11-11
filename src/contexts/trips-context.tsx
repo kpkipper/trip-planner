@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { usePathname } from 'next/navigation'
 
@@ -19,6 +19,10 @@ interface TripsContextValue {
   myTrips: Trip[]
   sharedTrips: Trip[]
   loaded: boolean
+  // The latest fetch failed (the list then holds whatever was there before, possibly nothing).
+  error: boolean
+  // Fetch the list again (e.g. a Retry button after an error).
+  reload: () => void
 }
 
 const EMPTY_TRIPS: Trip[] = []
@@ -33,6 +37,8 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
     authed: false,
   })
   const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const pathname = usePathname()
   const { status } = useAuth()
   // Refetch when the page or the login state changes (login/logout changes what is visible).
@@ -43,7 +49,14 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   if (loadedKey !== loadKey) {
     setLoadedKey(loadKey)
     setLoaded(false)
+    setError(false)
   }
+
+  const reload = useCallback(() => {
+    setLoaded(false)
+    setError(false)
+    setAttempt((n) => n + 1)
+  }, [])
 
   useEffect(() => {
     // Wait until we know whether the user is logged in, so the list is fetched once.
@@ -55,16 +68,21 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
         : getJourneys().then(({ data }) => toTripList(data ?? []))
     request
       .then((list) => {
-        if (!cancelled) setFetched({ list, authed: status === 'authed' })
+        if (cancelled) return
+        setFetched({ list, authed: status === 'authed' })
+        setError(false)
       })
-      .catch((err) => console.error('Failed to load trips:', errorSummary(err)))
+      .catch((err) => {
+        console.error('Failed to load trips:', errorSummary(err))
+        if (!cancelled) setError(true)
+      })
       .finally(() => {
         if (!cancelled) setLoaded(true)
       })
     return () => {
       cancelled = true
     }
-  }, [pathname, status])
+  }, [pathname, status, attempt])
 
   const authed = status === 'authed'
   const userTrips = fetched.authed === authed ? fetched.list : EMPTY_TRIPS
@@ -74,8 +92,10 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
       myTrips: authed ? userTrips.filter((t) => t.role === 'owner') : [],
       sharedTrips: authed ? userTrips.filter((t) => t.role !== 'owner') : [],
       loaded,
+      error,
+      reload,
     }),
-    [userTrips, authed, loaded],
+    [userTrips, authed, loaded, error, reload],
   )
 
   return <TripsContext.Provider value={value}>{children}</TripsContext.Provider>

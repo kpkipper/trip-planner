@@ -365,7 +365,7 @@ function DayChips({
             onClick={() => onSelect(idx)}
             className={cn(
               chipClass(active),
-              'min-w-14 shrink-0 flex-col gap-0 rounded-tile px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              'relative min-w-14 shrink-0 flex-col gap-0 rounded-tile px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
               !active && 'hover:bg-line',
             )}
           >

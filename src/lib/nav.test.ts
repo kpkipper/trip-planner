@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isActive, navItems } from './nav'
+import { isActive, isProfilePath, navItems } from './nav'
 
 describe('navItems', () => {
   it('is empty when not logged in', () => {
@@ -45,5 +45,33 @@ describe('isActive', () => {
   it('does not match other pages', () => {
     expect(isActive('/follow-requests', '/feed')).toBe(false)
     expect(isActive('/', '/trips')).toBe(false)
+  })
+})
+
+describe('isProfilePath', () => {
+  it('matches the profile page with or without a trailing slash', () => {
+    expect(isProfilePath('/u/test1', 'test1')).toBe(true)
+    expect(isProfilePath('/u/test1/', 'test1')).toBe(true)
+  })
+
+  it('matches a percent-encoded non-ASCII username', () => {
+    const name = 'กิ๊บ'
+    expect(isProfilePath(`/u/${encodeURIComponent(name)}`, name)).toBe(true)
+    expect(isProfilePath(`/u/${encodeURIComponent(name)}/`, name)).toBe(true)
+  })
+
+  it('matches an already-decoded non-ASCII pathname', () => {
+    expect(isProfilePath('/u/กิ๊บ', 'กิ๊บ')).toBe(true)
+  })
+
+  it('does not match another user, a prefix or a deeper page', () => {
+    expect(isProfilePath('/u/ploy', 'test1')).toBe(false)
+    expect(isProfilePath('/u/test10', 'test1')).toBe(false)
+    expect(isProfilePath('/u/test1/followers', 'test1')).toBe(false)
+    expect(isProfilePath('/feed', 'test1')).toBe(false)
+  })
+
+  it('does not throw on a malformed escape', () => {
+    expect(isProfilePath('/u/%E0%A4', 'test1')).toBe(false)
   })
 })

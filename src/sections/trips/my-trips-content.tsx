@@ -4,13 +4,14 @@ import { useEffect } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Plus } from 'lucide-react'
+import { CloudOff, Plus, RotateCw } from 'lucide-react'
 
 import { SkeletonBlock, TripGridSkeleton } from '@/components/page-loading'
 import TripCard from '@/components/trip-card'
-import { ButtonLink } from '@/components/ui/button'
+import { Button, ButtonLink } from '@/components/ui/button'
 import { useAuth } from '@/contexts/auth-context'
 import { useTrips } from '@/contexts/trips-context'
+import { myTripsView } from '@/lib/my-trips-view'
 import { loginPath } from '@/lib/safe-next'
 
 import type { Trip } from '@/types/trip'
@@ -39,15 +40,15 @@ function CreatePlanButton() {
 export default function MyTripsContent() {
   const router = useRouter()
   const { status } = useAuth()
-  const { myTrips, sharedTrips, loaded } = useTrips()
+  const { myTrips, sharedTrips, loaded, error, reload } = useTrips()
 
   useEffect(() => {
     if (status === 'anon') router.replace(loginPath('/trips'))
   }, [status, router])
 
   const empty = myTrips.length === 0 && sharedTrips.length === 0
-  // The list refetches on every navigation; only show the skeleton while nothing is there yet.
-  if (status !== 'authed' || (!loaded && empty)) {
+  const view = myTripsView({ authed: status === 'authed', loaded, error, empty })
+  if (view === 'loading') {
     return (
       <div className="px-4 py-8">
         <SkeletonBlock className="mb-6 h-10 w-40 md:h-14 md:w-56" />
@@ -62,7 +63,19 @@ export default function MyTripsContent() {
         My trips
       </h1>
 
-      {empty ? (
+      {view === 'error' ? (
+        <div
+          role="alert"
+          className="flex flex-col items-center gap-4 rounded-card bg-surface px-6 py-16 text-center shadow-soft"
+        >
+          <CloudOff size={28} className="text-muted" aria-hidden />
+          <p className="leading-normal text-muted">Could not load your trips.</p>
+          <Button variant="secondary" onClick={reload}>
+            <RotateCw size={16} className="flex-shrink-0" />
+            Try again
+          </Button>
+        </div>
+      ) : view === 'empty' ? (
         <div className="flex flex-col items-center gap-4 rounded-card bg-surface px-6 py-16 text-center shadow-soft">
           <p className="leading-normal text-muted">ยังไม่มีทริป เริ่มวางแผนทริปแรกกันเลย</p>
           <CreatePlanButton />

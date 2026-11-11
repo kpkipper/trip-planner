@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { updateMe } from '@/api/me'
 import { useAuth } from '@/contexts/auth-context'
@@ -21,6 +21,7 @@ import {
   labelClass,
   switchClass,
 } from '@/lib/ui-classes'
+import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { User } from '@/api/me/type'
 
@@ -44,6 +45,8 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
   const wasApproving = user.follow_approval !== false
   const [approve, setApprove] = useState(wasApproving)
+  const dialogRef = useRef<HTMLFormElement>(null)
+  useModalA11y(dialogRef, { open: true, onClose, canClose: !saving })
 
   const set = (key: keyof ProfileForm, value: string) => {
     setForm((f) => ({ ...f, [key]: value }))
@@ -90,10 +93,12 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={() => !saving && onClose()} />
       <form
+        ref={dialogRef}
         onSubmit={submit}
         role="dialog"
+        aria-modal="true"
         aria-label="Edit profile"
         className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-card bg-surface p-6 shadow-soft"
       >
@@ -170,7 +175,7 @@ export default function EditProfileDialog({ user, onClose, onSaved }: Props) {
             />
           </label>
           {wasApproving && !approve && (
-            <p role="status" className="mt-2 text-xs leading-normal text-danger">
+            <p role="status" className="mt-2 text-xs leading-normal text-ink-2">
               Pending requests will all be accepted.
             </p>
           )}

@@ -136,7 +136,15 @@ describe('switchClass', () => {
     expect(c).toContain('checked:bg-primary')
     expect(c).toContain('before:bg-white')
     expect(c).toContain('checked:before:translate-x-4')
-    expect(c).toContain('focus-visible:ring-accent')
+  })
+
+  it('draws the focus indicator outside the track, not as an inset ring', () => {
+    const c = tokens(switchClass)
+    expect(c).toContain('focus-visible:outline-2')
+    expect(c).toContain('focus-visible:outline-offset-2')
+    expect(c).toContain('focus-visible:outline-accent')
+    expect(c.some((t) => t.startsWith('focus-visible:ring'))).toBe(false)
+    expect(c).not.toContain('focus-visible:outline-none')
   })
 })
 

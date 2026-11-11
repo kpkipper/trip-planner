@@ -6,7 +6,7 @@ import { createReport } from '@/api/safety'
 import { useToast } from '@/contexts/toast-context'
 import { errorSummary } from '@/lib/error-summary'
 import { MAX_NOTE, REPORT_REASONS, reportErrorMessage, validateReport } from '@/lib/report-form'
-import { buttonClass, cn, fieldClass } from '@/lib/ui-classes'
+import { buttonClass, cn, fieldClass, labelClass } from '@/lib/ui-classes'
 import { useModalA11y } from '@/lib/use-modal-a11y'
 
 import type { ReportReason, ReportTargetType } from '@/api/safety/type'
@@ -88,7 +88,7 @@ export default function ReportDialog({ targetType, target, onClose, returnFocus 
             </label>
           ))}
         </fieldset>
-        <label className="mt-4 block text-[13px] font-medium leading-normal text-muted" htmlFor="report-note">
+        <label className={cn(labelClass, 'mt-4 block')} htmlFor="report-note">
           รายละเอียดเพิ่มเติม (ไม่บังคับ)
         </label>
         <textarea

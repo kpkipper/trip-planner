@@ -62,7 +62,7 @@ export default function DayCard({
           value={day.title}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => onUpdateTitle(e.target.value)}
-          className="min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium leading-normal text-ink outline-none transition-colors placeholder:text-muted focus:bg-chip focus:ring-2 focus:ring-accent"
+          className="min-w-0 flex-1 rounded-tile bg-transparent px-2 py-1 text-sm font-medium leading-normal text-ink outline-none transition-colors placeholder:text-muted focus:bg-chip focus:ring-2 focus:ring-accent"
           placeholder="Day title..."
         />
         <span className="flex-shrink-0 text-xs leading-normal text-muted">{day.date}</span>

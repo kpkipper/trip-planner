@@ -7,7 +7,7 @@ import { LogIn, Plus } from 'lucide-react'
 
 import { useAuth } from '@/contexts/auth-context'
 import { badgeLabel } from '@/lib/follow-requests'
-import { isActive, type NavIcon, navItems } from '@/lib/nav'
+import { isActive, isProfilePath, type NavIcon, navItems } from '@/lib/nav'
 import { isAuthPath, loginPath } from '@/lib/safe-next'
 import { cn } from '@/lib/ui-classes'
 
@@ -45,7 +45,8 @@ export default function BottomTabs({ pending }: { pending: number }) {
     // The login pages are the Log in screen already; the bar would only cover the form.
     if (isAuthPath(pathname)) return null
     return (
-      <div
+      <nav
+        aria-label="Main"
         className={cn(barPosition, glass, 'flex items-center justify-between gap-3 py-2 pr-2 pl-4')}
       >
         <Link
@@ -58,13 +59,13 @@ export default function BottomTabs({ pending }: { pending: number }) {
           <LogIn size={16} className="flex-shrink-0" />
           Log in
         </ButtonLink>
-      </div>
+      </nav>
     )
   }
 
   const [feed, trips, requests] = navItems(true)
   const badge = badgeLabel(pending)
-  const ownProfile = isActive(pathname, `/u/${encodeURIComponent(user.username)}`)
+  const ownProfile = isProfilePath(pathname, user.username)
 
   const tab = (item: typeof feed) => {
     const Icon = NAV_ICONS[item.icon]

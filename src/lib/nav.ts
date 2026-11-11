@@ -30,3 +30,16 @@ export const isActive = (pathname: string, href: string): boolean => {
   if (path === target) return true
   return NESTED.has(target) && path.startsWith(`${target}/`)
 }
+
+const safeDecode = (s: string) => {
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return s
+  }
+}
+
+// Whether pathname is `username`'s profile page. The router may report the path
+// percent-encoded or decoded, so both sides are compared decoded.
+export const isProfilePath = (pathname: string, username: string): boolean =>
+  safeDecode(trimSlash(pathname)) === `/u/${username}`

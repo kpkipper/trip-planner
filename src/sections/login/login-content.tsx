@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card'
 import { useAuth } from '@/contexts/auth-context'
 import { storeLoginNext } from '@/lib/login-next'
 import { safeNext } from '@/lib/safe-next'
-import { buttonClass, cn, fieldClass } from '@/lib/ui-classes'
+import { buttonClass, cn, fieldClass, labelClass } from '@/lib/ui-classes'
 
 import { emailStartErrorMessage, loginErrorMessage } from './errors'
 import GoogleButton from './google-button'
@@ -116,7 +116,7 @@ export default function LoginContent() {
             )}
 
             <form onSubmit={handleEmail} className="flex flex-col gap-2">
-              <label htmlFor="login-email" className="text-[13px] font-medium leading-normal text-muted">
+              <label htmlFor="login-email" className={labelClass}>
                 Email
               </label>
               <input

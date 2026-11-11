@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from 'react'
 
+import { Loader2 } from 'lucide-react'
+
 import { uploadKey, type UploadStore } from '@/lib/upload-store'
 
 const UploadStoreContext = createContext<UploadStore | null>(null)
@@ -51,6 +53,9 @@ export function useUploads(dayId: string, planId?: string) {
 }
 
 // Small marker for day chips that have uploads in flight (inherits the chip's text colour).
+// It sits inside the chip's <button>, so it is phrasing content only. The label is screen-reader
+// text: shown, it would widen the narrow date chip; the spinner says it visually. It sits in the
+// chip's top-right corner (the chip is `relative`), so the chip keeps its size.
 export function DayUploadingMark({ dayId }: { dayId: string }) {
   const store = useUploadStore()
   const busy = useSyncExternalStore(
@@ -59,5 +64,10 @@ export function DayUploadingMark({ dayId }: { dayId: string }) {
     () => false,
   )
   if (!busy) return null
-  return <div className="text-[10px] font-normal leading-normal opacity-80">กำลังอัปโหลด…</div>
+  return (
+    <span className="absolute top-1 right-1 opacity-80" title="กำลังอัปโหลด…">
+      <Loader2 size={12} className="animate-spin motion-reduce:animate-none" aria-hidden />
+      <span className="sr-only">กำลังอัปโหลด…</span>
+    </span>
+  )
 }

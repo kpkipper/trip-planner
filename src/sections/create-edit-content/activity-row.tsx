@@ -66,7 +66,9 @@ export default function ActivityRow({
         isOver ? 'bg-accent-soft ring-accent/40' : 'bg-surface ring-line',
       )}
     >
-      <div className="flex items-center gap-2">
+      {/* Below sm the category select drops to its own full-width line so time,
+          category and the icon buttons all keep a usable size at 375px. */}
+      <div className="flex flex-wrap items-center gap-2">
         <span className="hidden flex-shrink-0 cursor-grab touch-none text-muted/50 hover:text-muted active:cursor-grabbing sm:inline-flex">
           <GripVertical size={16} />
         </span>
@@ -75,7 +77,7 @@ export default function ActivityRow({
           value={act.category ?? ''}
           onChange={(e) => onUpdate('category', e.target.value)}
           aria-label="Category"
-          className={cn(fieldClass, 'min-w-0 px-3 py-2')}
+          className={cn(fieldClass, 'order-last w-full min-w-0 px-3 py-2 sm:order-none sm:w-auto')}
         >
           {CATEGORY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
