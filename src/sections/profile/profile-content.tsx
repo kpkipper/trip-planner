@@ -83,7 +83,7 @@ const TAB_LABELS: Record<TabKey, string> = {
   past: 'Past',
 }
 
-// Underline tabs (WAI-ARIA tabs pattern: arrow keys move between tabs).
+// Underline tabs (WAI-ARIA tabs pattern: arrow/Home/End keys move between tabs).
 function ProfileTabs({
   tabs,
   active,
@@ -94,10 +94,20 @@ function ProfileTabs({
   onChange: (tab: TabKey) => void
 }) {
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
-    if (!step) return
+    const i = tabs.indexOf(active)
+    const to =
+      e.key === 'ArrowRight'
+        ? (i + 1) % tabs.length
+        : e.key === 'ArrowLeft'
+          ? (i - 1 + tabs.length) % tabs.length
+          : e.key === 'Home'
+            ? 0
+            : e.key === 'End'
+              ? tabs.length - 1
+              : -1
+    if (to < 0) return
     e.preventDefault()
-    const next = tabs[(tabs.indexOf(active) + step + tabs.length) % tabs.length]
+    const next = tabs[to]
     onChange(next)
     document.getElementById(`profile-tab-${next}`)?.focus()
   }
@@ -121,7 +131,7 @@ function ProfileTabs({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(t)}
             className={cn(
-              '-mb-px whitespace-nowrap rounded-t-md border-b-2 pb-2.5 pt-1 text-sm font-medium leading-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              '-mb-px whitespace-nowrap rounded-t-md border-b-2 px-0.5 pb-2.5 pt-1 text-sm font-medium leading-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
               selected ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink',
             )}
           >
@@ -278,6 +288,7 @@ export default function ProfileContent({ username }: { username: string }) {
         ...(past.length > 0 || stats.trips > 0 ? (['past'] as const) : []),
       ]
   const activeTab = tab && tabs.includes(tab) ? tab : tabs[0]
+  const nowCover = safeHttpsUrl(profile.now?.cover_url)
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-10 md:pt-6">
@@ -353,16 +364,20 @@ export default function ProfileContent({ username }: { username: string }) {
               Share
             </Button>
             {!own && me && (
-              <BlockMenu
-                username={profile.user.username}
-                isBlocked={!!profile.is_blocked}
-                onChanged={reloadProfile}
-              />
+              // Right edge: the menu opens right-aligned, so it never clips off-screen.
+              <div className="ml-auto">
+                <BlockMenu
+                  username={profile.user.username}
+                  isBlocked={!!profile.is_blocked}
+                  onChanged={reloadProfile}
+                />
+              </div>
             )}
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-2 sm:max-w-md">
-            <Stat value={stats.trips} label={stats.trips === 1 ? 'trip' : 'trips'} />
+            {/* stats.trips counts completed trips only. */}
+            <Stat value={stats.trips} label={stats.trips === 1 ? 'trip taken' : 'trips taken'} />
             <Stat value={profile.followers} label="followers" />
             <Stat value={profile.following} label="following" />
           </div>
@@ -390,18 +405,28 @@ export default function ProfileContent({ username }: { username: string }) {
             href={`/plans/${encodeURIComponent(profile.now.slug)}`}
             className="flex items-center gap-4 overflow-hidden rounded-card bg-surface p-3 shadow-soft transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <span
-              aria-hidden
-              className="block h-16 w-16 flex-shrink-0 rounded-tile bg-chip bg-cover bg-center"
-              style={{
-                backgroundImage: safeHttpsUrl(profile.now.cover_url)
-                  ? `url("${safeHttpsUrl(profile.now.cover_url)}")`
-                  : coverGradient(profile.now.slug),
-              }}
-            />
+            {nowCover ? (
+              // eslint-disable-next-line @next/next/no-img-element -- static export, remote cover
+              <img
+                src={nowCover}
+                alt=""
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                className="h-16 w-16 flex-shrink-0 rounded-tile bg-chip object-cover"
+              />
+            ) : (
+              <span
+                aria-hidden
+                className="block h-16 w-16 flex-shrink-0 rounded-tile"
+                style={{ backgroundImage: coverGradient(profile.now.slug) }}
+              />
+            )}
             <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2 text-sm font-semibold leading-normal text-live">
-                <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-live ring-4 ring-live/25" />
+              <span className="flex items-start gap-2 text-sm font-semibold leading-normal text-live">
+                <span
+                  aria-hidden
+                  className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-live ring-4 ring-live/25"
+                />
                 {liveLabel({
                   city: profile.now.live.city,
                   dayNumber: profile.now.live.day_number,

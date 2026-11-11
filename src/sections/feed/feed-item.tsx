@@ -18,7 +18,9 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
             ? `ดูรูปในทริป ${item.trip.destination}`
             : item.trip.title || item.trip.destination
         }
-        className="relative block h-[150px] bg-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent sm:h-[220px]"
+        // The focus ring sits on an overlay: an inset ring on the link itself is painted over
+        // by the full-size cover.
+        className="relative block h-[150px] bg-chip after:pointer-events-none after:absolute after:inset-0 after:rounded-t-card focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-accent sm:h-[220px]"
       >
         {cover.kind === 'gradient' ? (
           <span
@@ -46,7 +48,7 @@ export default function FeedItem({ item, now }: { item: FeedItemType; now: Date 
                 alt=""
                 referrerPolicy="no-referrer"
                 loading="lazy"
-                className="h-10 w-10 rounded-lg object-cover bg-chip ring-2 ring-white"
+                className="h-10 w-10 rounded-tile object-cover bg-chip ring-2 ring-surface"
               />
             ))}
           </span>
