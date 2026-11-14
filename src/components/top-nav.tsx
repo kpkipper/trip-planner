@@ -8,8 +8,7 @@ import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { badgeLabel } from '@/lib/follow-requests'
 import { isActive, navItems } from '@/lib/nav'
-import { loginPath } from '@/lib/safe-next'
-import { buttonClass, cn } from '@/lib/ui-classes'
+import { cn } from '@/lib/ui-classes'
 
 import AccountMenu from './account-menu'
 import Logo from './logo'
@@ -74,20 +73,9 @@ export default function TopNav({ pending }: { pending: number }) {
 
         <span className="flex-1" />
 
-        {/* Create Plan needs a login; anonymous users go to login first. */}
-        {status === 'loading' ? (
-          <span
-            aria-disabled
-            className={cn(buttonClass('primary'), 'cursor-not-allowed opacity-50')}
-          >
-            <Plus size={16} className="flex-shrink-0" />
-            Create Plan
-          </span>
-        ) : (
-          <ButtonLink
-            href={status === 'authed' ? '/plans/create' : loginPath('/plans/create')}
-            aria-label="Create Plan"
-          >
+        {/* Only members get Create Plan; for everyone else it would be a second Log in button. */}
+        {status === 'authed' && (
+          <ButtonLink href="/plans/create" aria-label="Create Plan">
             <Plus size={16} className="flex-shrink-0" />
             Create Plan
           </ButtonLink>

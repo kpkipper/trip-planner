@@ -75,7 +75,7 @@ export default function AccountMenu({ variant = 'nav', active = false }: Props) 
 
   if (status === 'anon' || !user) {
     return (
-      <Link href={loginPath(pathname)} className={buttonClass('secondary', 'md')}>
+      <Link href={loginPath(pathname)} className={buttonClass('primary', 'md')}>
         <LogIn size={16} className="flex-shrink-0" />
         Log in
       </Link>
