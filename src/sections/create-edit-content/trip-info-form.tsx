@@ -1,3 +1,4 @@
+import DateRangePicker from '@/components/date-range-picker'
 import { VISIBILITY_OPTIONS } from '@/lib/trip-settings'
 import { cn, fieldClass, fieldErrorClass, labelClass } from '@/lib/ui-classes'
 
@@ -18,8 +19,7 @@ interface TripInfoFormProps {
   onTitleChange: (v: string) => void
   onCountryChange: (v: string) => void
   onDestinationChange: (v: string) => void
-  onStartDateChange: (v: string) => void
-  onEndDateChange: (v: string) => void
+  onDatesChange: (start: string, end: string) => void
 }
 
 const label = cn(labelClass, 'mb-1.5 block')
@@ -39,12 +39,13 @@ export default function TripInfoForm({
   onTitleChange,
   onCountryChange,
   onDestinationChange,
-  onStartDateChange,
-  onEndDateChange,
+  onDatesChange,
 }: TripInfoFormProps) {
   return (
     <div className="mb-6 rounded-card bg-surface p-6 shadow-soft">
-      <h2 className="mb-5 text-lg font-semibold leading-normal tracking-tight text-ink">Trip Info</h2>
+      <h2 className="mb-5 text-lg font-semibold leading-normal tracking-tight text-ink">
+        Trip Info
+      </h2>
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className={label}>Trip Title</label>
@@ -73,9 +74,7 @@ export default function TripInfoForm({
           <div>
             <label className={label}>
               Destination
-              {!country && (
-                <span className="font-normal text-muted"> (select country first)</span>
-              )}
+              {!country && <span className="font-normal text-muted"> (select country first)</span>}
             </label>
             <Autocomplete
               value={destination}
@@ -85,35 +84,17 @@ export default function TripInfoForm({
               disabled={!country}
               hasError={!!errors.destination}
             />
-            {errors.destination && (
-              <p className={errorText}>{errors.destination}</p>
-            )}
+            {errors.destination && <p className={errorText}>{errors.destination}</p>}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={label}>Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-              className={field(!!errors.startDate)}
-            />
-            {errors.startDate && <p className={errorText}>{errors.startDate}</p>}
-          </div>
-          <div>
-            <label className={label}>End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
-              min={startDate}
-              className={field(!!errors.endDate)}
-            />
-            {errors.endDate && <p className={errorText}>{errors.endDate}</p>}
-          </div>
-        </div>
+        <DateRangePicker
+          start={startDate}
+          end={endDate}
+          onChange={onDatesChange}
+          startError={errors.startDate}
+          endError={errors.endDate}
+        />
 
         {visibility !== undefined && (
           <div>

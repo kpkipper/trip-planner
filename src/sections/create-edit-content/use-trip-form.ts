@@ -149,15 +149,18 @@ export function useTripForm(slugProp?: string) {
     setDestination(v)
     clearError('destination')
   }
-  const onStartDateChange = (v: string) => {
-    setStartDate(v)
-    regenerateDays(v, endDate)
-    clearError('startDate')
-  }
-  const onEndDateChange = (v: string) => {
-    setEndDate(v)
-    regenerateDays(startDate, v)
-    clearError('endDate')
+  // Both dates at once, so the day list is rebuilt once from the final range.
+  const onDatesChange = (start: string, end: string) => {
+    setStartDate(start)
+    setEndDate(end)
+    regenerateDays(start, end)
+    if (errors.startDate || errors.endDate)
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next.startDate
+        delete next.endDate
+        return next
+      })
   }
 
   const toggleDay = (id: string) => {
@@ -438,8 +441,7 @@ export function useTripForm(slugProp?: string) {
     onTitleChange,
     onCountryChange,
     onDestinationChange,
-    onStartDateChange,
-    onEndDateChange,
+    onDatesChange,
     toggleDay,
     updateDayTitle,
     addActivity,

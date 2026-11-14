@@ -1,3 +1,5 @@
+import { MAX_TRIP_DAYS } from '@/lib/date-range'
+
 import type { TripDay } from '@/types/trip'
 
 export function uid() {
@@ -22,7 +24,7 @@ function formatDateDisplay(dateISO: string): string {
   })
 }
 
-// One entry per date in range (max 60). Every existing day on an in-range date is kept,
+// One entry per date in range (max MAX_TRIP_DAYS). Every existing day on an in-range date is kept,
 // including several days that share a date, so a loaded server day is never dropped
 // (dropping it would delete it and its plans on save). Duplicates by id are kept once.
 export function generateDays(startDate: string, endDate: string, existing: TripDay[]): TripDay[] {
@@ -31,7 +33,7 @@ export function generateDays(startDate: string, endDate: string, existing: TripD
   const end = localNoon(endDate)
   const cur = localNoon(startDate)
   let i = 0
-  while (cur <= end && i < 60) {
+  while (cur <= end && i < MAX_TRIP_DAYS) {
     const dateISO = toDateISO(cur)
     const matches = existing.filter((d) => d.dateISO === dateISO && !seen.has(d.id))
     if (matches.length === 0) {

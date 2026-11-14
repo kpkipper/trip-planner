@@ -36,8 +36,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
     onTitleChange,
     onCountryChange,
     onDestinationChange,
-    onStartDateChange,
-    onEndDateChange,
+    onDatesChange,
     toggleDay,
     updateDayTitle,
     addActivity,
@@ -84,8 +83,7 @@ export default function CreateEditContent({ slug: slugProp }: { slug?: string } 
         onTitleChange={onTitleChange}
         onCountryChange={onCountryChange}
         onDestinationChange={onDestinationChange}
-        onStartDateChange={onStartDateChange}
-        onEndDateChange={onEndDateChange}
+        onDatesChange={onDatesChange}
       />
 
       {days.length > 0 && (
