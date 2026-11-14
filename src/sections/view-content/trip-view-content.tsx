@@ -12,7 +12,7 @@ import { TripPageSkeleton } from '@/components/page-loading'
 import { Card } from '@/components/ui/card'
 import { coverGradient } from '@/lib/cover-gradient'
 import { groupMoments } from '@/lib/moments-by-day'
-import { safeHttpsUrl } from '@/lib/safe-url'
+import { safeMediaUrl } from '@/lib/safe-url'
 import { tripActions } from '@/lib/trip-roles'
 import { liveLabel } from '@/lib/trip-status'
 import { chipClass, cn } from '@/lib/ui-classes'
@@ -72,7 +72,7 @@ export default function TripViewContent({ slug }: { slug: string }) {
   if (notFound || !trip) return <NotFound />
 
   const selectedDay = trip.days[selectedDayIndex]
-  const coverUrl = safeHttpsUrl(trip.coverUrl)
+  const coverUrl = safeMediaUrl(trip.coverUrl)
   const todayPlans = trip.live?.todayPlans ?? []
   const livePlanIds = new Set(todayPlans.map((p) => p.id))
   const place = [trip.destination, trip.country].filter(Boolean).join(', ')
@@ -114,12 +114,13 @@ export default function TripViewContent({ slug }: { slug: string }) {
           onCancel={() => setLeaveOpen(false)}
         />
 
-        {/* Hero: cover photo (or the slug's gradient) with a dark bottom fade. The action menu
-            sits outside the clipped layer so its dropdown is not cut off. */}
+        {/* Hero: cover photo over the slug's gradient (the gradient also shows if the photo fails
+            to load, e.g. an expired link in a long-open tab), with a dark bottom fade. The action
+            menu sits outside the clipped layer so its dropdown is not cut off. */}
         <section className="relative">
           <div
             className="relative flex min-h-60 flex-col justify-end overflow-hidden rounded-card bg-primary md:min-h-[340px]"
-            style={coverUrl ? undefined : { backgroundImage: coverGradient(slug) }}
+            style={{ backgroundImage: coverGradient(slug) }}
           >
             {coverUrl && (
               // eslint-disable-next-line @next/next/no-img-element -- static export, remote cover

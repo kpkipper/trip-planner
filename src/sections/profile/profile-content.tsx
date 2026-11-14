@@ -22,7 +22,7 @@ import { errorSummary } from '@/lib/error-summary'
 import { followButton } from '@/lib/follow-button'
 import { groupCalendar } from '@/lib/profile-calendar'
 import { loginPath } from '@/lib/safe-next'
-import { safeHttpsUrl } from '@/lib/safe-url'
+import { safeMediaUrl } from '@/lib/safe-url'
 import { liveLabel } from '@/lib/trip-status'
 import { buttonClass, cn } from '@/lib/ui-classes'
 import BlockMenu from '@/sections/safety/block-menu'
@@ -286,7 +286,7 @@ export default function ProfileContent({ username }: { username: string }) {
         ...(past.length > 0 || stats.trips > 0 ? (['past'] as const) : []),
       ]
   const activeTab = tab && tabs.includes(tab) ? tab : tabs[0]
-  const nowCover = safeHttpsUrl(profile.now?.cover_url)
+  const nowCover = safeMediaUrl(profile.now?.cover_url)
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-10 md:pt-6">

@@ -11,20 +11,14 @@ import { memberErrorMessage } from '@/lib/member-errors'
 import { timezoneOptions } from '@/lib/timezone'
 import {
   buildSettingsPatch,
-  coverError,
   formFromTrip,
   settingsAccess,
   type SettingsForm,
   VISIBILITY_OPTIONS,
 } from '@/lib/trip-settings'
-import {
-  buttonClass,
-  cn,
-  fieldClass,
-  fieldErrorClass,
-  labelClass,
-  switchClass,
-} from '@/lib/ui-classes'
+import { buttonClass, cn, fieldClass, labelClass, switchClass } from '@/lib/ui-classes'
+
+import CoverPicker from './cover-picker'
 
 import type { TripSettings } from '@/types/trip'
 
@@ -80,7 +74,7 @@ export default function TripSettingsPanel({
   const { showToast } = useToast()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const original = { visibility, coverUrl, settings }
+  const original = { visibility, settings }
   const [form, setForm] = useState<SettingsForm>(() => formFromTrip(original))
   // Re-sync from the refetched trip (not on every render: unsaved edits are kept).
   const serverKey = JSON.stringify(original)
@@ -94,10 +88,9 @@ export default function TripSettingsPanel({
 
   const set = <K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
-  const coverProblem = access.cover ? coverError(form.coverUrl) : null
 
   const save = async () => {
-    if (saving || coverProblem) return
+    if (saving) return
     const patch = buildSettingsPatch(role, form, original)
     if (Object.keys(patch).length === 0) {
       showToast('No changes to save')
@@ -135,6 +128,7 @@ export default function TripSettingsPanel({
 
       {open && (
         <div className="space-y-5 px-3 pt-3 pb-3">
+          {access.cover && <CoverPicker slug={slug} coverUrl={coverUrl} onChanged={onChanged} />}
           {access.visibility && (
             <fieldset>
               <legend className={cn(labelClass, 'mb-2')}>Who can see this trip</legend>
@@ -225,26 +219,10 @@ export default function TripSettingsPanel({
             </label>
           )}
 
-          {access.cover && (
-            <label className="block">
-              <span className={cn(labelClass, 'mb-1.5 block')}>Cover image URL</span>
-              <input
-                type="url"
-                value={form.coverUrl}
-                onChange={(e) => set('coverUrl', e.target.value)}
-                placeholder="https://…"
-                className={cn(inputClass, coverProblem && fieldErrorClass)}
-              />
-              {coverProblem && (
-                <span className="mt-1 block text-xs leading-normal text-danger">{coverProblem}</span>
-              )}
-            </label>
-          )}
-
           <button
             type="button"
             onClick={save}
-            disabled={saving || !!coverProblem}
+            disabled={saving}
             className={buttonClass('primary', 'md')}
           >
             {saving ? 'Saving…' : 'Save settings'}

@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react'
 
 import { coverGradient } from '@/lib/cover-gradient'
-import { safeHttpsUrl } from '@/lib/safe-url'
+import { safeMediaUrl } from '@/lib/safe-url'
 import { cardClass, cn } from '@/lib/ui-classes'
 import StatusBadge from '@/sections/view-content/status-badge'
 
@@ -16,7 +16,7 @@ const place = (destination: string, country?: string) =>
 // Trip tile for grids (My trips, profile). A full page load on purpose: trip pages are served
 // from a static shell, like every other trip link in the app.
 export default function TripCard({ trip, className }: { trip: TripCardData; className?: string }) {
-  const cover = safeHttpsUrl(trip.coverUrl)
+  const cover = safeMediaUrl(trip.coverUrl)
   const where = place(trip.destination, trip.country)
 
   return (
@@ -30,8 +30,12 @@ export default function TripCard({ trip, className }: { trip: TripCardData; clas
         '',
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-chip">
-        {cover ? (
+      {/* The gradient stays behind the photo, so a photo that fails to load shows it. */}
+      <div
+        className="relative aspect-[16/10] overflow-hidden bg-chip"
+        style={{ backgroundImage: coverGradient(trip.slug ?? trip.title) }}
+      >
+        {cover && (
           // eslint-disable-next-line @next/next/no-img-element -- static export, remote cover
           <img
             src={cover}
@@ -39,12 +43,6 @@ export default function TripCard({ trip, className }: { trip: TripCardData; clas
             referrerPolicy="no-referrer"
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <span
-            aria-hidden
-            className="block h-full w-full"
-            style={{ backgroundImage: coverGradient(trip.slug ?? trip.title) }}
           />
         )}
       </div>

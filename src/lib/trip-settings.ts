@@ -1,5 +1,3 @@
-import { safeHttpsUrl } from './safe-url'
-
 import type { TripSettings } from '@/types/trip'
 
 export const VISIBILITY_OPTIONS = [
@@ -18,6 +16,7 @@ export interface SettingsAccess {
   hideLiveStatus: boolean
   editorsCanInvite: boolean
   membersCanPost: boolean
+  // Upload or remove the cover image (saved at once, not with the form).
   cover: boolean
   draft: boolean
   timezone: boolean
@@ -40,20 +39,8 @@ export const settingsAccess = (role: string | undefined, hasSettings: boolean): 
   }
 }
 
-const MAX_URL_BYTES = 2048
-
-export const coverError = (url: string): string | null => {
-  const v = url.trim()
-  if (!v) return null
-  if (new TextEncoder().encode(v).length > MAX_URL_BYTES || !safeHttpsUrl(v)) {
-    return 'Cover image must be an https URL'
-  }
-  return null
-}
-
 export interface SettingsForm {
   visibility: string
-  coverUrl: string
   timezone: string
   hideLiveStatus: boolean
   editorsCanInvite: boolean
@@ -63,13 +50,11 @@ export interface SettingsForm {
 
 export interface SettingsOriginal {
   visibility?: string
-  coverUrl?: string
   settings?: TripSettings
 }
 
 export const formFromTrip = (o: SettingsOriginal): SettingsForm => ({
   visibility: o.visibility ?? '',
-  coverUrl: o.coverUrl ?? '',
   timezone: o.settings?.timezone ?? '',
   hideLiveStatus: o.settings?.hideLiveStatus ?? false,
   editorsCanInvite: o.settings?.editorsCanInvite ?? false,
@@ -79,7 +64,6 @@ export const formFromTrip = (o: SettingsOriginal): SettingsForm => ({
 
 export interface SettingsPatch {
   visibility?: string
-  cover_url?: string
   timezone?: string
   hide_live_status?: boolean
   editors_can_invite?: boolean
@@ -98,9 +82,6 @@ export const buildSettingsPatch = (
   const patch: SettingsPatch = {}
   if (access.visibility && form.visibility && form.visibility !== original.visibility) {
     patch.visibility = form.visibility
-  }
-  if (access.cover && form.coverUrl.trim() !== (original.coverUrl ?? '')) {
-    patch.cover_url = form.coverUrl.trim()
   }
   if (access.timezone && form.timezone && form.timezone !== s?.timezone) {
     patch.timezone = form.timezone

@@ -1,5 +1,5 @@
 import { coverGradient } from './cover-gradient'
-import { safeHttpsUrl, safeMediaUrl } from './safe-url'
+import { safeMediaUrl } from './safe-url'
 
 import type { FeedItem } from '@/api/feed/type'
 
@@ -18,7 +18,7 @@ export function feedCover(item: FeedItem): FeedCover {
     .filter((u): u is string => !!u)
     .slice(0, MAX_THUMBS)
   if (thumbs.length > 0) return { kind: 'photo', src: thumbs[0], extras: thumbs.slice(1) }
-  const cover = safeHttpsUrl(item.trip.cover_url)
+  const cover = safeMediaUrl(item.trip.cover_url)
   if (cover) return { kind: 'cover', src: cover }
   return { kind: 'gradient', background: coverGradient(item.trip.slug) }
 }

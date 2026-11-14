@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildSettingsPatch,
-  coverError,
   formFromTrip,
   settingsAccess,
   VISIBILITY_OPTIONS,
@@ -17,7 +16,6 @@ const settings = {
 }
 const original = {
   visibility: 'followers',
-  coverUrl: 'https://a.example/c.jpg',
   settings,
 }
 
@@ -79,7 +77,6 @@ describe('formFromTrip', () => {
   it('starts from the trip values, never assuming a visibility', () => {
     expect(formFromTrip(original)).toEqual({
       visibility: 'followers',
-      coverUrl: 'https://a.example/c.jpg',
       timezone: 'Asia/Bangkok',
       hideLiveStatus: false,
       editorsCanInvite: false,
@@ -105,15 +102,15 @@ describe('buildSettingsPatch', () => {
       ),
     ).toEqual({ visibility: 'private', hide_live_status: true, timezone: 'Asia/Tokyo' })
   })
-  it('sends false when a flag is switched off and clears the cover with an empty string', () => {
+  it('sends false when a flag is switched off', () => {
     const on = { ...original, settings: { ...settings, editorsCanInvite: true, isDraft: true } }
     expect(
       buildSettingsPatch(
         'owner',
-        { ...formFromTrip(on), editorsCanInvite: false, draft: false, coverUrl: ' ' },
+        { ...formFromTrip(on), editorsCanInvite: false, draft: false },
         on,
       ),
-    ).toEqual({ editors_can_invite: false, is_draft: false, cover_url: '' })
+    ).toEqual({ editors_can_invite: false, is_draft: false })
   })
   it('sends members_can_post only when it changed, and only for the owner', () => {
     const form = { ...formFromTrip(original), membersCanPost: true }
@@ -127,7 +124,6 @@ describe('buildSettingsPatch', () => {
         'editor',
         {
           visibility: 'public',
-          coverUrl: 'https://b.example/x.jpg',
           timezone: 'Asia/Seoul',
           hideLiveStatus: true,
           editorsCanInvite: true,
@@ -139,7 +135,7 @@ describe('buildSettingsPatch', () => {
     ).toEqual({ timezone: 'Asia/Seoul', is_draft: true })
   })
   it('sends nothing for settings that are unknown', () => {
-    const noSettings = { visibility: 'followers', coverUrl: '' }
+    const noSettings = { visibility: 'followers' }
     expect(
       buildSettingsPatch(
         'owner',
@@ -147,20 +143,5 @@ describe('buildSettingsPatch', () => {
         noSettings,
       ),
     ).toEqual({})
-  })
-})
-
-describe('coverError', () => {
-  it('accepts empty and https, rejects other schemes', () => {
-    expect(coverError('')).toBeNull()
-    expect(coverError('https://a.example/x.png')).toBeNull()
-    expect(coverError('http://a.example/x.png')).not.toBeNull()
-    expect(coverError('javascript:alert(1)')).not.toBeNull()
-  })
-  it('limits the length in bytes, not characters', () => {
-    expect(coverError('https://a.example/' + 'x'.repeat(2048))).not.toBeNull()
-    // 1000 two-byte characters fit in characters but not in bytes once the prefix is added.
-    expect(coverError('https://a.example/' + 'é'.repeat(1020))).not.toBeNull()
-    expect(coverError('https://a.example/' + 'x'.repeat(2000))).toBeNull()
   })
 })
