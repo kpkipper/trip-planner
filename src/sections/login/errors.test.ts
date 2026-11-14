@@ -13,6 +13,10 @@ describe('emailStartErrorMessage', () => {
     expect(emailStartErrorMessage(httpError(400))).toMatch(/valid email/i)
   })
 
+  it('maps 403 to "email login is turned off"', () => {
+    expect(emailStartErrorMessage(httpError(403))).toMatch(/email login is turned off/i)
+  })
+
   it('falls back to a generic message', () => {
     expect(emailStartErrorMessage(httpError(500))).toMatch(/something went wrong/i)
     expect(emailStartErrorMessage(new Error('Network Error'))).toMatch(/something went wrong/i)
@@ -23,6 +27,10 @@ describe('verifyErrorMessage', () => {
   it('maps 400 (and a missing token) to invalid/expired', () => {
     expect(verifyErrorMessage(httpError(400))).toMatch(/invalid or has expired/i)
     expect(verifyErrorMessage(null)).toMatch(/invalid or has expired/i)
+  })
+
+  it('maps 403 to "email login is turned off"', () => {
+    expect(verifyErrorMessage(httpError(403))).toMatch(/email login is turned off/i)
   })
 
   it('falls back to a generic message', () => {

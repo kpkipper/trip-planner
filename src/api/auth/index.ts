@@ -1,6 +1,18 @@
 import { apiClient } from '@/api/httpClient/apiClient'
 
-import type { EmptyResponse, LoginResponse } from './type'
+import type { EmptyResponse, LoginMethods, LoginMethodsResponse, LoginResponse } from './type'
+
+// Short timeout: the login page waits for this before showing any button.
+export const getLoginMethods = async (): Promise<LoginMethods> => {
+  const { data } = await apiClient.get<LoginMethodsResponse>('/api/v1/auth/methods', {
+    timeout: 5000,
+  })
+  const m = data?.data
+  if (typeof m?.email !== 'boolean' || typeof m?.google !== 'boolean') {
+    throw new Error('unexpected /auth/methods response')
+  }
+  return { email: m.email, google: m.google }
+}
 
 export const loginWithGoogle = async (idToken: string) => {
   const { data } = await apiClient.post<LoginResponse>('/api/v1/auth/google', { id_token: idToken })

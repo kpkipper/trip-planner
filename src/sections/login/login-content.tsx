@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Mail } from 'lucide-react'
 
-import { loginWithGoogle, startEmailLogin } from '@/api/auth'
+import { getLoginMethods, loginWithGoogle, startEmailLogin } from '@/api/auth'
 import Logo from '@/components/logo'
 import PageLoading from '@/components/page-loading'
 import { Card } from '@/components/ui/card'
@@ -17,6 +17,9 @@ import { buttonClass, cn, fieldClass, labelClass } from '@/lib/ui-classes'
 
 import { emailStartErrorMessage, loginErrorMessage } from './errors'
 import GoogleButton from './google-button'
+import { visibleLoginMethods } from './login-methods'
+
+import type { LoginMethods } from '@/api/auth/type'
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''
 
@@ -31,6 +34,18 @@ export default function LoginContent() {
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [googleBusy, setGoogleBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // undefined = still asking the server; null = could not ask.
+  const [methods, setMethods] = useState<LoginMethods | null | undefined>(undefined)
+
+  useEffect(() => {
+    let live = true
+    getLoginMethods()
+      .then((m) => live && setMethods(m))
+      .catch(() => live && setMethods(null))
+    return () => {
+      live = false
+    }
+  }, [])
 
   // Already logged in (or just logged in with Google): go where the user was headed.
   useEffect(() => {
@@ -58,11 +73,26 @@ export default function LoginContent() {
     storeLoginNext(next)
     startEmailLogin(value)
       .then(() => setSentTo(value))
-      .catch((err) => setError(emailStartErrorMessage(err)))
+      .catch((err) => {
+        setError(emailStartErrorMessage(err))
+        // 403 = the server turned email login off: hide the form, keep Google if shown.
+        if ((err as { response?: { status?: number } })?.response?.status === 403) {
+          setMethods((m) => ({
+            email: false,
+            google: visibleLoginMethods(m ?? null, GOOGLE_CLIENT_ID !== '').google,
+          }))
+        }
+      })
       .finally(() => setSending(false))
   }
 
-  if (status !== 'anon' || googleBusy) return <PageLoading />
+  if (status !== 'anon' || googleBusy || methods === undefined) return <PageLoading />
+  const show = visibleLoginMethods(methods, GOOGLE_CLIENT_ID !== '')
+  if (!show.google && !show.email) {
+    console.error(
+      'No login method: check GOOGLE_CLIENT_ID / SMTP on the API and NEXT_PUBLIC_GOOGLE_CLIENT_ID on the web',
+    )
+  }
 
   return (
     <div className="flex min-h-[70dvh] flex-col items-center justify-center bg-bg px-4 py-10">
@@ -81,8 +111,8 @@ export default function LoginContent() {
             </h1>
             <p className="text-sm leading-relaxed text-muted">
               We sent a login link to{' '}
-              <span className="break-all font-medium text-ink">{sentTo}</span>.
-              The link works once and expires in 15 minutes.
+              <span className="break-all font-medium text-ink">{sentTo}</span>. The link works once
+              and expires in 15 minutes.
             </p>
             <button
               type="button"
@@ -104,40 +134,50 @@ export default function LoginContent() {
               Plan trips and share them with friends.
             </p>
 
-            {GOOGLE_CLIENT_ID && (
-              <>
-                <GoogleButton clientId={GOOGLE_CLIENT_ID} onCredential={handleGoogle} />
-                <div className="my-5 flex items-center gap-3 text-xs leading-normal text-muted">
-                  <div className="flex-1 border-t border-line" />
-                  or
-                  <div className="flex-1 border-t border-line" />
-                </div>
-              </>
+            {show.google && (
+              <GoogleButton clientId={GOOGLE_CLIENT_ID} onCredential={handleGoogle} />
+            )}
+            {show.google && show.email && (
+              <div className="my-5 flex items-center gap-3 text-xs leading-normal text-muted">
+                <div className="flex-1 border-t border-line" />
+                or
+                <div className="flex-1 border-t border-line" />
+              </div>
+            )}
+            {!show.google && !show.email && (
+              <p
+                role="status"
+                className="rounded-tile bg-chip px-4 py-3 text-center text-sm leading-normal text-muted"
+              >
+                Login isn&apos;t available right now. Please try again later.
+              </p>
             )}
 
-            <form onSubmit={handleEmail} className="flex flex-col gap-2">
-              <label htmlFor="login-email" className={labelClass}>
-                Email
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className={`${fieldClass} w-full`}
-              />
-              <button
-                type="submit"
-                disabled={sending}
-                className={`${buttonClass('primary', 'lg')} mt-2 w-full`}
-              >
-                <Mail size={16} />
-                {sending ? 'Sending…' : 'Email me a login link'}
-              </button>
-            </form>
+            {show.email && (
+              <form onSubmit={handleEmail} className="flex flex-col gap-2">
+                <label htmlFor="login-email" className={labelClass}>
+                  Email
+                </label>
+                <input
+                  id="login-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className={`${fieldClass} w-full`}
+                />
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className={`${buttonClass('primary', 'lg')} mt-2 w-full`}
+                >
+                  <Mail size={16} />
+                  {sending ? 'Sending…' : 'Email me a login link'}
+                </button>
+              </form>
+            )}
           </>
         )}
 

@@ -6,6 +6,7 @@ export interface RecordedRequest {
   data: unknown
   headers: Record<string, unknown>
   skipAuthRedirect?: boolean
+  timeout?: number
 }
 
 // A fake axios adapter for tests: records each request and answers with `body`.
@@ -18,6 +19,7 @@ export const fakeAdapter = (body: unknown, status = 200) => {
       data: typeof config.data === 'string' ? JSON.parse(config.data) : config.data,
       headers: { ...config.headers },
       skipAuthRedirect: config.skipAuthRedirect,
+      timeout: config.timeout,
     })
     const response = { data: body, status, statusText: '', headers: {}, config }
     if (status >= 400) {

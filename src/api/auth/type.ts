@@ -16,3 +16,14 @@ export interface EmptyResponse {
   message: string
   data?: Record<string, never>
 }
+
+export interface LoginMethods {
+  email: boolean
+  google: boolean
+}
+
+export interface LoginMethodsResponse {
+  code: string
+  message: string
+  data: LoginMethods
+}

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/api/httpClient/apiClient'
 import { fakeAdapter } from '@/api/test-adapter'
 
-import { loginWithGoogle, logout, startEmailLogin, verifyEmailLogin } from '.'
+import { getLoginMethods, loginWithGoogle, logout, startEmailLogin, verifyEmailLogin } from '.'
 
 const original = apiClient.defaults.adapter
 afterEach(() => {
@@ -23,6 +23,34 @@ describe('auth api', () => {
       url: '/api/v1/auth/google',
       data: { id_token: 'google-id-token' },
     })
+  })
+
+  it('getLoginMethods reads which login methods are on', async () => {
+    const fake = fakeAdapter({
+      code: 'JOURNEY-200000',
+      message: 'Success',
+      data: { email: false, google: true },
+    })
+    apiClient.defaults.adapter = fake.adapter
+    await expect(getLoginMethods()).resolves.toEqual({ email: false, google: true })
+    expect(fake.requests[0]).toMatchObject({ method: 'get', url: '/api/v1/auth/methods' })
+  })
+
+  it('getLoginMethods rejects a response without the two flags', async () => {
+    const fake = fakeAdapter('<!doctype html><html></html>')
+    apiClient.defaults.adapter = fake.adapter
+    await expect(getLoginMethods()).rejects.toThrow(/unexpected/)
+  })
+
+  it('getLoginMethods gives up after 5 seconds', async () => {
+    const fake = fakeAdapter({
+      code: 'JOURNEY-200000',
+      message: 'Success',
+      data: { email: true, google: true },
+    })
+    apiClient.defaults.adapter = fake.adapter
+    await getLoginMethods()
+    expect(fake.requests[0]).toMatchObject({ timeout: 5000 })
   })
 
   it('startEmailLogin posts the email', async () => {
