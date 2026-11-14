@@ -6,31 +6,17 @@ import { useRouter } from 'next/navigation'
 
 import PageLoading from '@/components/page-loading'
 import { useAuth } from '@/contexts/auth-context'
-import { useTrips } from '@/contexts/trips-context'
-import { loginPath } from '@/lib/safe-next'
 
+// The home page has no content of its own: logged-in users go to their feed,
+// everyone else to /trips, which lists every public trip.
 export default function Home() {
   const router = useRouter()
-  const { trips, loaded } = useTrips()
   const { status } = useAuth()
 
   useEffect(() => {
-    if (status === 'authed') {
-      router.replace('/feed')
-      return
-    }
-    if (!loaded || status === 'loading') return
-    const latest = trips
-      .slice()
-      .sort(
-        (a, b) =>
-          (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) -
-          (a.updatedAt ? new Date(a.updatedAt).getTime() : 0),
-      )[0]
-    // Nothing to show: creating a plan needs a login, so anonymous visitors go there first.
-    const empty = loginPath('/plans/create')
-    router.replace(latest ? `/plans/${encodeURIComponent(latest.slug ?? '')}` : empty)
-  }, [loaded, status, trips, router])
+    if (status === 'loading') return
+    router.replace(status === 'authed' ? '/feed' : '/trips')
+  }, [status, router])
 
   return <PageLoading />
 }
